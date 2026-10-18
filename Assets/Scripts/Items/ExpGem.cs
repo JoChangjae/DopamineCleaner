@@ -23,8 +23,19 @@ namespace DopamineCleaner.Items
         [SerializeField] private int expValue = 1;
         [SerializeField] private float magnetSpeed = 9f;
 
+        [Header("아이템 스프라이트")]
+        [SerializeField] private Sprite spriteGreen;
+        [SerializeField] private Sprite spriteBlue;
+        [SerializeField] private Sprite spritePink;
+        [SerializeField] private Sprite spriteMega;
+        [SerializeField] private Sprite spriteCake;
+        [SerializeField] private Sprite spriteBomb;
+        [SerializeField] private Sprite spriteMagnet;
+        [SerializeField] private Sprite spriteChest;
+
         private SpriteRenderer spriteRenderer;
         private bool isAttracted = false;
+        private float bobOffset;
 
         public GemType Type => gemType;
         public int ExpValue => expValue;
@@ -32,6 +43,7 @@ namespace DopamineCleaner.Items
         private void Awake()
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            bobOffset = Random.Range(0f, 100f);
         }
 
         public void Initialize(GemType type, int value)
@@ -59,6 +71,13 @@ namespace DopamineCleaner.Items
 
         private void Update()
         {
+            // 바닥에 정지해 있을 때 부드러운 둥둥 떠있는 픽셀 애니메이션
+            if (!isAttracted && spriteRenderer != null)
+            {
+                float bobY = Mathf.Sin((Time.time * 4f) + bobOffset) * 0.08f;
+                spriteRenderer.transform.localPosition = new Vector3(0, bobY, 0);
+            }
+
             if (PlayerController.Instance == null) return;
 
             Vector3 playerPos = PlayerController.Instance.transform.position;
@@ -69,6 +88,8 @@ namespace DopamineCleaner.Items
             if (distSq < magRadius * magRadius)
             {
                 isAttracted = true;
+                if (spriteRenderer != null)
+                    spriteRenderer.transform.localPosition = Vector3.zero;
             }
 
             if (isAttracted)
@@ -110,45 +131,61 @@ namespace DopamineCleaner.Items
         public void ForceAttract()
         {
             isAttracted = true;
+            if (spriteRenderer != null)
+                spriteRenderer.transform.localPosition = Vector3.zero;
+        }
+
+        public void SetSprites(Sprite green, Sprite blue, Sprite pink, Sprite mega, Sprite cake, Sprite bomb, Sprite magnet, Sprite chest)
+        {
+            spriteGreen = green;
+            spriteBlue = blue;
+            spritePink = pink;
+            spriteMega = mega;
+            spriteCake = cake;
+            spriteBomb = bomb;
+            spriteMagnet = magnet;
+            spriteChest = chest;
         }
 
         private void UpdateVisual()
         {
             if (spriteRenderer == null) return;
 
+            spriteRenderer.color = Color.white;
+
             switch (gemType)
             {
                 case GemType.Green:
-                    spriteRenderer.color = new Color(0.32f, 0.72f, 0.53f);
-                    transform.localScale = Vector3.one * 0.45f;
+                    if (spriteGreen != null) spriteRenderer.sprite = spriteGreen;
+                    transform.localScale = Vector3.one * 1.0f;
                     break;
                 case GemType.Blue:
-                    spriteRenderer.color = new Color(0.31f, 0.66f, 0.87f);
-                    transform.localScale = Vector3.one * 0.55f;
+                    if (spriteBlue != null) spriteRenderer.sprite = spriteBlue;
+                    transform.localScale = Vector3.one * 1.1f;
                     break;
                 case GemType.Pink:
-                    spriteRenderer.color = new Color(1.0f, 0.46f, 0.56f);
-                    transform.localScale = Vector3.one * 0.65f;
+                    if (spritePink != null) spriteRenderer.sprite = spritePink;
+                    transform.localScale = Vector3.one * 1.2f;
                     break;
                 case GemType.MegaPink:
-                    spriteRenderer.color = new Color(1.0f, 0.25f, 0.45f);
-                    transform.localScale = Vector3.one * 0.9f;
+                    if (spriteMega != null) spriteRenderer.sprite = spriteMega;
+                    transform.localScale = Vector3.one * 1.35f;
                     break;
                 case GemType.Cake:
-                    spriteRenderer.color = new Color(1.0f, 0.5f, 0.65f);
-                    transform.localScale = Vector3.one * 0.75f;
+                    if (spriteCake != null) spriteRenderer.sprite = spriteCake;
+                    transform.localScale = Vector3.one * 1.25f;
                     break;
                 case GemType.Bomb:
-                    spriteRenderer.color = new Color(1.0f, 0.2f, 0.2f);
-                    transform.localScale = Vector3.one * 0.8f;
+                    if (spriteBomb != null) spriteRenderer.sprite = spriteBomb;
+                    transform.localScale = Vector3.one * 1.25f;
                     break;
                 case GemType.Magnet:
-                    spriteRenderer.color = new Color(0.88f, 0.62f, 0.24f);
-                    transform.localScale = Vector3.one * 0.75f;
+                    if (spriteMagnet != null) spriteRenderer.sprite = spriteMagnet;
+                    transform.localScale = Vector3.one * 1.25f;
                     break;
                 case GemType.Chest:
-                    spriteRenderer.color = new Color(1.0f, 0.82f, 0.4f);
-                    transform.localScale = Vector3.one * 0.85f;
+                    if (spriteChest != null) spriteRenderer.sprite = spriteChest;
+                    transform.localScale = Vector3.one * 1.35f;
                     break;
             }
         }

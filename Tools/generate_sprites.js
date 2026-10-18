@@ -3,7 +3,6 @@ const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
 
-// 1. PNG 생성 헬퍼
 function crc32(buf) {
   let table = new Uint32Array(256);
   for (let i = 0; i < 256; i++) {
@@ -78,7 +77,7 @@ function makeCanvas(w, h) {
 }
 
 function writeSprite(relPath, canvas, ppu = 32) {
-  const fullPath = path.join(__dirname, relPath);
+  const fullPath = path.join(__dirname, '..', relPath);
   fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   fs.writeFileSync(fullPath, createPng(canvas.w, canvas.h, canvas.buf));
 
@@ -110,211 +109,174 @@ TextureImporter:
   textureType: 8
   textureShape: 1
 `;
-  fs.writeFileSync(fullPath + '.meta', metaContent);
-  console.log('Saved:', relPath);
-}
-
-// -------------------------------------------------------------
-// 2. 도파민 클리너 스프라이트 디자인
-// -------------------------------------------------------------
-
-// (1) 플레이어: 귀여운 스마트 브러시 요정 (32x32)
-{
-  const c = makeCanvas(32, 32);
-  // 몸통 (파스텔 핑크/스트로베리 젤리형)
-  c.fillCircle(16, 17, 10, 255, 117, 143);
-  c.fillCircle(16, 16, 9, 255, 143, 163);
-
-  // 헤어밴드 / 꼭지 (산뜻한 민트 초록)
-  c.fillCircle(16, 7, 3, 45, 106, 79);
-  c.fillRect(14, 5, 18, 7, 82, 183, 136);
-
-  // 눈 (초롱초롱한 블랙 & 화이트 하이라이트)
-  c.fillRect(12, 15, 13, 18, 40, 30, 45);
-  c.fillRect(19, 15, 20, 18, 40, 30, 45);
-  c.set(12, 15, 255, 255, 255);
-  c.set(19, 15, 255, 255, 255);
-
-  // 발그레한 볼터치 (피치 핑크)
-  c.fillRect(10, 19, 12, 20, 255, 80, 110);
-  c.fillRect(20, 19, 22, 20, 255, 80, 110);
-
-  // 귀여운 청소용 버블 브러시 (오른손)
-  c.fillRect(24, 18, 28, 20, 230, 180, 90); // 손잡이
-  c.fillCircle(28, 14, 3, 120, 220, 255);  // 비누 거품 헤드
-  c.set(29, 13, 255, 255, 255);
-  writeSprite('Assets/Sprites/Characters/player_brush.png', c, 32);
-}
-
-// (2) 몬스터: 잡생각 먼지 (Mind Dust, 32x32)
-{
-  const c = makeCanvas(32, 32);
-  // 몽글몽글 먼지 구름 외곽
-  c.fillCircle(16, 16, 9, 214, 199, 232);
-  c.fillCircle(11, 15, 6, 200, 180, 225);
-  c.fillCircle(21, 15, 6, 200, 180, 225);
-  c.fillCircle(16, 21, 6, 185, 165, 215);
-  c.fillCircle(16, 11, 6, 225, 215, 240);
-
-  // 어지러운 소용돌이 눈
-  c.fillRect(13, 14, 14, 16, 90, 70, 120);
-  c.fillRect(18, 14, 19, 16, 90, 70, 120);
-  c.set(13, 14, 255, 255, 255);
-  c.set(18, 14, 255, 255, 255);
-  // 삐쭉빼쭉 먼지 가닥
-  c.set(7, 10, 190, 170, 220);
-  c.set(24, 10, 190, 170, 220);
-  c.set(8, 22, 190, 170, 220);
-  c.set(23, 22, 190, 170, 220);
-  writeSprite('Assets/Sprites/Enemies/enemy_dust.png', c, 32);
-}
-
-// (3) 몬스터: 쏟아지는 졸음 (Heavy Sloth, 32x32)
-{
-  const c = makeCanvas(32, 32);
-  // 포근한 하늘빛 슬라임
-  c.fillCircle(16, 18, 10, 190, 225, 230);
-  c.fillRect(8, 18, 24, 26, 190, 225, 230);
-  c.fillCircle(16, 17, 8, 210, 240, 245);
-
-  // 감긴 눈 (Zzz 표정)
-  c.fillRect(12, 17, 14, 18, 50, 90, 130);
-  c.fillRect(18, 17, 20, 18, 50, 90, 130);
-
-  // 수면 모자 (Nightcap, 부드러운 바이올렛)
-  c.fillRect(12, 6, 20, 10, 160, 150, 210);
-  c.fillRect(18, 3, 23, 6, 160, 150, 210);
-  c.fillCircle(24, 3, 2, 255, 255, 255); // 방울
-  writeSprite('Assets/Sprites/Enemies/enemy_sloth.png', c, 32);
-}
-
-// (4) 몬스터: 알림 유령 (Notification Ghost, 32x32)
-{
-  const c = makeCanvas(32, 32);
-  // 스마트폰 핑크빛 유령 몸체
-  c.fillCircle(16, 13, 9, 255, 180, 200);
-  c.fillRect(8, 13, 24, 23, 255, 180, 200);
-  // 유령 하단 꼬리 파동
-  c.fillCircle(10, 23, 2, 255, 180, 200);
-  c.fillCircle(16, 24, 3, 255, 180, 200);
-  c.fillCircle(22, 23, 2, 255, 180, 200);
-
-  // 붉은 알림 뱃지 (!) 마크
-  c.fillCircle(22, 8, 4, 255, 60, 80);
-  c.set(22, 6, 255, 255, 255);
-  c.set(22, 7, 255, 255, 255);
-  c.set(22, 9, 255, 255, 255);
-
-  // 반짝이는 큰 눈
-  c.fillRect(12, 13, 14, 16, 80, 30, 50);
-  c.fillRect(18, 13, 20, 16, 80, 30, 50);
-  c.set(13, 14, 255, 255, 255);
-  c.set(19, 14, 255, 255, 255);
-  writeSprite('Assets/Sprites/Enemies/enemy_ghost.png', c, 32);
-}
-
-// (5) 몬스터: 도파민 거인 보스 (Dopamine Boss, 64x64)
-{
-  const c = makeCanvas(64, 64);
-  // 거대한 사이버 퍼플 보스 몸체
-  c.fillCircle(32, 34, 22, 123, 124, 219);
-  c.fillCircle(32, 32, 19, 145, 146, 235);
-
-  // 번쩍이는 황금 왕관
-  c.fillRect(24, 10, 40, 16, 255, 210, 70);
-  c.fillRect(22, 6, 26, 12, 255, 210, 70);
-  c.fillRect(30, 4, 34, 12, 255, 230, 100);
-  c.fillRect(38, 6, 42, 12, 255, 210, 70);
-  // 왕관 보석
-  c.set(32, 8, 255, 50, 80);
-  c.set(24, 9, 50, 180, 255);
-  c.set(40, 9, 50, 180, 255);
-
-  // 위압적인 붉은 보스 눈
-  c.fillRect(23, 28, 28, 33, 255, 60, 90);
-  c.fillRect(36, 28, 41, 33, 255, 60, 90);
-  c.fillRect(25, 30, 27, 32, 255, 255, 255);
-  c.fillRect(38, 30, 40, 255, 255, 255);
-
-  // 사악한 보스 미소
-  c.fillRect(28, 41, 36, 43, 60, 40, 90);
-  writeSprite('Assets/Sprites/Enemies/enemy_boss.png', c, 32);
-}
-
-// (6) 경험치 보석 4종 (16x16, 24x24)
-{
-  function makeGem(r, g, b, hr, hg, hb, size = 16) {
-    const c = makeCanvas(size, size);
-    const mid = size / 2;
-    c.fillCircle(mid, mid, mid - 2, r, g, b);
-    c.fillCircle(mid - 1, mid - 1, mid - 4, hr, hg, hb);
-    c.set(Math.floor(mid - 1), Math.floor(mid - 2), 255, 255, 255);
-    return c;
+  if (!fs.existsSync(fullPath + '.meta')) {
+    fs.writeFileSync(fullPath + '.meta', metaContent);
   }
-  writeSprite('Assets/Sprites/Items/gem_green.png', makeGem(82, 183, 136, 120, 220, 170, 16), 16);
-  writeSprite('Assets/Sprites/Items/gem_blue.png', makeGem(78, 168, 222, 120, 200, 250, 16), 16);
-  writeSprite('Assets/Sprites/Items/gem_pink.png', makeGem(255, 117, 143, 255, 160, 180, 16), 16);
-  writeSprite('Assets/Sprites/Items/gem_mega.png', makeGem(255, 60, 110, 255, 210, 230, 24), 24);
+  console.log('Saved sprite:', relPath);
 }
 
-// (7) 특수 아이템 4종 (24x24)
+// -------------------------------------------------------------
+// 1. 고화질 32x32 직관적인 필드 드랍 아이템 스프라이트
+// -------------------------------------------------------------
+
+// (A) 케이크 (item_cake.png, 32x32) - 층층이 딸기 생크림 조각 케이크
 {
-  // 케이크
-  const cake = makeCanvas(24, 24);
-  cake.fillRect(5, 10, 19, 18, 255, 235, 215); // 빵 시트
-  cake.fillRect(5, 10, 19, 12, 255, 255, 255); // 크림
-  cake.fillRect(5, 14, 19, 15, 255, 120, 150); // 딸기잼 레이어
-  cake.fillCircle(12, 8, 3, 255, 60, 80);      // 위쪽 딸기
-  writeSprite('Assets/Sprites/Items/item_cake.png', cake, 24);
+  const c = makeCanvas(32, 32);
+  // 그림자
+  c.fillCircle(16, 26, 9, 0, 0, 0, 60);
 
-  // 토마토 폭탄
-  const bomb = makeCanvas(24, 24);
-  bomb.fillCircle(12, 14, 8, 255, 60, 60);
-  bomb.fillCircle(10, 12, 6, 255, 100, 100);
-  bomb.fillRect(10, 5, 14, 8, 50, 140, 70); // 꼭지
-  bomb.set(14, 4, 255, 200, 50); // 심지 불꽃
-  writeSprite('Assets/Sprites/Items/item_bomb.png', bomb, 24);
+  // 케이크 빵 바디 (골든 옐로우 스폰지)
+  c.fillRect(7, 14, 25, 24, 245, 215, 160);
+  // 딸기잼 샌드 레이어
+  c.fillRect(7, 18, 25, 20, 235, 60, 95);
+  // 하얀 생크림 프로스팅
+  c.fillRect(6, 12, 26, 15, 255, 255, 255);
+  c.fillRect(5, 14, 7, 17, 255, 255, 255); // 옆으로 흘러내리는 크림 드립
+  c.fillRect(14, 14, 16, 17, 255, 255, 255);
+  c.fillRect(23, 14, 25, 17, 255, 255, 255);
 
-  // 슈퍼 자석
-  const mag = makeCanvas(24, 24);
-  mag.fillRect(5, 6, 8, 17, 230, 70, 70);   // 왼쪽 극 (레드)
-  mag.fillRect(16, 6, 19, 17, 70, 120, 230); // 오른쪽 극 (블루)
-  mag.fillRect(8, 14, 16, 17, 200, 200, 200); // 하단 U 연결
-  mag.fillRect(5, 5, 8, 7, 255, 255, 255);  // 은색 팁
-  mag.fillRect(16, 5, 19, 7, 255, 255, 255);
-  writeSprite('Assets/Sprites/Items/item_magnet.png', mag, 24);
+  // 상단 탐스러운 딸기 토핑
+  c.fillCircle(16, 9, 4, 245, 45, 65);
+  c.set(15, 8, 255, 160, 180); // 딸기 윤기 하이라이트
+  c.fillRect(15, 5, 17, 6, 45, 140, 75); // 딸기 꼭지 잎
 
-  // 황금 보물상자
-  const chest = makeCanvas(24, 24);
-  chest.fillRect(4, 9, 20, 20, 255, 190, 50); // 골드 몸체
-  chest.fillRect(6, 11, 18, 18, 220, 150, 30);
-  chest.fillRect(4, 13, 20, 14, 100, 60, 20);  // 경계선
-  chest.fillRect(11, 12, 13, 16, 255, 255, 255); // 자물쇠
-  writeSprite('Assets/Sprites/Items/item_chest.png', chest, 24);
+  // 외곽선 정리
+  c.fillRect(6, 24, 26, 25, 180, 130, 80); // 바닥 테두리
+  writeSprite('Assets/Sprites/Items/item_cake.png', c, 32);
 }
 
-// (8) 무기 & 투사체 (16x16, 20x20)
+// (B) 토마토 폭탄 (item_bomb.png, 32x32) - 빨갛고 동글동글한 토마토 폭탄 & 타오르는 심지
 {
-  // 클린 탄환
-  const bullet = makeCanvas(16, 16);
-  bullet.fillCircle(8, 8, 5, 255, 117, 143);
-  bullet.fillCircle(7, 7, 3, 255, 180, 200);
-  bullet.set(6, 6, 255, 255, 255);
-  writeSprite('Assets/Sprites/Weapons/bullet_clean.png', bullet, 16);
+  const c = makeCanvas(32, 32);
+  // 그림자
+  c.fillCircle(16, 26, 9, 0, 0, 0, 60);
 
-  // 기가 개틀링 탄환
-  const gatling = makeCanvas(16, 16);
-  gatling.fillCircle(8, 8, 6, 255, 210, 50);
-  gatling.fillCircle(8, 8, 4, 255, 245, 150);
-  gatling.set(8, 8, 255, 255, 255);
-  writeSprite('Assets/Sprites/Weapons/bullet_gatling.png', gatling, 16);
+  // 붉은 토마토 몸체
+  c.fillCircle(16, 18, 10, 235, 40, 40);
+  c.fillCircle(15, 16, 8, 255, 75, 75);
+  c.fillCircle(13, 14, 4, 255, 140, 140); // 반짝이는 하이라이트
 
-  // 위성 배리어
-  const sat = makeCanvas(20, 20);
-  sat.fillCircle(10, 10, 7, 255, 140, 170);
-  sat.fillCircle(9, 9, 5, 255, 180, 210);
-  sat.fillRect(7, 2, 13, 4, 70, 180, 110); // 딸기 행성 잎
-  writeSprite('Assets/Sprites/Weapons/satellite_orbit.png', sat, 20);
+  // 토마토 초록 꼭지 잎
+  c.fillRect(12, 8, 20, 10, 45, 145, 75);
+  c.fillRect(15, 7, 17, 11, 45, 145, 75);
+  c.set(11, 9, 35, 115, 55);
+  c.set(21, 9, 35, 115, 55);
+
+  // 꼬불꼬불 폭탄 심지
+  c.set(16, 6, 120, 90, 60);
+  c.set(17, 5, 120, 90, 60);
+  c.set(18, 4, 120, 90, 60);
+
+  // 타오르는 불꽃 파티클
+  c.fillCircle(19, 3, 2, 255, 215, 50);
+  c.set(19, 3, 255, 255, 255);
+  c.set(21, 2, 255, 90, 30);
+  c.set(18, 1, 255, 150, 40);
+  writeSprite('Assets/Sprites/Items/item_bomb.png', c, 32);
 }
 
-console.log('✨ All 2D Pixel Art Sprites generated successfully!');
+// (C) 슈퍼 자석 (item_magnet.png, 32x32) - 클래식 말굽 자석 & 전기 스파크
+{
+  const c = makeCanvas(32, 32);
+  // 그림자
+  c.fillCircle(16, 27, 9, 0, 0, 0, 60);
+
+  // U자형 말굽 자석 - 왼쪽(N극 빨강), 오른쪽(S극 파랑)
+  c.fillRect(8, 8, 13, 21, 235, 50, 50);  // N극 몸체
+  c.fillRect(19, 8, 24, 21, 50, 100, 235); // S극 몸체
+  c.fillRect(11, 18, 21, 24, 200, 40, 50); // 하단 U 커브
+  c.fillRect(14, 12, 18, 18, 0, 0, 0, 0);  // 내부 빈 공간 뚫기
+
+  // 은색 자석 팁
+  c.fillRect(8, 6, 13, 8, 230, 235, 245);
+  c.fillRect(19, 6, 24, 8, 230, 235, 245);
+  c.fillRect(8, 5, 13, 5, 160, 170, 185);
+  c.fillRect(19, 5, 24, 5, 160, 170, 185);
+
+  // 반짝이는 전기 스파크 (노랑)
+  c.set(10, 3, 255, 235, 80);
+  c.set(11, 2, 255, 255, 180);
+  c.set(21, 3, 255, 235, 80);
+  c.set(22, 2, 255, 255, 180);
+  c.set(16, 5, 255, 220, 60);
+  writeSprite('Assets/Sprites/Items/item_magnet.png', c, 32);
+}
+
+// (D) 황금 보물상자 (item_chest.png, 32x32) - 눈부신 골드 보물상자
+{
+  const c = makeCanvas(32, 32);
+  // 그림자
+  c.fillCircle(16, 26, 10, 0, 0, 0, 60);
+
+  // 상자 본체 (빛나는 황금 골드 & 원목 테두리)
+  c.fillRect(6, 14, 26, 25, 240, 170, 40);
+  c.fillRect(8, 16, 24, 23, 255, 210, 75); // 전면 하이라이트
+
+  // 상자 뚜껑
+  c.fillRect(5, 10, 27, 15, 220, 145, 30);
+  c.fillRect(7, 9, 25, 13, 255, 225, 95);
+
+  // 쇠 장식 띠 & 리벳
+  c.fillRect(9, 9, 11, 25, 120, 75, 25);
+  c.fillRect(21, 9, 23, 25, 120, 75, 25);
+  c.set(10, 12, 255, 230, 120);
+  c.set(22, 12, 255, 230, 120);
+  c.set(10, 20, 255, 230, 120);
+  c.set(22, 20, 255, 230, 120);
+
+  // 중앙 열쇠구멍 자물쇠 (실버 & 반짝임)
+  c.fillRect(14, 13, 18, 18, 255, 255, 255);
+  c.set(16, 15, 60, 40, 20);
+  c.set(16, 16, 60, 40, 20);
+
+  // 반짝이 별
+  c.set(26, 7, 255, 255, 255);
+  c.set(25, 8, 255, 230, 100);
+  writeSprite('Assets/Sprites/Items/item_chest.png', c, 32);
+}
+
+// -------------------------------------------------------------
+// 2. 반짝이는 32x32 다이아몬드 크리스탈 보석 (Green, Blue, Pink, Mega)
+// -------------------------------------------------------------
+function makeCrystal(r, g, b, hr, hg, hb, size = 32) {
+  const c = makeCanvas(size, size);
+  const mid = size / 2;
+  // 그림자
+  c.fillCircle(mid, size - 5, Math.floor(mid * 0.6), 0, 0, 0, 50);
+
+  // 다이아몬드 젬 컷팅 형태
+  for (let y = 6; y < size - 6; y++) {
+    const dy = Math.abs(y - mid);
+    const span = Math.round((mid - 5) * (1 - dy / mid));
+    for (let x = mid - span; x <= mid + span; x++) {
+      if (x < mid) {
+        c.set(x, y, r, g, b); // 어두운 면
+      } else {
+        c.set(x, y, Math.min(255, r + 25), Math.min(255, g + 25), Math.min(255, b + 25)); // 밝은 면
+      }
+    }
+  }
+
+  // 상단 하이라이트 패싯
+  c.fillCircle(mid - 2, mid - 2, 3, hr, hg, hb);
+  c.set(mid - 2, mid - 3, 255, 255, 255);
+  c.set(mid - 3, mid - 2, 255, 255, 255);
+  return c;
+}
+
+writeSprite('Assets/Sprites/Items/gem_green.png', makeCrystal(65, 175, 120, 160, 245, 195, 32), 32);
+writeSprite('Assets/Sprites/Items/gem_blue.png', makeCrystal(60, 150, 230, 170, 225, 255, 32), 32);
+writeSprite('Assets/Sprites/Items/gem_pink.png', makeCrystal(245, 85, 135, 255, 185, 215, 32), 32);
+
+// 메가 핑크 다이아몬드 (무지개빛 골드 림)
+{
+  const c = makeCrystal(255, 50, 110, 255, 215, 235, 32);
+  // 외곽 골든 반짝임
+  c.set(16, 4, 255, 220, 80);
+  c.set(4, 16, 255, 220, 80);
+  c.set(27, 16, 255, 220, 80);
+  c.set(16, 27, 255, 220, 80);
+  writeSprite('Assets/Sprites/Items/gem_mega.png', c, 32);
+}
+
+console.log('✨ All 32x32 field drop item sprites regenerated successfully!');

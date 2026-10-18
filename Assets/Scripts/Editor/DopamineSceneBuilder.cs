@@ -204,14 +204,14 @@ namespace DopamineCleaner.Editor
             RectTransform cardContRt = cardsContainer.GetComponent<RectTransform>();
             cardContRt.anchorMin = new Vector2(0.5f, 0.5f);
             cardContRt.anchorMax = new Vector2(0.5f, 0.5f);
-            cardContRt.sizeDelta = new Vector2(900, 480);
-            cardContRt.anchoredPosition = new Vector2(0, -40);
+            cardContRt.sizeDelta = new Vector2(960, 480);
+            cardContRt.anchoredPosition = new Vector2(0, -30);
 
             HorizontalLayoutGroup hlg = cardsContainer.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 30;
+            hlg.spacing = 25;
             hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = true;
-            hlg.childControlHeight = true;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
 
             SetPrivateField(uiMgr, "levelUpPanel", lvlPanel);
             SetPrivateField(uiMgr, "cardContainer", cardsContainer.transform);
@@ -362,9 +362,20 @@ namespace DopamineCleaner.Editor
 
             CircleCollider2D col = obj.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
-            col.radius = 0.3f;
+            col.radius = 0.35f;
 
-            obj.AddComponent<ExpGem>();
+            ExpGem gemComp = obj.AddComponent<ExpGem>();
+
+            Sprite sGreen = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/gem_green.png");
+            Sprite sBlue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/gem_blue.png");
+            Sprite sPink = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/gem_pink.png");
+            Sprite sMega = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/gem_mega.png");
+            Sprite sCake = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/item_cake.png");
+            Sprite sBomb = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/item_bomb.png");
+            Sprite sMagnet = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/item_magnet.png");
+            Sprite sChest = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/item_chest.png");
+
+            gemComp.SetSprites(sGreen, sBlue, sPink, sMega, sCake, sBomb, sMagnet, sChest);
 
             string path = "Assets/Prefabs/GemPrefab.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(obj, path);
@@ -397,30 +408,46 @@ namespace DopamineCleaner.Editor
         {
             GameObject cardObj = CreateUIObject("UpgradeCard", null);
             RectTransform rt = cardObj.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(260, 420);
+            rt.sizeDelta = new Vector2(280, 420);
 
             Image cardBg = cardObj.AddComponent<Image>();
-            cardBg.color = new Color(0.98f, 0.95f, 0.92f);
+            cardBg.color = new Color(0.98f, 0.96f, 0.94f);
 
             Button btn = cardObj.AddComponent<Button>();
             UpgradeCardUI cardUI = cardObj.AddComponent<UpgradeCardUI>();
 
-            Text icon = CreateText("CardIcon", cardObj.transform, "💧", 52, TextAnchor.MiddleCenter, new Vector2(0, 110));
-            Text title = CreateText("CardTitle", cardObj.transform, "스킬 이름", 24, TextAnchor.MiddleCenter, new Vector2(0, 20));
-            title.color = new Color(0.2f, 0.15f, 0.25f);
+            // 아이콘
+            Text icon = CreateText("CardIcon", cardObj.transform, "💧", 52, TextAnchor.MiddleCenter, new Vector2(0, 95));
+            RectTransform iconRt = icon.GetComponent<RectTransform>();
+            iconRt.sizeDelta = new Vector2(80, 80);
+
+            // 스킬 이름
+            Text title = CreateText("CardTitle", cardObj.transform, "스킬 이름", 22, TextAnchor.MiddleCenter, new Vector2(0, 25));
+            RectTransform titleRt = title.GetComponent<RectTransform>();
+            titleRt.sizeDelta = new Vector2(250, 40);
+            title.color = new Color(0.18f, 0.12f, 0.24f);
             title.fontStyle = FontStyle.Bold;
 
-            Text desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 18, TextAnchor.MiddleCenter, new Vector2(0, -90));
-            desc.color = new Color(0.45f, 0.4f, 0.5f);
+            // 스킬 설명 (카드 너비 280 안에서 여유있게 줄바꿈되도록 240 너비 지정)
+            Text desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 16, TextAnchor.UpperCenter, new Vector2(0, -90));
+            RectTransform descRt = desc.GetComponent<RectTransform>();
+            descRt.sizeDelta = new Vector2(240, 130);
+            desc.color = new Color(0.32f, 0.28f, 0.38f);
+            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
+            desc.verticalOverflow = VerticalWrapMode.Truncate;
+            desc.lineSpacing = 1.2f;
 
+            // 진화 뱃지
             GameObject badgeObj = CreateUIObject("EvoBadge", cardObj.transform);
             RectTransform bRt = badgeObj.GetComponent<RectTransform>();
-            bRt.sizeDelta = new Vector2(100, 30);
-            bRt.anchoredPosition = new Vector2(0, 180);
+            bRt.sizeDelta = new Vector2(120, 28);
+            bRt.anchoredPosition = new Vector2(0, 165);
             Image bImg = badgeObj.AddComponent<Image>();
-            bImg.color = new Color(1f, 0.8f, 0.2f);
-            Text bText = CreateText("BadgeText", badgeObj.transform, "EVOLUTION", 13, TextAnchor.MiddleCenter, Vector2.zero);
-            bText.color = new Color(0.3f, 0.15f, 0.0f);
+            bImg.color = new Color(1f, 0.78f, 0.22f);
+            Text bText = CreateText("BadgeText", badgeObj.transform, "EVOLUTION", 12, TextAnchor.MiddleCenter, Vector2.zero);
+            RectTransform bTextRt = bText.GetComponent<RectTransform>();
+            bTextRt.sizeDelta = new Vector2(115, 26);
+            bText.color = new Color(0.35f, 0.18f, 0.02f);
             bText.fontStyle = FontStyle.Bold;
 
             SetPrivateField(cardUI, "iconText", icon);
