@@ -213,11 +213,7 @@ namespace DopamineCleaner.Weapons
 
         public void OpenTreasureChestJackpot()
         {
-            var options = GetRandomUpgradeOptions(1);
-            if (options.Count > 0)
-            {
-                ApplyUpgrade(options[0].type);
-            }
+            UIManager.Instance?.ShowChestRewardUI();
         }
     }
 }

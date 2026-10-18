@@ -197,8 +197,8 @@ namespace DopamineCleaner.Editor
             Image dimImg = lvlPanel.AddComponent<Image>();
             dimImg.color = new Color(0.1f, 0.08f, 0.15f, 0.88f);
 
-            CreateText("LvlUpTitle", lvlPanel.transform, "🎉 레벨 업!", 48, TextAnchor.MiddleCenter, new Vector2(0, 350));
-            CreateText("LvlUpSub", lvlPanel.transform, "원하는 도파민 디톡스 능력을 선택하세요", 24, TextAnchor.MiddleCenter, new Vector2(0, 280));
+            Text lvlTitle = CreateText("LvlUpTitle", lvlPanel.transform, "🎉 레벨 업!", 48, TextAnchor.MiddleCenter, new Vector2(0, 350));
+            Text lvlSub = CreateText("LvlUpSub", lvlPanel.transform, "원하는 도파민 디톡스 능력을 선택하세요", 24, TextAnchor.MiddleCenter, new Vector2(0, 280));
 
             GameObject cardsContainer = CreateUIObject("CardsContainer", lvlPanel.transform);
             RectTransform cardContRt = cardsContainer.GetComponent<RectTransform>();
@@ -214,6 +214,8 @@ namespace DopamineCleaner.Editor
             hlg.childControlHeight = false;
 
             SetPrivateField(uiMgr, "levelUpPanel", lvlPanel);
+            SetPrivateField(uiMgr, "levelUpTitleText", lvlTitle);
+            SetPrivateField(uiMgr, "levelUpSubText", lvlSub);
             SetPrivateField(uiMgr, "cardContainer", cardsContainer.transform);
             SetPrivateField(uiMgr, "cardPrefab", cardPrefab);
 

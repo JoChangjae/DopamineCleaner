@@ -21,8 +21,12 @@ namespace DopamineCleaner.UI
 
         [Header("레벨업 모달")]
         [SerializeField] private GameObject levelUpPanel;
+        [SerializeField] private Text levelUpTitleText;
+        [SerializeField] private Text levelUpSubText;
         [SerializeField] private Transform cardContainer;
         [SerializeField] private GameObject cardPrefab;
+
+        private int pendingLevelUps = 0;
 
         [Header("게임오버 모달")]
         [SerializeField] private GameObject gameOverPanel;
@@ -131,11 +135,47 @@ namespace DopamineCleaner.UI
             }
         }
 
-        private void ShowLevelUpUI(int newLevel)
+        public void ShowLevelUpUI(int newLevel)
+        {
+            pendingLevelUps++;
+            if (levelUpPanel != null && !levelUpPanel.activeSelf)
+            {
+                PresentNextLevelUp(false);
+            }
+        }
+
+        public void ShowChestRewardUI()
+        {
+            pendingLevelUps++;
+            if (levelUpPanel != null && !levelUpPanel.activeSelf)
+            {
+                PresentNextLevelUp(true);
+            }
+        }
+
+        private void PresentNextLevelUp(bool isChest = false)
         {
             if (levelUpPanel == null) return;
 
+            if (pendingLevelUps <= 0)
+            {
+                levelUpPanel.SetActive(false);
+                GameManager.Instance?.SetState(GameState.Playing);
+                return;
+            }
+
+            GameManager.Instance?.SetState(GameState.LevelUp);
             levelUpPanel.SetActive(true);
+
+            if (levelUpTitleText != null)
+            {
+                levelUpTitleText.text = isChest ? "🎁 황금 보물상자 발견!" : "🎉 레벨 업!";
+            }
+
+            if (levelUpSubText != null)
+            {
+                levelUpSubText.text = isChest ? "행운의 보너스 능력을 선택하세요!" : "원하는 도파민 디톡스 능력을 선택하세요";
+            }
 
             // 기존 카드 정리
             if (cardContainer != null)
@@ -145,7 +185,7 @@ namespace DopamineCleaner.UI
                     Destroy(child.gameObject);
                 }
 
-                // 3개 옵션 생성
+                // 3개 옵션 생성 (보물상자면 진화 무기 우선 배치)
                 List<UpgradeCardInfo> options = WeaponManager.Instance.GetRandomUpgradeOptions(3);
                 for (int i = 0; i < options.Count; i++)
                 {
@@ -159,7 +199,17 @@ namespace DopamineCleaner.UI
                             cardUI.Setup(opt, () =>
                             {
                                 WeaponManager.Instance?.ApplyUpgrade(opt.type);
-                                levelUpPanel.SetActive(false);
+                                pendingLevelUps--;
+
+                                if (pendingLevelUps > 0)
+                                {
+                                    PresentNextLevelUp(false);
+                                }
+                                else
+                                {
+                                    levelUpPanel.SetActive(false);
+                                    GameManager.Instance?.SetState(GameState.Playing);
+                                }
                             });
                         }
                     }

@@ -46,11 +46,13 @@ namespace DopamineCleaner.Items
 
         public void SpawnGem(Vector3 position, GemType type, int exp)
         {
+            Vector3 spawnPos = new Vector3(position.x, position.y, 0f);
+
             // 1. 특수 아이템(폭탄, 상자, 케이크, 자석)은 무조건 즉시 스폰
             if (type is GemType.Bomb or GemType.Chest or GemType.Cake or GemType.Magnet)
             {
                 ExpGem item = GetAvailableGem();
-                item.transform.position = position;
+                item.transform.position = spawnPos;
                 item.Initialize(type, 0);
                 return;
             }
@@ -67,7 +69,7 @@ namespace DopamineCleaner.Items
                     activeCount++;
                     if (gemPool[i].Type is GemType.Green or GemType.Blue or GemType.Pink or GemType.MegaPink)
                     {
-                        float dSq = (gemPool[i].transform.position - position).sqrMagnitude;
+                        float dSq = (gemPool[i].transform.position - spawnPos).sqrMagnitude;
                         if (dSq < minDistanceSq)
                         {
                             minDistanceSq = dSq;
@@ -86,7 +88,7 @@ namespace DopamineCleaner.Items
 
             // 신규 보석 활성화
             ExpGem newGem = GetAvailableGem();
-            newGem.transform.position = position;
+            newGem.transform.position = spawnPos;
             newGem.Initialize(type, exp);
         }
 

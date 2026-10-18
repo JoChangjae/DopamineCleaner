@@ -113,6 +113,37 @@ TextureImporter:
     fs.writeFileSync(fullPath + '.meta', metaContent);
   }
   console.log('Saved sprite:', relPath);
+
+  // Resources/Items 폴더 동기화
+  if (relPath.startsWith('Assets/Sprites/Items/')) {
+    const filename = path.basename(relPath);
+    const resPath = path.join(__dirname, '..', 'Assets/Resources/Items', filename);
+    fs.mkdirSync(path.dirname(resPath), { recursive: true });
+    fs.copyFileSync(fullPath, resPath);
+    if (!fs.existsSync(resPath + '.meta')) {
+      const resMetaContent = `fileFormatVersion: 2
+guid: ${crypto.randomBytes(16).toString('hex')}
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+  spriteMode: 1
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: ${ppu}
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  textureType: 8
+  textureShape: 1
+`;
+      fs.writeFileSync(resPath + '.meta', resMetaContent);
+    }
+  }
 }
 
 // -------------------------------------------------------------
