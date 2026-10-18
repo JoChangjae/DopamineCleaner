@@ -72,6 +72,16 @@ namespace DopamineCleaner.Weapons
                     ? Instantiate(satellitePrefab, transform)
                     : CreateFallbackSatellite();
 
+                if (sat.TryGetComponent<OrbitSatelliteContact>(out var contact))
+                {
+                    contact.Initialize(this);
+                }
+                else
+                {
+                    contact = sat.AddComponent<OrbitSatelliteContact>();
+                    contact.Initialize(this);
+                }
+
                 satellites.Add(sat);
             }
 
@@ -107,8 +117,14 @@ namespace DopamineCleaner.Weapons
         {
             if (enemy != null && enemy.IsAlive)
             {
+                float mult = 1f;
+                if (Meta.GameDataManager.Instance != null)
+                {
+                    mult = Meta.CharacterDatabase.Get(Meta.GameDataManager.Instance.Profile.selectedCharacterId).baseDamageMult;
+                }
+
                 Vector2 pushDir = (enemy.transform.position - transform.position).normalized;
-                enemy.TakeDamage(damagePerSecond * Time.deltaTime, pushDir, 0.15f);
+                enemy.TakeDamage(damagePerSecond * mult * Time.deltaTime, pushDir, 0.15f);
             }
         }
     }

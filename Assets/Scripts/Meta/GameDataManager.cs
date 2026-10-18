@@ -90,8 +90,20 @@ namespace DopamineCleaner.Meta
                 SaveProfile();
             }
 
+            if (Profile.unlockedCharacterIds == null)
+                Profile.unlockedCharacterIds = new() { "char_intern" };
+
             if (!Profile.unlockedCharacterIds.Contains("char_intern"))
                 Profile.unlockedCharacterIds.Add("char_intern");
+
+            if (string.IsNullOrEmpty(Profile.selectedCharacterId))
+                Profile.selectedCharacterId = "char_intern";
+
+            if (Profile.inventory == null)
+                Profile.inventory = new() { "item_first_aid" };
+
+            if (Profile.stashStorage == null)
+                Profile.stashStorage = new() { "artifact_golden_calc", "item_speed_booster" };
 
             OnProfileUpdated?.Invoke();
         }

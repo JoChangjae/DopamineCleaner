@@ -131,14 +131,17 @@ namespace DopamineCleaner.Editor
             // 2. 상점 패널
             GameObject shopPanel = CreateShopPanel(contentArea.transform, shopItemPrefab, sellItemPrefab);
             SetPrivateField(townMgr, "shopPanel", shopPanel);
+            shopPanel.SetActive(false);
 
             // 3. 창고 패널
             GameObject storagePanel = CreateStoragePanel(contentArea.transform, storageItemPrefab);
             SetPrivateField(townMgr, "storagePanel", storagePanel);
+            storagePanel.SetActive(false);
 
             // 4. 던전 출장 접수처 패널
             GameObject dungeonPanel = CreateDungeonSelectPanel(contentArea.transform);
             SetPrivateField(townMgr, "dungeonPanel", dungeonPanel);
+            dungeonPanel.SetActive(false);
 
             // 씬 저장
             Directory.CreateDirectory("Assets/Scenes");

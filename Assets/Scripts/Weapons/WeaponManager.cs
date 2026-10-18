@@ -43,6 +43,7 @@ namespace DopamineCleaner.Weapons
 
         public CleanBulletWeapon BulletWeapon => cleanBulletWeapon;
         public OrbitWeapon OrbitWeapon => orbitWeapon;
+        public int AttackSpeedLevel => attackSpeedLevel;
 
         private void Awake()
         {
@@ -59,6 +60,12 @@ namespace DopamineCleaner.Weapons
         {
             // 기본 무기 1레벨 시작
             cleanBulletWeapon?.Upgrade();
+
+            // 윤이사 사원 특권: 시작부터 가디언 위성 1기 장착 출동
+            if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.Profile.selectedCharacterId == "char_director")
+            {
+                orbitWeapon?.Upgrade();
+            }
         }
 
         public List<UpgradeCardInfo> GetRandomUpgradeOptions(int count = 3)

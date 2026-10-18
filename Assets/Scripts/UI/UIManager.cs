@@ -131,7 +131,25 @@ namespace DopamineCleaner.UI
         {
             if (dashCooldownText != null)
             {
-                dashCooldownText.text = currentCooldown <= 0f ? "💨 대시 준비완료 (Space)" : $"⏳ 대시 ({currentCooldown:F1}s)";
+                string dashStr = currentCooldown <= 0f ? "💨 대시 준비완료 (Space)" : $"⏳ 대시 ({currentCooldown:F1}s)";
+
+                int aidCount = 0;
+                if (Meta.GameDataManager.Instance != null)
+                {
+                    foreach (string id in Meta.GameDataManager.Instance.Profile.inventory)
+                    {
+                        if (id == "item_first_aid") aidCount++;
+                    }
+                }
+
+                if (aidCount > 0)
+                {
+                    dashCooldownText.text = $"{dashStr}  |  🩹 구급약 [1] (보유: {aidCount}개)";
+                }
+                else
+                {
+                    dashCooldownText.text = dashStr;
+                }
             }
         }
 

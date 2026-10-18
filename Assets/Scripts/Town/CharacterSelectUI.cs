@@ -13,7 +13,7 @@ namespace DopamineCleaner.Town
 
         public void RefreshUI()
         {
-            if (cardContainer == null || GameDataManager.Instance == null) return;
+            if (cardContainer == null || characterCardPrefab == null || GameDataManager.Instance == null) return;
 
             foreach (Transform child in cardContainer)
             {

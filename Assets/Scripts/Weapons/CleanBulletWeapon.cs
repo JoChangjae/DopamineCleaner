@@ -53,6 +53,12 @@ namespace DopamineCleaner.Weapons
                 targetDir = (target.transform.position - transform.position).normalized;
             }
 
+            float damageMult = 1f;
+            if (Meta.GameDataManager.Instance != null)
+            {
+                damageMult = Meta.CharacterDatabase.Get(Meta.GameDataManager.Instance.Profile.selectedCharacterId).baseDamageMult;
+            }
+
             if (isEvolved)
             {
                 // 진화 개틀링: 8발 전방위 고속 산탄
@@ -61,7 +67,7 @@ namespace DopamineCleaner.Weapons
                 {
                     float angle = Mathf.Atan2(targetDir.y, targetDir.x) + (i - 3.5f) * 0.22f;
                     Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-                    FireBullet(dir, 14f, 65f, 25, true);
+                    FireBullet(dir, 14f, 65f * damageMult, 25, true);
                 }
             }
             else
@@ -72,7 +78,7 @@ namespace DopamineCleaner.Weapons
                 {
                     float angle = Mathf.Atan2(targetDir.y, targetDir.x) + (i - (bulletCount - 1) * 0.5f) * 0.18f;
                     Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-                    FireBullet(dir, 10f, 20f + currentLevel * 5f, 1 + currentLevel, false);
+                    FireBullet(dir, 10f, (20f + currentLevel * 5f) * damageMult, 1 + currentLevel, false);
                 }
             }
         }

@@ -33,8 +33,22 @@ namespace DopamineCleaner.Weapons
             if (cooldownTimer <= 0f)
             {
                 Attack();
-                cooldownTimer = baseCooldown;
+                cooldownTimer = GetEffectiveCooldown();
             }
+        }
+
+        public virtual float GetEffectiveCooldown()
+        {
+            float rate = 1f;
+            if (WeaponManager.Instance != null)
+            {
+                rate += WeaponManager.Instance.AttackSpeedLevel * 0.15f;
+            }
+            if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.Profile.inventory.Contains("equip_coffee_thermos"))
+            {
+                rate += 0.15f;
+            }
+            return Mathf.Max(0.1f, baseCooldown / rate);
         }
     }
 }
