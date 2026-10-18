@@ -42,28 +42,58 @@
 
 ---
 
+## 🏢 윤회 보험사 R.I.P 시스템 (Town & Dungeon Meta Loop)
+
+1. **본사 마을 시스템 (TownScene)**
+   * **🧑‍💼 사원 선택소**: 김인턴, 박사정, 강반장, 윤이사 4종의 고유 특약 패시브 사원 해금 및 선택.
+   * **🛒 사내 보급 매점**: 응급 구급약, 부활 보험 증권, 스피드 부스터 등 실전 아이템 구매 및 가방 아이템 매각.
+   * **🗄️ 개인 사물함**: 출격 가방 (6칸) ⇄ 개인 사물함 (24칸) 아이템 보관 및 자유로운 세팅.
+   * **🚀 출장 접수처**: 유령 병원, 지하 오피스, 도파민 고속도로 맵과 4단계 위험 난이도(Easy, Normal, Hard, Nightmare) 설정 후 현장 출동.
+2. **현장 액션 던전 & 귀환 (MainGame)**
+   * 실시간 구급약 사용 (`1`번 키) 및 부활 보험 증권 자동 발동.
+   * 만렙 도달 후 무한 성과급/체력/폭탄 한계 돌파 시스템.
+   * 목표 생존 시간 달성 시 승리 정산 후 마을로 귀환하여 골드 및 윤회 포인트 획득.
+
+---
+
 ## 📁 프로젝트 구조 (Assets/Scripts)
 
 ```
 Assets/Scripts/
 ├── Core/
-│   ├── GameManager.cs       # 게임 상태(Ready/Playing/LevelUp/GameOver), 스테이지, 킬 카운트
-│   └── CameraFollow.cs      # 2D 부드러운 플레이어 추적 카메라 (LateUpdate SmoothDamp)
+│   ├── GameManager.cs       # 게임 상태, 스테이지, 킬 카운트, 던전 정산금 계산
+│   └── CameraFollow.cs      # 2D 부드러운 플레이어 추적 카메라
+├── Meta/
+│   ├── GameEnums.cs         # 난이도, 아이템 타입/희귀도 정의
+│   ├── CharacterData.cs     # 사원 스탯, 패시브, 해금 비용 데이터베이스
+│   ├── ItemData.cs          # 소모품, 장비, 유물 데이터베이스
+│   ├── DungeonData.cs       # 던전 맵, 난이도별 배율 데이터베이스
+│   └── GameDataManager.cs  # 싱글톤 프로필 세이브/로드, 인벤토리/창고, 재화 관리
+├── Town/
+│   ├── TownManager.cs       # 마을 UI 탭 네비게이션 및 경제 현황 표시
+│   ├── CharacterSelectUI.cs # 사원 고용 및 출장 선택 UI
+│   ├── ShopUI.cs            # 사내 매점 구매 및 매각 UI
+│   ├── StorageUI.cs         # 가방 ⇄ 사물함 보관함 UI
+│   └── DungeonSelectUI.cs   # 현장 맵 및 난이도 선택, 브리핑 UI
 ├── Characters/
-│   └── PlayerController.cs  # 2D 물리 이동, 대시, 체력, 무적, 경험치 & 레벨업, 부활
+│   └── PlayerController.cs  # 2D 물리 이동, 대시, 체력, 무적, 경험치 & 레벨업, 구급약 사용
 ├── Enemies/
-│   ├── Enemy.cs             # 잡생각 먼지, 쏟아지는 졸음, 알림 유령, 도파민 보스 AI
-│   └── EnemySpawner.cs      # Mob Density Cap(90마리 제한), 웨이브 러시, 보스 스폰
+│   ├── Enemy.cs             # 몬스터 AI (난이도 배율 스케일링)
+│   └── EnemySpawner.cs      # 몹 스폰 풀링, 웨이브 러시, 보스 스폰
 ├── Weapons/
 │   ├── WeaponBase.cs        # 무기 기본 추상 클래스
 │   ├── CleanBulletWeapon.cs # 자동 사격 및 기가 개틀링 진화
-│   ├── OrbitWeapon.cs       # 가디언 궤도 위성 회전 무기
+│   ├── OrbitWeapon.cs       # 가디언 궤도 위성 회전 무기 및 은하계 정화 진화
+│   ├── OrbitSatelliteContact.cs # 위성 회전 충돌체
 │   ├── Projectile.cs        # 관통 탄환 물리 및 대미지
-│   └── WeaponManager.cs     # 레벨업 3선택 카드 생성, 패시브 강화 및 진화 판정
+│   └── WeaponManager.cs     # 레벨업 3선택 카드, 만렙 한계돌파 보너스, 진화 판정
 ├── Items/
 │   ├── ExpGem.cs            # 경험치 보석 및 특수 아이템 (자석 흡수, 자동 병합)
 │   └── ItemManager.cs       # 보석 풀링, 전역 폭탄/자석 발동
-└── UI/
-    ├── UIManager.cs         # 상단 HUD (체력, 경험치, 타이머, 대시 쿨타임) 및 모달 제어
-    └── UpgradeCardUI.cs     # 레벨업 카드 선택 UI
+├── UI/
+│   ├── UIManager.cs         # 인게임 HUD, 레벨업 팝업, 게임오버/승리 정산 모달
+│   └── UpgradeCardUI.cs     # 레벨업 카드 UI
+└── Editor/
+    ├── TownSceneBuilder.cs  # 본사 마을 씬(TownScene) 자동 생성 빌더
+    └── DopamineSceneBuilder.cs # 액션 던전 씬(MainGame) 및 원클릭 빌드 도구
 ```
