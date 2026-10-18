@@ -73,6 +73,12 @@ namespace DopamineCleaner.Characters
 
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+            if (Meta.GameDataManager.Instance == null)
+            {
+                GameObject dm = new GameObject("[GameDataManager]");
+                dm.AddComponent<Meta.GameDataManager>();
+            }
         }
 
         private void Start()
@@ -137,6 +143,12 @@ namespace DopamineCleaner.Characters
                 c.a = 1f;
                 spriteRenderer.color = c;
             }
+
+            // 4. 단축키 1: 응급 구급약 사용
+            if ((Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) && currentHP < maxHP)
+            {
+                TryUseFirstAid();
+            }
         }
 
         private void FixedUpdate()
@@ -180,16 +192,21 @@ namespace DopamineCleaner.Characters
 
                 if (hasRevive && !reviveUsed)
                 {
-                    // 천사 부활
+                    // 사후 부활 증서 혜택 발동
                     reviveUsed = true;
-                    currentHP = maxHP;
-                    invincibleTimer = 2.5f;
+                    if (Meta.GameDataManager.Instance != null)
+                    {
+                        Meta.GameDataManager.Instance.Profile.inventory.Remove("item_revive_policy");
+                        Meta.GameDataManager.Instance.SaveProfile();
+                    }
+                    currentHP = maxHP * 0.5f;
+                    invincibleTimer = 3.0f;
                     OnHealthChanged?.Invoke(currentHP, maxHP);
                 }
                 else
                 {
                     OnPlayerDied?.Invoke();
-                    GameManager.Instance?.TriggerGameOver();
+                    GameManager.Instance?.TriggerGameOver(false);
                 }
             }
             else
@@ -202,6 +219,20 @@ namespace DopamineCleaner.Characters
         {
             currentHP = Mathf.Min(maxHP, currentHP + amount);
             OnHealthChanged?.Invoke(currentHP, maxHP);
+        }
+
+        public void TryUseFirstAid()
+        {
+            if (Meta.GameDataManager.Instance != null)
+            {
+                var profile = Meta.GameDataManager.Instance.Profile;
+                if (profile.inventory.Contains("item_first_aid"))
+                {
+                    profile.inventory.Remove("item_first_aid");
+                    Meta.GameDataManager.Instance.SaveProfile();
+                    Heal(40f);
+                }
+            }
         }
 
         public void AddExp(float exp)
@@ -239,27 +270,31 @@ namespace DopamineCleaner.Characters
 
         private void InitCharacterStats()
         {
-            switch (characterType)
+            if (Meta.GameDataManager.Instance != null)
             {
-                case CharacterType.SmartBrush:
-                    maxHP = 100f;
-                    moveSpeed = 5.5f;
-                    break;
-                case CharacterType.EspressoShot:
-                    maxHP = 85f;
-                    moveSpeed = 5.8f;
-                    break;
-                case CharacterType.VitaminBunny:
-                    maxHP = 90f;
-                    moveSpeed = 6.4f;
-                    dashCooldown = 2.2f;
-                    break;
-                case CharacterType.TomatoKnight:
-                    maxHP = 140f;
-                    moveSpeed = 4.8f;
-                    hasRevive = true;
-                    break;
+                var profile = Meta.GameDataManager.Instance.Profile;
+                var def = Meta.CharacterDatabase.Get(profile.selectedCharacterId);
+
+                maxHP = def.baseMaxHP + profile.contractHPLevel * 15f;
+                moveSpeed = def.baseMoveSpeed + profile.contractSpeedLevel * 0.3f;
+                magnetRadius = def.baseMagnetRadius;
+
+                // 인벤토리 장비 & 유물 패시브 효과 적용
+                foreach (string itemId in profile.inventory)
+                {
+                    if (itemId == "artifact_magnet_badge") magnetRadius *= 1.35f;
+                    if (itemId == "equip_hazard_suit") maxHP += 30f;
+                    if (itemId == "item_speed_booster") moveSpeed *= 1.15f;
+                    if (itemId == "item_revive_policy") hasRevive = true;
+                }
             }
+            else
+            {
+                maxHP = 100f;
+                moveSpeed = 5.5f;
+                magnetRadius = 3.0f;
+            }
+
             currentHP = maxHP;
         }
     }

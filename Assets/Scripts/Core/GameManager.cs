@@ -64,6 +64,17 @@ namespace DopamineCleaner.Core
             if (currentState == GameState.Playing)
             {
                 survivalTime += Time.deltaTime;
+
+                float targetSec = 300f;
+                if (Meta.GameDataManager.Instance != null)
+                {
+                    targetSec = Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance.SelectedMapId).targetSurvivalSec;
+                }
+
+                if (survivalTime >= targetSec)
+                {
+                    TriggerGameOver(true);
+                }
             }
         }
 
@@ -133,9 +144,60 @@ namespace DopamineCleaner.Core
             OnStageChanged?.Invoke(currentStage);
         }
 
-        public void TriggerGameOver()
+        public bool IsVictory { get; private set; } = false;
+        public int EarnedGold { get; private set; } = 0;
+        public int EarnedKarma { get; private set; } = 0;
+
+        public void TriggerGameOver(bool victory = false)
         {
+            if (currentState == GameState.GameOver) return;
+
+            IsVictory = victory;
+            CalculateSettlement(victory);
             SetState(GameState.GameOver);
+        }
+
+        private void CalculateSettlement(bool victory)
+        {
+            float targetSec = 300f;
+            int baseGold = 600;
+            int baseKarma = 1;
+            float goldMult = 1.0f;
+            float karmaMult = 1.0f;
+
+            if (Meta.GameDataManager.Instance != null)
+            {
+                var map = Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance.SelectedMapId);
+                var diff = Meta.DungeonDatabase.GetDifficultyMultiplier(Meta.GameDataManager.Instance.SelectedDifficulty);
+                targetSec = map.targetSurvivalSec;
+                baseGold = map.baseGoldReward;
+                baseKarma = map.baseKarmaReward;
+                goldMult = diff.rewardGoldMult;
+                karmaMult = diff.rewardKarmaMult;
+
+                // 유물 황금 계산기 보유 시 추가 25% 보너스
+                if (Meta.GameDataManager.Instance.Profile.inventory.Contains("artifact_golden_calc"))
+                {
+                    goldMult *= 1.25f;
+                }
+            }
+
+            int killBonusGold = totalKills * 3;
+            int survivalBonusGold = Mathf.FloorToInt(survivalTime * 1.5f);
+
+            if (victory)
+            {
+                EarnedGold = Mathf.RoundToInt((baseGold + killBonusGold + survivalBonusGold) * goldMult);
+                EarnedKarma = Mathf.Max(1, Mathf.RoundToInt(baseKarma * karmaMult));
+            }
+            else
+            {
+                // 순직(사망) 시 기본 보험금 지급 (50%)
+                EarnedGold = Mathf.RoundToInt((baseGold * 0.4f + killBonusGold + survivalBonusGold) * goldMult);
+                EarnedKarma = survivalTime >= (targetSec * 0.6f) ? 1 : 0;
+            }
+
+            Meta.GameDataManager.Instance?.ApplyDungeonSettlement(EarnedGold, EarnedKarma, null);
         }
     }
 }

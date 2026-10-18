@@ -125,14 +125,22 @@ namespace DopamineCleaner.Editor
 
             EditorBuildSettingsScene[] scenes = new EditorBuildSettingsScene[]
             {
-                new EditorBuildSettingsScene(scenePath, true)
+                new EditorBuildSettingsScene("Assets/Scenes/TownScene.unity", true),
+                new EditorBuildSettingsScene("Assets/Scenes/MainGame.unity", true)
             };
             EditorBuildSettings.scenes = scenes;
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
 
-            EditorUtility.DisplayDialog("도파민 클리너", "✨ 도트 배경 및 한글 폰트가 완벽히 적용된 씬(MainGame.unity) 구축이 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 바로 게임을 즐기실 수 있습니다.", "확인");
+        [MenuItem("Dopamine Cleaner/🚀 Build Complete Game (Town + Dungeon)")]
+        public static void BuildCompleteGame()
+        {
+            TownSceneBuilder.BuildTownScene();
+            BuildScene();
+            EditorSceneManager.OpenScene("Assets/Scenes/TownScene.unity");
+            EditorUtility.DisplayDialog("윤회 보험사 R.I.P", "🎉 마을 본사(TownScene)와 액션 던전(MainGame) 원클릭 구축이 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 마을에서 사원을 고르고 상점/창고 이용 후 던전으로 출동할 수 있습니다!", "확인");
         }
 
         private static void LoadKoreanFont()

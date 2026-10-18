@@ -231,21 +231,33 @@ namespace DopamineCleaner.UI
 
             gameOverPanel.SetActive(true);
             int sec = Mathf.FloorToInt(GameManager.Instance.SurvivalTime);
+            bool isVictory = GameManager.Instance.IsVictory;
+            int gold = GameManager.Instance.EarnedGold;
+            int karma = GameManager.Instance.EarnedKarma;
+
+            Text titleText = gameOverPanel.transform.Find("GoTitle")?.GetComponent<Text>();
+            if (titleText != null)
+            {
+                titleText.text = isVictory ? "🏆 출장 임무 완료 (생존)" : "💀 현장 순직 (사후 보험금 정산)";
+                titleText.color = isVictory ? new Color(1f, 0.85f, 0.25f) : new Color(1f, 0.4f, 0.45f);
+            }
 
             if (gameOverStatsText != null)
             {
                 gameOverStatsText.text =
-                    $"도달 스테이지: STAGE {GameManager.Instance.CurrentStage}\n" +
-                    $"생존 시간: {sec / 60:D2}:{sec % 60:D2}\n" +
-                    $"정화한 잡생각 몬스터: {GameManager.Instance.TotalKills}마리\n" +
-                    $"달성 레벨: Lv.{PlayerController.Instance?.Level ?? 1}";
+                    $"출장 현장: {Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance?.SelectedMapId ?? "map_hospital").name}\n" +
+                    $"생존 시간: {sec / 60:D2}:{sec % 60:D2}  |  처치: {GameManager.Instance.TotalKills}마리\n\n" +
+                    $"[정산 회수 내역]\n" +
+                    $"💰 수령 보험금: +{gold:N0} G\n" +
+                    $"✨ 윤회 포인트: +{karma} P";
             }
         }
 
         public void OnRestartButtonClicked()
         {
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
-            GameManager.Instance?.StartNewGame();
+            Time.timeScale = 1f;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("TownScene");
         }
     }
 }

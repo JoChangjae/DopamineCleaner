@@ -87,6 +87,14 @@ namespace DopamineCleaner.Enemies
                     break;
             }
 
+            if (Meta.GameDataManager.Instance != null)
+            {
+                var diff = Meta.DungeonDatabase.GetDifficultyMultiplier(Meta.GameDataManager.Instance.SelectedDifficulty);
+                maxHP *= diff.enemyHpMult;
+                damage *= diff.enemyDmgMult;
+                moveSpeed *= diff.enemySpeedMult;
+            }
+
             currentHP = maxHP;
             gameObject.SetActive(true);
         }
