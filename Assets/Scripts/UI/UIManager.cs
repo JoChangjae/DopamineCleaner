@@ -252,6 +252,22 @@ namespace DopamineCleaner.UI
 
                 // 3개 옵션 생성 (보물상자면 진화 무기 우선 배치)
                 List<UpgradeCardInfo> options = WeaponManager.Instance.GetRandomUpgradeOptions(3);
+                if (options == null || options.Count == 0)
+                {
+                    // 후보가 전혀 없을 때 게임 정지 먹통 방지 (즉시 플레이 재개)
+                    pendingLevelUps = 0;
+                    levelUpPanel.SetActive(false);
+                    GameManager.Instance?.SetState(GameState.Playing);
+                    return;
+                }
+
+                // 만렙 보너스 카드인 경우 타이틀 변경
+                if (options.Count > 0 && (options[0].type == UpgradeType.BonusGold || options[0].type == UpgradeType.BonusHeal || options[0].type == UpgradeType.BonusBomb))
+                {
+                    if (levelUpTitleText != null) levelUpTitleText.text = "👑 만렙 달성! 특별 보너스";
+                    if (levelUpSubText != null) levelUpSubText.text = "모든 능력을 마스터했습니다! 원하는 성과급을 선택하세요.";
+                }
+
                 for (int i = 0; i < options.Count; i++)
                 {
                     UpgradeCardInfo opt = options[i];

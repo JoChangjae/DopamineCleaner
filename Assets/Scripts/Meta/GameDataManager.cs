@@ -208,6 +208,12 @@ namespace DopamineCleaner.Meta
             return true;
         }
 
+        public void AddGold(int amount)
+        {
+            Profile.gold += amount;
+            SaveProfile();
+        }
+
         // ==========================================
         // 던전 보상 정산
         // ==========================================

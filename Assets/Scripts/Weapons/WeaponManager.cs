@@ -15,7 +15,10 @@ namespace DopamineCleaner.Weapons
         Magnet,
         AttackSpeed,
         EvoGigaGatling,
-        EvoGalacticCleanse
+        EvoGalacticCleanse,
+        BonusGold,
+        BonusHeal,
+        BonusBomb
     }
 
     [System.Serializable]
@@ -172,6 +175,37 @@ namespace DopamineCleaner.Weapons
                 });
             }
 
+            // 4. 모든 스킬 만렙 시 제공되는 '한계 돌파 / 만렙 보너스'
+            if (candidates.Count == 0)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.BonusGold,
+                    title = "💰 도파민 성과급 (+100G)",
+                    description = "모든 능력을 마스터했습니다! 즉시 추가 골드 100G를 정산금에 적립합니다.",
+                    iconText = "💰",
+                    isEvolution = false
+                });
+
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.BonusHeal,
+                    title = "💖 긴급 영양 보충 (+40 HP)",
+                    description = "도파민 피로를 씻어내고 체력을 40 즉시 회복합니다.",
+                    iconText = "💖",
+                    isEvolution = false
+                });
+
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.BonusBomb,
+                    title = "💣 전면 방역 살포 (화면 폭탄)",
+                    description = "화면 내의 모든 일반 몬스터를 일망타진 소독합니다.",
+                    iconText = "💣",
+                    isEvolution = false
+                });
+            }
+
             // 셔플 및 count개 추출
             for (int i = 0; i < candidates.Count; i++)
             {
@@ -213,6 +247,15 @@ namespace DopamineCleaner.Weapons
                     break;
                 case UpgradeType.AttackSpeed:
                     attackSpeedLevel++;
+                    break;
+                case UpgradeType.BonusGold:
+                    GameManager.Instance?.AddBonusGold(100);
+                    break;
+                case UpgradeType.BonusHeal:
+                    PlayerController.Instance?.Heal(40f);
+                    break;
+                case UpgradeType.BonusBomb:
+                    Items.ItemManager.Instance?.TriggerScreenBomb();
                     break;
             }
 

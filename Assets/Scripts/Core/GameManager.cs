@@ -86,6 +86,7 @@ namespace DopamineCleaner.Core
             totalKills = 0;
             survivalTime = 0f;
             bossActive = false;
+            BonusGold = 0;
 
             Time.timeScale = 1f;
             SetState(GameState.Playing);
@@ -147,6 +148,13 @@ namespace DopamineCleaner.Core
         public bool IsVictory { get; private set; } = false;
         public int EarnedGold { get; private set; } = 0;
         public int EarnedKarma { get; private set; } = 0;
+        public int BonusGold { get; private set; } = 0;
+
+        public void AddBonusGold(int amount)
+        {
+            BonusGold += amount;
+            EarnedGold += amount;
+        }
 
         public void TriggerGameOver(bool victory = false)
         {
@@ -187,13 +195,13 @@ namespace DopamineCleaner.Core
 
             if (victory)
             {
-                EarnedGold = Mathf.RoundToInt((baseGold + killBonusGold + survivalBonusGold) * goldMult);
+                EarnedGold = Mathf.RoundToInt((baseGold + killBonusGold + survivalBonusGold) * goldMult) + BonusGold;
                 EarnedKarma = Mathf.Max(1, Mathf.RoundToInt(baseKarma * karmaMult));
             }
             else
             {
                 // 순직(사망) 시 기본 보험금 지급 (50%)
-                EarnedGold = Mathf.RoundToInt((baseGold * 0.4f + killBonusGold + survivalBonusGold) * goldMult);
+                EarnedGold = Mathf.RoundToInt((baseGold * 0.4f + killBonusGold + survivalBonusGold) * goldMult) + BonusGold;
                 EarnedKarma = survivalTime >= (targetSec * 0.6f) ? 1 : 0;
             }
 
