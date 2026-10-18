@@ -105,7 +105,7 @@ namespace DopamineCleaner.Items
 
         public void TriggerScreenBomb()
         {
-            Enemy[] allEnemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+            Enemy[] allEnemies = FindObjectsByType<Enemy>();
             for (int i = 0; i < allEnemies.Length; i++)
             {
                 if (allEnemies[i].gameObject.activeSelf && allEnemies[i].IsAlive)

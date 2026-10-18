@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DopamineCleaner.Enemies;
+using DopamineCleaner.Meta;
 
 namespace DopamineCleaner.Weapons
 {
@@ -115,7 +116,7 @@ namespace DopamineCleaner.Weapons
 
         private Enemy FindClosestEnemy()
         {
-            Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+            Enemy[] enemies = FindObjectsByType<Enemy>();
             Enemy closest = null;
             float minDistSq = 144f; // 최대 12 유닛 내 탐색
 

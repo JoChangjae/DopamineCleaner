@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using DopamineCleaner.Core;
+using DopamineCleaner.Meta;
 
 namespace DopamineCleaner.Characters
 {

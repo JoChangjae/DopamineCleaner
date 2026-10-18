@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DopamineCleaner.Core;
 using DopamineCleaner.Characters;
+using DopamineCleaner.UI;
 
 namespace DopamineCleaner.Weapons
 {
