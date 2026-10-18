@@ -156,45 +156,71 @@ namespace DopamineCleaner.Editor
 
         private static void BuildCanvasUI(GameObject canvasObj, UIManager uiMgr, GameObject cardPrefab)
         {
-            // 상단 레이아웃
+            // 상단 레이아웃 (어두운 반투명 HUD 글래스 패널)
             GameObject topHud = CreateUIObject("TopHUD", canvasObj.transform);
             RectTransform topRt = topHud.GetComponent<RectTransform>();
-            topRt.anchorMin = new Vector2(0f, 1f);
-            topRt.anchorMax = new Vector2(1f, 1f);
+            topRt.anchorMin = new Vector2(0.5f, 1f);
+            topRt.anchorMax = new Vector2(0.5f, 1f);
             topRt.pivot = new Vector2(0.5f, 1f);
-            topRt.sizeDelta = new Vector2(-40, 140);
-            topRt.anchoredPosition = new Vector2(0, -20);
+            topRt.sizeDelta = new Vector2(920, 150);
+            topRt.anchoredPosition = new Vector2(0, -15);
+
+            Image topBg = topHud.AddComponent<Image>();
+            topBg.color = new Color(0.12f, 0.09f, 0.18f, 0.88f);
 
             // 경험치 바 (최상단)
-            Slider expSlider = CreateSimpleSlider("ExpBar", topHud.transform, new Color(1f, 0.46f, 0.56f), new Vector2(0, 40));
+            Slider expSlider = CreateSimpleSlider("ExpBar", topHud.transform, new Color(1f, 0.46f, 0.56f), new Vector2(0, 45));
             SetPrivateField(uiMgr, "expSlider", expSlider);
 
             // 체력 바
-            Slider hpSlider = CreateSimpleSlider("HpBar", topHud.transform, new Color(0.32f, 0.72f, 0.53f), new Vector2(0, 0));
+            Slider hpSlider = CreateSimpleSlider("HpBar", topHud.transform, new Color(0.32f, 0.72f, 0.53f), new Vector2(0, 5));
             SetPrivateField(uiMgr, "hpSlider", hpSlider);
 
             // 레벨 텍스트
-            Text lvlText = CreateText("LevelText", topHud.transform, "Lv.1", 24, TextAnchor.MiddleLeft, new Vector2(-200, 40));
+            Text lvlText = CreateText("LevelText", topHud.transform, "Lv.1", 24, TextAnchor.MiddleLeft, new Vector2(-380, 45));
+            lvlText.color = new Color(1f, 0.78f, 0.35f);
+            lvlText.fontStyle = FontStyle.Bold;
+            Outline lvlOut = lvlText.gameObject.AddComponent<Outline>();
+            lvlOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            lvlOut.effectDistance = new Vector2(1.5f, -1.5f);
             SetPrivateField(uiMgr, "levelText", lvlText);
 
-            // 타이머 텍스트
-            Text timerText = CreateText("TimerText", topHud.transform, "00:00", 34, TextAnchor.MiddleCenter, new Vector2(0, -60));
+            // 타이머 텍스트 (화사한 골드 옐로우 + 또렷한 블랙 아웃라인)
+            Text timerText = CreateText("TimerText", topHud.transform, "00:00", 36, TextAnchor.MiddleCenter, new Vector2(0, -32));
+            timerText.color = new Color(1f, 0.88f, 0.32f);
+            timerText.fontStyle = FontStyle.Bold;
+            Outline timerOut = timerText.gameObject.AddComponent<Outline>();
+            timerOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            timerOut.effectDistance = new Vector2(2f, -2f);
             SetPrivateField(uiMgr, "timerText", timerText);
 
-            // 킬/스테이지 텍스트
-            Text killsText = CreateText("KillsText", topHud.transform, "STAGE 1 [0/35]  👾 0", 24, TextAnchor.MiddleCenter, new Vector2(0, -100));
+            // 킬/스테이지 텍스트 (산뜻한 네온 민트 그린 + 블랙 아웃라인)
+            Text killsText = CreateText("KillsText", topHud.transform, "STAGE 1 [0/35]  👾 0", 22, TextAnchor.MiddleCenter, new Vector2(0, -65));
+            killsText.color = new Color(0.40f, 0.95f, 0.75f);
+            killsText.fontStyle = FontStyle.Bold;
+            Outline killsOut = killsText.gameObject.AddComponent<Outline>();
+            killsOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            killsOut.effectDistance = new Vector2(1.5f, -1.5f);
             SetPrivateField(uiMgr, "stageKillsText", killsText);
 
-            // 하단 대시 쿨타임 텍스트
+            // 하단 대시 / 구급약 텍스트
             GameObject bottomHud = CreateUIObject("BottomHUD", canvasObj.transform);
             RectTransform botRt = bottomHud.GetComponent<RectTransform>();
-            botRt.anchorMin = new Vector2(0f, 0f);
-            botRt.anchorMax = new Vector2(1f, 0f);
+            botRt.anchorMin = new Vector2(0.5f, 0f);
+            botRt.anchorMax = new Vector2(0.5f, 0f);
             botRt.pivot = new Vector2(0.5f, 0f);
-            botRt.sizeDelta = new Vector2(0, 80);
-            botRt.anchoredPosition = Vector2.zero;
+            botRt.sizeDelta = new Vector2(700, 60);
+            botRt.anchoredPosition = new Vector2(0, 15);
 
-            Text dashText = CreateText("DashText", bottomHud.transform, "💨 대시 준비완료 (Space / Shift)", 24, TextAnchor.MiddleCenter, new Vector2(0, 30));
+            Image botBg = bottomHud.AddComponent<Image>();
+            botBg.color = new Color(0.12f, 0.09f, 0.18f, 0.85f);
+
+            Text dashText = CreateText("DashText", bottomHud.transform, "💨 대시 준비완료 (Space / Shift)", 22, TextAnchor.MiddleCenter, Vector2.zero);
+            dashText.color = new Color(0.70f, 0.90f, 1f);
+            dashText.fontStyle = FontStyle.Bold;
+            Outline dashOut = dashText.gameObject.AddComponent<Outline>();
+            dashOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            dashOut.effectDistance = new Vector2(1.5f, -1.5f);
             SetPrivateField(uiMgr, "dashCooldownText", dashText);
 
             // 레벨업 패널

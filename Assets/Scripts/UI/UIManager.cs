@@ -58,6 +58,51 @@ namespace DopamineCleaner.UI
 
             if (levelUpPanel != null) levelUpPanel.SetActive(false);
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
+
+            // HUD 텍스트 시인성 극대화 (골드/민트 색상 + 블랙 아웃라인)
+            if (timerText != null)
+            {
+                timerText.color = new Color(1f, 0.88f, 0.32f); // 화사한 골드 옐로우
+                if (!timerText.TryGetComponent<Outline>(out _))
+                {
+                    var outl = timerText.gameObject.AddComponent<Outline>();
+                    outl.effectColor = new Color(0f, 0f, 0f, 0.95f);
+                    outl.effectDistance = new Vector2(2f, -2f);
+                }
+            }
+
+            if (stageKillsText != null)
+            {
+                stageKillsText.color = new Color(0.40f, 0.95f, 0.75f); // 산뜻한 네온 민트
+                if (!stageKillsText.TryGetComponent<Outline>(out _))
+                {
+                    var outl = stageKillsText.gameObject.AddComponent<Outline>();
+                    outl.effectColor = new Color(0f, 0f, 0f, 0.95f);
+                    outl.effectDistance = new Vector2(1.5f, -1.5f);
+                }
+            }
+
+            if (levelText != null)
+            {
+                levelText.color = new Color(1f, 0.78f, 0.35f); // 웜 피치
+                if (!levelText.TryGetComponent<Outline>(out _))
+                {
+                    var outl = levelText.gameObject.AddComponent<Outline>();
+                    outl.effectColor = new Color(0f, 0f, 0f, 0.95f);
+                    outl.effectDistance = new Vector2(1.5f, -1.5f);
+                }
+            }
+
+            if (dashCooldownText != null)
+            {
+                dashCooldownText.color = new Color(0.70f, 0.90f, 1f); // 아이스 시안
+                if (!dashCooldownText.TryGetComponent<Outline>(out _))
+                {
+                    var outl = dashCooldownText.gameObject.AddComponent<Outline>();
+                    outl.effectColor = new Color(0f, 0f, 0f, 0.95f);
+                    outl.effectDistance = new Vector2(1.5f, -1.5f);
+                }
+            }
         }
 
         private void OnDestroy()
@@ -118,11 +163,13 @@ namespace DopamineCleaner.UI
             {
                 if (GameManager.Instance.IsBossActive)
                 {
-                    stageKillsText.text = $"👑 STAGE {GameManager.Instance.CurrentStage} BOSS 출현! (👾 {totalKills})";
+                    stageKillsText.text = $"⚠️ STAGE {GameManager.Instance.CurrentStage} BOSS 출현! (👾 {totalKills})";
+                    stageKillsText.color = new Color(1f, 0.35f, 0.45f); // 보스 경고 네온 레드
                 }
                 else
                 {
                     stageKillsText.text = $"STAGE {GameManager.Instance.CurrentStage} [{stageKills}/{GameManager.Instance.StageTargetKills}]  👾 {totalKills}";
+                    stageKillsText.color = new Color(0.40f, 0.95f, 0.75f); // 일반 스테이지 네온 민트
                 }
             }
         }
