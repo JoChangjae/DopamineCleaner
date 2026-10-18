@@ -1,17 +1,16 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using DopamineCleaner.Weapons;
 
 namespace DopamineCleaner.UI
 {
     public class UpgradeCardUI : MonoBehaviour
     {
-        [Header("UI 요소")]
-        [SerializeField] private TextMeshProUGUI iconText;
-        [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI descriptionText;
+        [Header("UI 요소 (한글 호환 표준 Text)")]
+        [SerializeField] private Text iconText;
+        [SerializeField] private Text titleText;
+        [SerializeField] private Text descriptionText;
         [SerializeField] private GameObject evoBadge;
         [SerializeField] private Button selectButton;
 

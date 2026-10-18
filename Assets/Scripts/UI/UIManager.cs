@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using DopamineCleaner.Core;
 using DopamineCleaner.Characters;
 using DopamineCleaner.Weapons;
@@ -12,13 +11,13 @@ namespace DopamineCleaner.UI
     {
         public static UIManager Instance { get; private set; }
 
-        [Header("상단 HUD")]
+        [Header("상단 HUD (한글 호환 표준 Text)")]
         [SerializeField] private Slider hpSlider;
         [SerializeField] private Slider expSlider;
-        [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private TextMeshProUGUI timerText;
-        [SerializeField] private TextMeshProUGUI stageKillsText;
-        [SerializeField] private TextMeshProUGUI dashCooldownText;
+        [SerializeField] private Text levelText;
+        [SerializeField] private Text timerText;
+        [SerializeField] private Text stageKillsText;
+        [SerializeField] private Text dashCooldownText;
 
         [Header("레벨업 모달")]
         [SerializeField] private GameObject levelUpPanel;
@@ -27,7 +26,7 @@ namespace DopamineCleaner.UI
 
         [Header("게임오버 모달")]
         [SerializeField] private GameObject gameOverPanel;
-        [SerializeField] private TextMeshProUGUI gameOverStatsText;
+        [SerializeField] private Text gameOverStatsText;
 
         private void Awake()
         {

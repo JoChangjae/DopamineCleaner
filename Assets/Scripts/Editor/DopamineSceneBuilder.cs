@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using TMPro;
 using DopamineCleaner.Core;
 using DopamineCleaner.Characters;
 using DopamineCleaner.Enemies;
@@ -15,10 +14,13 @@ namespace DopamineCleaner.Editor
 {
     public static class DopamineSceneBuilder
     {
+        private static Font koreanFont;
+
         [MenuItem("Dopamine Cleaner/✨ Build Complete Gameplay Scene (원클릭 자동 구성)")]
         public static void BuildScene()
         {
             EnsureTagsExist();
+            LoadKoreanFont();
 
             // 1. 프리팹 생성
             GameObject projectilePrefab = CreateOrUpdateProjectilePrefab();
@@ -36,12 +38,25 @@ namespace DopamineCleaner.Editor
             Camera cam = camObj.AddComponent<Camera>();
             cam.orthographic = true;
             cam.orthographicSize = 7.5f;
-            cam.backgroundColor = new Color(0.98f, 0.96f, 0.94f); // 포근한 바닐라 크림 배경
+            cam.backgroundColor = new Color(0.92f, 0.96f, 0.94f); // 파스텔 민트그린
             cam.clearFlags = CameraClearFlags.SolidColor;
             camObj.AddComponent<AudioListener>();
             CameraFollow camFollow = camObj.AddComponent<CameraFollow>();
 
-            // 4. 플레이어 생성
+            // 4. 예쁜 2D 도트 잔디 타일맵 배경 (Background Tiled)
+            GameObject bgObj = new GameObject("Background_MentalGarden");
+            bgObj.transform.position = Vector3.zero;
+            Sprite bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Environment/bg_mental_garden.png");
+            if (bgSprite != null)
+            {
+                SpriteRenderer bgSr = bgObj.AddComponent<SpriteRenderer>();
+                bgSr.sprite = bgSprite;
+                bgSr.drawMode = SpriteDrawMode.Tiled;
+                bgSr.size = new Vector2(120f, 120f); // 120x120 대형 파스텔 멘탈 가든
+                bgSr.sortingOrder = -10;
+            }
+
+            // 5. 플레이어 생성
             GameObject playerObj = new GameObject("Player");
             playerObj.tag = "Player";
             playerObj.transform.position = Vector3.zero;
@@ -75,7 +90,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(weaponMgr, "cleanBulletWeapon", bulletWeapon);
             SetPrivateField(weaponMgr, "orbitWeapon", orbitWeapon);
 
-            // 5. 게임 매니저 & 스포너 & 아이템 매니저
+            // 6. 게임 매니저 & 스포너 & 아이템 매니저
             GameObject sysObj = new GameObject("[Systems]");
             GameManager gameMgr = sysObj.AddComponent<GameManager>();
 
@@ -85,7 +100,7 @@ namespace DopamineCleaner.Editor
             ItemManager itemMgr = sysObj.AddComponent<ItemManager>();
             SetPrivateField(itemMgr, "gemPrefab", gemPrefab);
 
-            // 6. UI 캔버스 및 HUD 생성
+            // 7. UI 캔버스 및 HUD 생성 (한글 100% 완벽 출력 표준 uGUI Text)
             GameObject canvasObj = new GameObject("Canvas");
             Canvas canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -103,12 +118,11 @@ namespace DopamineCleaner.Editor
             UIManager uiMgr = canvasObj.AddComponent<UIManager>();
             BuildCanvasUI(canvasObj, uiMgr, cardPrefab);
 
-            // 7. 씬 저장
+            // 8. 씬 저장
             Directory.CreateDirectory("Assets/Scenes");
             string scenePath = "Assets/Scenes/MainGame.unity";
             EditorSceneManager.SaveScene(scene, scenePath);
 
-            // Build Settings에 씬 등록
             EditorBuildSettingsScene[] scenes = new EditorBuildSettingsScene[]
             {
                 new EditorBuildSettingsScene(scenePath, true)
@@ -118,7 +132,16 @@ namespace DopamineCleaner.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            EditorUtility.DisplayDialog("도파민 클리너", "✨ 게임플레이 씬(MainGame.unity) 및 전체 시스템 구축이 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 바로 게임을 플레이하실 수 있습니다.", "확인");
+            EditorUtility.DisplayDialog("도파민 클리너", "✨ 도트 배경 및 한글 폰트가 완벽히 적용된 씬(MainGame.unity) 구축이 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 바로 게임을 즐기실 수 있습니다.", "확인");
+        }
+
+        private static void LoadKoreanFont()
+        {
+            koreanFont = AssetDatabase.LoadAssetAtPath<Font>("Assets/Fonts/MalgunGothic.ttf");
+            if (koreanFont == null)
+            {
+                koreanFont = Font.CreateDynamicFontFromOSFont(new string[] { "Malgun Gothic", "맑은 고딕", "Arial" }, 24);
+            }
         }
 
         private static void BuildCanvasUI(GameObject canvasObj, UIManager uiMgr, GameObject cardPrefab)
@@ -141,15 +164,15 @@ namespace DopamineCleaner.Editor
             SetPrivateField(uiMgr, "hpSlider", hpSlider);
 
             // 레벨 텍스트
-            TextMeshProUGUI lvlText = CreateText("LevelText", topHud.transform, "Lv.1", 28, TextAlignmentOptions.Left, new Vector2(-200, 40));
+            Text lvlText = CreateText("LevelText", topHud.transform, "Lv.1", 24, TextAnchor.MiddleLeft, new Vector2(-200, 40));
             SetPrivateField(uiMgr, "levelText", lvlText);
 
             // 타이머 텍스트
-            TextMeshProUGUI timerText = CreateText("TimerText", topHud.transform, "00:00", 36, TextAlignmentOptions.Center, new Vector2(0, -60));
+            Text timerText = CreateText("TimerText", topHud.transform, "00:00", 34, TextAnchor.MiddleCenter, new Vector2(0, -60));
             SetPrivateField(uiMgr, "timerText", timerText);
 
             // 킬/스테이지 텍스트
-            TextMeshProUGUI killsText = CreateText("KillsText", topHud.transform, "STAGE 1 [0/35]  👾 0", 26, TextAlignmentOptions.Center, new Vector2(0, -100));
+            Text killsText = CreateText("KillsText", topHud.transform, "STAGE 1 [0/35]  👾 0", 24, TextAnchor.MiddleCenter, new Vector2(0, -100));
             SetPrivateField(uiMgr, "stageKillsText", killsText);
 
             // 하단 대시 쿨타임 텍스트
@@ -161,7 +184,7 @@ namespace DopamineCleaner.Editor
             botRt.sizeDelta = new Vector2(0, 80);
             botRt.anchoredPosition = Vector2.zero;
 
-            TextMeshProUGUI dashText = CreateText("DashText", bottomHud.transform, "💨 대시 준비완료 (Space)", 26, TextAlignmentOptions.Center, new Vector2(0, 30));
+            Text dashText = CreateText("DashText", bottomHud.transform, "💨 대시 준비완료 (Space / Shift)", 24, TextAnchor.MiddleCenter, new Vector2(0, 30));
             SetPrivateField(uiMgr, "dashCooldownText", dashText);
 
             // 레벨업 패널
@@ -172,10 +195,10 @@ namespace DopamineCleaner.Editor
             lvlRt.sizeDelta = Vector2.zero;
 
             Image dimImg = lvlPanel.AddComponent<Image>();
-            dimImg.color = new Color(0.1f, 0.08f, 0.15f, 0.85f);
+            dimImg.color = new Color(0.1f, 0.08f, 0.15f, 0.88f);
 
-            CreateText("LvlUpTitle", lvlPanel.transform, "🎉 레벨 업!", 52, TextAlignmentOptions.Center, new Vector2(0, 350));
-            CreateText("LvlUpSub", lvlPanel.transform, "원하는 도파민 디톡스 능력을 선택하세요", 26, TextAlignmentOptions.Center, new Vector2(0, 280));
+            CreateText("LvlUpTitle", lvlPanel.transform, "🎉 레벨 업!", 48, TextAnchor.MiddleCenter, new Vector2(0, 350));
+            CreateText("LvlUpSub", lvlPanel.transform, "원하는 도파민 디톡스 능력을 선택하세요", 24, TextAnchor.MiddleCenter, new Vector2(0, 280));
 
             GameObject cardsContainer = CreateUIObject("CardsContainer", lvlPanel.transform);
             RectTransform cardContRt = cardsContainer.GetComponent<RectTransform>();
@@ -202,10 +225,10 @@ namespace DopamineCleaner.Editor
             goRt.sizeDelta = Vector2.zero;
 
             Image goDim = goPanel.AddComponent<Image>();
-            goDim.color = new Color(0.12f, 0.05f, 0.15f, 0.92f);
+            goDim.color = new Color(0.12f, 0.05f, 0.15f, 0.94f);
 
-            CreateText("GoTitle", goPanel.transform, "디톡스 세션 종료", 56, TextAlignmentOptions.Center, new Vector2(0, 240));
-            TextMeshProUGUI goStats = CreateText("GoStats", goPanel.transform, "통계 정보", 30, TextAlignmentOptions.Center, new Vector2(0, 60));
+            CreateText("GoTitle", goPanel.transform, "디톡스 세션 종료", 52, TextAnchor.MiddleCenter, new Vector2(0, 240));
+            Text goStats = CreateText("GoStats", goPanel.transform, "통계 정보", 28, TextAnchor.MiddleCenter, new Vector2(0, 60));
 
             GameObject restartBtnObj = CreateUIObject("RestartButton", goPanel.transform);
             RectTransform rBtnRt = restartBtnObj.GetComponent<RectTransform>();
@@ -216,7 +239,7 @@ namespace DopamineCleaner.Editor
             Button btn = restartBtnObj.AddComponent<Button>();
             btn.onClick.AddListener(uiMgr.OnRestartButtonClicked);
 
-            CreateText("BtnText", restartBtnObj.transform, "🔄 다시 도전하기", 32, TextAlignmentOptions.Center, Vector2.zero);
+            CreateText("BtnText", restartBtnObj.transform, "🔄 다시 도전하기", 30, TextAnchor.MiddleCenter, Vector2.zero);
 
             SetPrivateField(uiMgr, "gameOverPanel", goPanel);
             SetPrivateField(uiMgr, "gameOverStatsText", goStats);
@@ -265,19 +288,20 @@ namespace DopamineCleaner.Editor
             return slider;
         }
 
-        private static TextMeshProUGUI CreateText(string name, Transform parent, string text, float size, TextAlignmentOptions align, Vector2 pos)
+        private static Text CreateText(string name, Transform parent, string content, int size, TextAnchor align, Vector2 pos)
         {
             GameObject obj = CreateUIObject(name, parent);
             RectTransform rt = obj.GetComponent<RectTransform>();
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(700, 60);
 
-            TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = size;
-            tmp.alignment = align;
-            tmp.color = Color.white;
-            return tmp;
+            Text txt = obj.AddComponent<Text>();
+            txt.text = content;
+            txt.fontSize = size;
+            txt.alignment = align;
+            txt.color = Color.white;
+            txt.font = koreanFont;
+            return txt;
         }
 
         private static GameObject CreateUIObject(string name, Transform parent)
@@ -381,11 +405,12 @@ namespace DopamineCleaner.Editor
             Button btn = cardObj.AddComponent<Button>();
             UpgradeCardUI cardUI = cardObj.AddComponent<UpgradeCardUI>();
 
-            TextMeshProUGUI icon = CreateText("CardIcon", cardObj.transform, "💧", 64, TextAlignmentOptions.Center, new Vector2(0, 110));
-            TextMeshProUGUI title = CreateText("CardTitle", cardObj.transform, "스킬 이름", 26, TextAlignmentOptions.Center, new Vector2(0, 20));
+            Text icon = CreateText("CardIcon", cardObj.transform, "💧", 52, TextAnchor.MiddleCenter, new Vector2(0, 110));
+            Text title = CreateText("CardTitle", cardObj.transform, "스킬 이름", 24, TextAnchor.MiddleCenter, new Vector2(0, 20));
             title.color = new Color(0.2f, 0.15f, 0.25f);
+            title.fontStyle = FontStyle.Bold;
 
-            TextMeshProUGUI desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 18, TextAlignmentOptions.Center, new Vector2(0, -90));
+            Text desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 18, TextAnchor.MiddleCenter, new Vector2(0, -90));
             desc.color = new Color(0.45f, 0.4f, 0.5f);
 
             GameObject badgeObj = CreateUIObject("EvoBadge", cardObj.transform);
@@ -394,8 +419,9 @@ namespace DopamineCleaner.Editor
             bRt.anchoredPosition = new Vector2(0, 180);
             Image bImg = badgeObj.AddComponent<Image>();
             bImg.color = new Color(1f, 0.8f, 0.2f);
-            TextMeshProUGUI bText = CreateText("BadgeText", badgeObj.transform, "EVOLUTION", 14, TextAlignmentOptions.Center, Vector2.zero);
+            Text bText = CreateText("BadgeText", badgeObj.transform, "EVOLUTION", 13, TextAnchor.MiddleCenter, Vector2.zero);
             bText.color = new Color(0.3f, 0.15f, 0.0f);
+            bText.fontStyle = FontStyle.Bold;
 
             SetPrivateField(cardUI, "iconText", icon);
             SetPrivateField(cardUI, "titleText", title);
