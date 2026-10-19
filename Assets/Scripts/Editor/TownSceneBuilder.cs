@@ -397,14 +397,14 @@ namespace DopamineCleaner.Editor
             DungeonSelectUI ui = panel.AddComponent<DungeonSelectUI>();
 
             // 1. 맵 선택 헤더 & 버튼들
-            CreateText("MapHeader", panel.transform, "📍 정화 작전 구역 선택", 28, TextAnchor.MiddleCenter, new Vector2(0, 340), new Vector2(900, 40));
+            CreateText("MapHeader", panel.transform, "📍 정화 작전 구역 선택", 28, TextAnchor.MiddleCenter, new Vector2(0, 350), new Vector2(900, 35));
 
             GameObject mapBtnGroup = CreateUIObject("MapBtnGroup", panel.transform);
             RectTransform mRt = mapBtnGroup.GetComponent<RectTransform>();
             mRt.anchorMin = new Vector2(0.5f, 0.5f);
             mRt.anchorMax = new Vector2(0.5f, 0.5f);
-            mRt.sizeDelta = new Vector2(1400, 100);
-            mRt.anchoredPosition = new Vector2(0, 255);
+            mRt.sizeDelta = new Vector2(1300, 75);
+            mRt.anchoredPosition = new Vector2(0, 280);
 
             HorizontalLayoutGroup mHlg = mapBtnGroup.AddComponent<HorizontalLayoutGroup>();
             mHlg.spacing = 25;
@@ -412,19 +412,19 @@ namespace DopamineCleaner.Editor
             mHlg.childControlWidth = true;
             mHlg.childControlHeight = true;
 
-            Button mapHosp = CreateButton("BtnHosp", mapBtnGroup.transform, "🏥 격리 병동\n(5분 생존)", 22, new Color(0.24f, 0.32f, 0.38f));
-            Button mapOff = CreateButton("BtnOff", mapBtnGroup.transform, "🏢 번아웃 오피스\n(7분 생존)", 22, new Color(0.32f, 0.25f, 0.4f));
-            Button mapHigh = CreateButton("BtnHigh", mapBtnGroup.transform, "🛣️ 숏폼 고속도로\n(10분 생존)", 22, new Color(0.42f, 0.22f, 0.25f));
+            Button mapHosp = CreateButton("BtnHosp", mapBtnGroup.transform, "🏥 격리 병동\n(5분 생존)", 20, new Color(0.24f, 0.32f, 0.38f));
+            Button mapOff = CreateButton("BtnOff", mapBtnGroup.transform, "🏢 번아웃 오피스\n(7분 생존)", 20, new Color(0.32f, 0.25f, 0.4f));
+            Button mapHigh = CreateButton("BtnHigh", mapBtnGroup.transform, "🛣️ 숏폼 고속도로\n(10분 생존)", 20, new Color(0.42f, 0.22f, 0.25f));
 
             // 2. 난이도 선택 헤더 & 버튼들
-            CreateText("DiffHeader", panel.transform, "⚡ 도파민 오염 등급 (난이도 설정)", 26, TextAnchor.MiddleCenter, new Vector2(0, 155), new Vector2(900, 35));
+            CreateText("DiffHeader", panel.transform, "⚡ 도파민 오염 등급 (난이도 설정)", 25, TextAnchor.MiddleCenter, new Vector2(0, 215), new Vector2(900, 30));
 
             GameObject diffBtnGroup = CreateUIObject("DiffBtnGroup", panel.transform);
             RectTransform dRt = diffBtnGroup.GetComponent<RectTransform>();
             dRt.anchorMin = new Vector2(0.5f, 0.5f);
             dRt.anchorMax = new Vector2(0.5f, 0.5f);
-            dRt.sizeDelta = new Vector2(1300, 65);
-            dRt.anchoredPosition = new Vector2(0, 90);
+            dRt.sizeDelta = new Vector2(1300, 52);
+            dRt.anchoredPosition = new Vector2(0, 160);
 
             HorizontalLayoutGroup dHlg = diffBtnGroup.AddComponent<HorizontalLayoutGroup>();
             dHlg.spacing = 20;
@@ -432,39 +432,39 @@ namespace DopamineCleaner.Editor
             dHlg.childControlWidth = true;
             dHlg.childControlHeight = true;
 
-            Button btnEasy = CreateButton("BtnEasy", diffBtnGroup.transform, "Easy (0.8x)", 20, new Color(0.25f, 0.55f, 0.35f));
-            Button btnNorm = CreateButton("BtnNorm", diffBtnGroup.transform, "Normal (1.0x)", 20, new Color(0.25f, 0.45f, 0.75f));
-            Button btnHard = CreateButton("BtnHard", diffBtnGroup.transform, "Hard (1.5x)", 20, new Color(0.75f, 0.45f, 0.2f));
-            Button btnNight = CreateButton("BtnNight", diffBtnGroup.transform, "Nightmare (2.2x)", 20, new Color(0.75f, 0.15f, 0.25f));
+            Button btnEasy = CreateButton("BtnEasy", diffBtnGroup.transform, "Easy (0.8x)", 19, new Color(0.25f, 0.55f, 0.35f));
+            Button btnNorm = CreateButton("BtnNorm", diffBtnGroup.transform, "Normal (1.0x)", 19, new Color(0.25f, 0.45f, 0.75f));
+            Button btnHard = CreateButton("BtnHard", diffBtnGroup.transform, "Hard (1.5x)", 19, new Color(0.75f, 0.45f, 0.2f));
+            Button btnNight = CreateButton("BtnNight", diffBtnGroup.transform, "Nightmare (2.2x)", 19, new Color(0.75f, 0.15f, 0.25f));
 
-            // 3. 브리핑 정보 창 (카드 형태)
+            // 3. 브리핑 정보 창 (카드 형태: 난이도 버튼과 16px 이상 여백 확보)
             GameObject briefingObj = CreateUIObject("BriefingBox", panel.transform);
             RectTransform bRt = briefingObj.GetComponent<RectTransform>();
             bRt.anchorMin = new Vector2(0.5f, 0.5f);
             bRt.anchorMax = new Vector2(0.5f, 0.5f);
-            bRt.sizeDelta = new Vector2(1300, 200);
-            bRt.anchoredPosition = new Vector2(0, -10);
+            bRt.sizeDelta = new Vector2(1300, 185);
+            bRt.anchoredPosition = new Vector2(0, 25);
             Image bImg = briefingObj.AddComponent<Image>();
             bImg.color = new Color(0.20f, 0.17f, 0.27f);
 
             GameObject previewImgObj = CreateUIObject("MapPreview", briefingObj.transform);
             RectTransform pImgRt = previewImgObj.GetComponent<RectTransform>();
-            pImgRt.sizeDelta = new Vector2(150, 150);
+            pImgRt.sizeDelta = new Vector2(145, 145);
             pImgRt.anchoredPosition = new Vector2(-530, 0);
             Image mapPrevImg = previewImgObj.AddComponent<Image>();
             mapPrevImg.preserveAspect = false;
 
-            Text mapTitle = CreateText("MapTitle", briefingObj.transform, "🏥 도파민 격리 병동", 26, TextAnchor.MiddleLeft, new Vector2(90, 60), new Vector2(980, 35));
+            Text mapTitle = CreateText("MapTitle", briefingObj.transform, "🏥 도파민 격리 병동", 26, TextAnchor.MiddleLeft, new Vector2(90, 56), new Vector2(980, 32));
             mapTitle.color = new Color(1f, 0.9f, 0.5f);
             mapTitle.fontStyle = FontStyle.Bold;
 
-            Text mapDesc = CreateText("MapDesc", briefingObj.transform, "정화 작전 구역 설명", 19, TextAnchor.UpperLeft, new Vector2(90, 20), new Vector2(980, 38));
+            Text mapDesc = CreateText("MapDesc", briefingObj.transform, "정화 작전 구역 설명", 18, TextAnchor.UpperLeft, new Vector2(90, 20), new Vector2(980, 34));
             mapDesc.color = new Color(0.85f, 0.82f, 0.9f);
 
-            Text diffSummary = CreateText("DiffSummary", briefingObj.transform, "난이도 계수 정보", 18, TextAnchor.MiddleLeft, new Vector2(90, -22), new Vector2(980, 32));
+            Text diffSummary = CreateText("DiffSummary", briefingObj.transform, "난이도 계수 정보", 18, TextAnchor.MiddleLeft, new Vector2(90, -18), new Vector2(980, 28));
             diffSummary.color = new Color(0.6f, 0.85f, 1f);
 
-            Text rewardPreview = CreateText("RewardPreview", briefingObj.transform, "클리어 예상 보상", 22, TextAnchor.MiddleLeft, new Vector2(90, -60), new Vector2(980, 35));
+            Text rewardPreview = CreateText("RewardPreview", briefingObj.transform, "클리어 예상 보상", 22, TextAnchor.MiddleLeft, new Vector2(90, -54), new Vector2(980, 32));
             rewardPreview.color = new Color(0.4f, 1f, 0.6f);
             rewardPreview.fontStyle = FontStyle.Bold;
 
@@ -474,7 +474,7 @@ namespace DopamineCleaner.Editor
             pRt.anchorMin = new Vector2(0.5f, 0.5f);
             pRt.anchorMax = new Vector2(0.5f, 0.5f);
             pRt.sizeDelta = new Vector2(1300, 46);
-            pRt.anchoredPosition = new Vector2(0, -140);
+            pRt.anchoredPosition = new Vector2(0, -105);
 
             HorizontalLayoutGroup pHlg = pactBtnGroup.AddComponent<HorizontalLayoutGroup>();
             pHlg.spacing = 15;
@@ -487,7 +487,7 @@ namespace DopamineCleaner.Editor
             Button pactNotif = CreateButton("PactNotif", pactBtnGroup.transform, "📨 스팸 폭탄 (+25%Exp)", 17, new Color(0.22f, 0.20f, 0.28f));
             Button pactBlackout = CreateButton("PactBlackout", pactBtnGroup.transform, "🔌 블랙아웃 (+35%G)", 17, new Color(0.22f, 0.20f, 0.28f));
 
-            Text pactSummary = CreateText("PactSummary", panel.transform, "📜 [근로 조약]: 미체결", 17, TextAnchor.MiddleCenter, new Vector2(0, -180), new Vector2(1300, 26));
+            Text pactSummary = CreateText("PactSummary", panel.transform, "📜 [근로 조약]: 미체결", 17, TextAnchor.MiddleCenter, new Vector2(0, -146), new Vector2(1300, 24));
             pactSummary.color = new Color(0.7f, 0.75f, 0.85f);
 
             // 5. 돌연변이 룰렛 영역
@@ -495,10 +495,10 @@ namespace DopamineCleaner.Editor
             RectTransform spRt = spinBtn.GetComponent<RectTransform>();
             spRt.anchorMin = new Vector2(0.5f, 0.5f);
             spRt.anchorMax = new Vector2(0.5f, 0.5f);
-            spRt.sizeDelta = new Vector2(340, 44);
-            spRt.anchoredPosition = new Vector2(-320, -228);
+            spRt.sizeDelta = new Vector2(340, 42);
+            spRt.anchoredPosition = new Vector2(-320, -195);
 
-            Text mutStatus = CreateText("MutationStatus", panel.transform, "🎰 [출격 돌연변이]: 🛡️ 표준 모드 (특이 변이 없음)", 17, TextAnchor.MiddleLeft, new Vector2(180, -228), new Vector2(620, 40));
+            Text mutStatus = CreateText("MutationStatus", panel.transform, "🎰 [출격 돌연변이]: 🛡️ 표준 모드 (특이 변이 없음)", 17, TextAnchor.MiddleLeft, new Vector2(180, -195), new Vector2(620, 38));
             mutStatus.color = new Color(0.8f, 0.85f, 1f);
 
             // 6. 대형 출동 버튼
@@ -506,13 +506,13 @@ namespace DopamineCleaner.Editor
             RectTransform sBtnRt = startBtnObj.GetComponent<RectTransform>();
             sBtnRt.anchorMin = new Vector2(0.5f, 0.5f);
             sBtnRt.anchorMax = new Vector2(0.5f, 0.5f);
-            sBtnRt.sizeDelta = new Vector2(650, 68);
-            sBtnRt.anchoredPosition = new Vector2(0, -305);
+            sBtnRt.sizeDelta = new Vector2(650, 66);
+            sBtnRt.anchoredPosition = new Vector2(0, -275);
             Image sBtnImg = startBtnObj.AddComponent<Image>();
             sBtnImg.color = new Color(0.92f, 0.32f, 0.38f);
             Button startBtn = startBtnObj.AddComponent<Button>();
 
-            Text startTxt = CreateText("StartText", startBtnObj.transform, "🚀 정화 작전 출동 (Start Cleanse)", 26, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(630, 68));
+            Text startTxt = CreateText("StartText", startBtnObj.transform, "🚀 정화 작전 출동 (Start Cleanse)", 26, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(630, 66));
             startTxt.color = Color.white;
             startTxt.fontStyle = FontStyle.Bold;
 
