@@ -15,19 +15,21 @@ namespace DopamineCleaner.Weapons
         private Vector2 direction;
         private float lifeTimer;
         private SpriteRenderer spriteRenderer;
+        private CleanBulletWeapon ownerWeapon;
 
         private void Awake()
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         }
 
-        public void Initialize(Vector2 dir, float projSpeed, float projDamage, int projPierce, bool isEvolved)
+        public void Initialize(Vector2 dir, float projSpeed, float projDamage, int projPierce, bool isEvolved, CleanBulletWeapon owner = null)
         {
             direction = dir.normalized;
             speed = projSpeed;
             damage = projDamage;
             pierce = projPierce;
             lifeTimer = lifetime;
+            ownerWeapon = owner;
 
             if (spriteRenderer != null)
             {
@@ -55,6 +57,7 @@ namespace DopamineCleaner.Weapons
             if (other.TryGetComponent<Enemy>(out var enemy) && enemy.IsAlive)
             {
                 enemy.TakeDamage(damage, direction, 0.2f);
+                ownerWeapon?.RegisterDamage(damage);
                 pierce--;
                 if (pierce <= 0)
                 {

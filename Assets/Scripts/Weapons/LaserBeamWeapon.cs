@@ -130,6 +130,7 @@ namespace DopamineCleaner.Weapons
                     if (hitEnemies.Add(enemy))
                     {
                         enemy.TakeDamage(damage);
+                        RegisterDamage(damage);
                     }
                 }
             }

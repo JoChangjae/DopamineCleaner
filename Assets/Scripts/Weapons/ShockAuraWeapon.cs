@@ -59,6 +59,7 @@ namespace DopamineCleaner.Weapons
                 if (target == null) continue;
 
                 target.TakeDamage(damage);
+                RegisterDamage(damage);
                 StartCoroutine(DrawLightningArc(playerPos, target.transform.position));
             }
         }

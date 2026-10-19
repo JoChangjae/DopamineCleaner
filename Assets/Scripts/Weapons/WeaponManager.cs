@@ -60,6 +60,36 @@ namespace DopamineCleaner.Weapons
         public FirewallMineWeapon MineWeapon => mineWeapon;
         public ShockAuraWeapon ShockWeapon => shockWeapon;
         public int AttackSpeedLevel => attackSpeedLevel;
+        public int MoveSpeedLevel => moveSpeedLevel;
+        public int MaxHPLevel => maxHPLevel;
+        public int MagnetLevel => magnetLevel;
+
+        public string GetEquipmentSummary()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("⚔️ [장착 무기 현황]");
+
+            WeaponBase[] weapons = { cleanBulletWeapon, orbitWeapon, laserBeamWeapon, mineWeapon, shockWeapon };
+            string[] icons = { "💧", "🛡️", "🔦", "💣", "⚡" };
+
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                if (weapons[i] != null && weapons[i].IsActive)
+                {
+                    string status = weapons[i].IsEvolved ? "✨ EVOLVED (진화 완료)" : $"Lv.{weapons[i].Level}";
+                    sb.AppendLine($"  {icons[i]} {weapons[i].WeaponName} [{status}] - 대미지: {weapons[i].TotalDamageDealt:N0}");
+                }
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("🧬 [패시브 훈련 현황]");
+            sb.AppendLine($"  🥾 달콤한 신발 (이동속도) : Lv.{moveSpeedLevel} / 5");
+            sb.AppendLine($"  💖 하트 비타민 (최대체력) : Lv.{maxHPLevel} / 5");
+            sb.AppendLine($"  🧲 도파민 자석 (흡수반경) : Lv.{magnetLevel} / 5");
+            sb.AppendLine($"  ☕ 에스프레소 (공격속도) : Lv.{attackSpeedLevel} / 5");
+
+            return sb.ToString();
+        }
 
         private void Awake()
         {
@@ -380,6 +410,49 @@ namespace DopamineCleaner.Weapons
         public void OpenTreasureChestJackpot()
         {
             UIManager.Instance?.ShowChestRewardUI();
+        }
+
+        public struct WeaponDamageStat
+        {
+            public string name;
+            public string icon;
+            public float damage;
+            public float percentage;
+        }
+
+        public List<WeaponDamageStat> GetDamageStatistics()
+        {
+            var list = new List<WeaponDamageStat>();
+            float total = 0f;
+
+            WeaponBase[] weapons = { cleanBulletWeapon, orbitWeapon, laserBeamWeapon, mineWeapon, shockWeapon };
+            string[] icons = { "💧", "🛡️", "🔦", "💣", "⚡" };
+
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                if (weapons[i] != null && weapons[i].IsActive)
+                {
+                    total += weapons[i].TotalDamageDealt;
+                }
+            }
+
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                if (weapons[i] != null && weapons[i].IsActive)
+                {
+                    float pct = total > 0f ? (weapons[i].TotalDamageDealt / total) * 100f : 0f;
+                    list.Add(new WeaponDamageStat
+                    {
+                        name = weapons[i].WeaponName,
+                        icon = icons[i],
+                        damage = weapons[i].TotalDamageDealt,
+                        percentage = pct
+                    });
+                }
+            }
+
+            list.Sort((a, b) => b.damage.CompareTo(a.damage));
+            return list;
         }
     }
 }

@@ -261,6 +261,7 @@ namespace DopamineCleaner.Enemies
 
             // 킬 카운트 등록
             GameManager.Instance?.RegisterKill(isBoss);
+            Core.EmergencyQuestManager.Instance?.ReportEnemyKilled(enemyType);
 
             // 아이템 및 경험치 드랍
             DropLoot(isBoss);

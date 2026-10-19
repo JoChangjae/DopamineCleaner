@@ -176,6 +176,17 @@ namespace DopamineCleaner.Characters
             {
                 speed *= 1.3f;
             }
+            if (MentalSanctuaryManager.Instance != null)
+            {
+                if (MentalSanctuaryManager.Instance.IsInSanctuary)
+                {
+                    speed *= 1.2f; // 쉼터 내 쾌속 회복 기동
+                }
+                else if (MentalSanctuaryManager.Instance.OverloadPercent >= 75f)
+                {
+                    speed *= 0.88f; // 도파민 과부하 뇌 피로 둔화
+                }
+            }
 
             rb.linearVelocity = movementInput * speed;
         }

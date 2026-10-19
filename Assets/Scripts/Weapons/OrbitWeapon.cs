@@ -125,7 +125,9 @@ namespace DopamineCleaner.Weapons
                 }
 
                 Vector2 pushDir = (enemy.transform.position - transform.position).normalized;
-                enemy.TakeDamage(damagePerSecond * mult * Time.deltaTime, pushDir, 0.15f);
+                float actualDmg = damagePerSecond * mult * Time.deltaTime;
+                enemy.TakeDamage(actualDmg, pushDir, 0.15f);
+                RegisterDamage(actualDmg);
             }
         }
     }

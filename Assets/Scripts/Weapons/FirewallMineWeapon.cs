@@ -11,12 +11,14 @@ namespace DopamineCleaner.Weapons
         private bool isEvolved;
         private float lifeTimer = 3.5f;
         private bool hasExploded = false;
+        private FirewallMineWeapon ownerWeapon;
 
-        public void Setup(float dmg, float radius, bool evolved)
+        public void Setup(float dmg, float radius, bool evolved, FirewallMineWeapon owner = null)
         {
             damage = dmg;
             explosionRadius = radius;
             isEvolved = evolved;
+            ownerWeapon = owner;
             lifeTimer = 4.0f;
             hasExploded = false;
 
@@ -74,6 +76,7 @@ namespace DopamineCleaner.Weapons
                 if (col.TryGetComponent<Enemy>(out var enemy))
                 {
                     enemy.TakeDamage(damage);
+                    ownerWeapon?.RegisterDamage(damage);
                 }
             }
 
@@ -173,7 +176,7 @@ namespace DopamineCleaner.Weapons
             mineObj.transform.position = transform.position;
 
             FirewallMine mine = mineObj.AddComponent<FirewallMine>();
-            mine.Setup(damage, explosionRadius, isEvolved);
+            mine.Setup(damage, explosionRadius, isEvolved, this);
         }
     }
 }

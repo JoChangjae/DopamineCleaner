@@ -92,7 +92,7 @@ namespace DopamineCleaner.Weapons
             if (p != null)
             {
                 p.transform.position = transform.position;
-                p.Initialize(dir, speed, damage, pierce, evolved);
+                p.Initialize(dir, speed, damage, pierce, evolved, this);
             }
         }
 

@@ -51,8 +51,23 @@ namespace DopamineCleaner.Core
             clipCache[SoundEffect.Fever] = GenerateFanfare(0.55f);
         }
 
+        [SerializeField] private bool isMuted = false;
+        public bool IsMuted => isMuted;
+
+        public bool ToggleMute()
+        {
+            isMuted = !isMuted;
+            if (audioSource != null)
+            {
+                audioSource.mute = isMuted;
+            }
+            return isMuted;
+        }
+
         public void Play(SoundEffect sfx, float volume = 0.5f)
         {
+            if (isMuted) return;
+
             if (clipCache.TryGetValue(sfx, out var clip) && clip != null)
             {
                 audioSource.PlayOneShot(clip, volume);

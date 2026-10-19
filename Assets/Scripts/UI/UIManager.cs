@@ -38,6 +38,11 @@ namespace DopamineCleaner.UI
         [SerializeField] private GameObject gameOverPanel;
         [SerializeField] private Text gameOverStatsText;
 
+        [Header("일시정지(Pause) 모달")]
+        [SerializeField] private GameObject pausePanel;
+        [SerializeField] private Text pauseEquipmentText;
+        [SerializeField] private Text pauseMuteBtnText;
+
         private void Awake()
         {
             if (Instance == null)
@@ -74,6 +79,7 @@ namespace DopamineCleaner.UI
             if (levelUpPanel != null) levelUpPanel.SetActive(false);
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
             if (feverBanner != null) feverBanner.SetActive(false);
+            if (pausePanel != null) pausePanel.SetActive(false);
 
             // HUD 텍스트 시인성 극대화 (골드/민트 색상 + 블랙 아웃라인)
             if (timerText != null)
@@ -140,6 +146,11 @@ namespace DopamineCleaner.UI
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                TogglePauseMenu();
+            }
+
             if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Playing)
             {
                 int totalSec = Mathf.FloorToInt(GameManager.Instance.SurvivalTime);
@@ -472,24 +483,73 @@ namespace DopamineCleaner.UI
             gameOverPanel.SetActive(true);
             int sec = Mathf.FloorToInt(GameManager.Instance.SurvivalTime);
             bool isVictory = GameManager.Instance.IsVictory;
+            int totalKills = GameManager.Instance.TotalKills;
             int gold = GameManager.Instance.EarnedGold;
             int karma = GameManager.Instance.EarnedKarma;
+
+            // 1. 디톡스 등급 산정
+            string grade;
+            Color gradeColor;
+            if (isVictory || (sec >= 300 && totalKills >= 350))
+            {
+                grade = "👑 S등급 (디톡스 마스터)";
+                gradeColor = new Color(1f, 0.85f, 0.25f);
+            }
+            else if (sec >= 180 && totalKills >= 180)
+            {
+                grade = "🌟 A등급 (우수 멘탈 요원)";
+                gradeColor = new Color(0.4f, 0.95f, 0.65f);
+            }
+            else if (sec >= 90)
+            {
+                grade = "🌱 B등급 (수습 디톡스 요원)";
+                gradeColor = new Color(0.35f, 0.8f, 1f);
+            }
+            else
+            {
+                grade = "📱 C등급 (도파민 과부하 주의)";
+                gradeColor = new Color(1f, 0.45f, 0.45f);
+            }
 
             Text titleText = gameOverPanel.transform.Find("GoTitle")?.GetComponent<Text>();
             if (titleText != null)
             {
-                titleText.text = isVictory ? "🏆 디톡스 임무 완료 (생존)" : "💀 도파민 과부하 (정화 실패)";
-                titleText.color = isVictory ? new Color(1f, 0.85f, 0.25f) : new Color(1f, 0.4f, 0.45f);
+                titleText.text = isVictory ? "📋 도파민 디톡스 종합 검진표 (작전 완료)" : "📋 도파민 디톡스 종합 검진표 (작전 종료)";
+                titleText.color = gradeColor;
             }
+
+            // 2. 무기별 DPS 통계 텍스트 구성
+            string weaponReport = "⚔️ [무기별 정화 기여도 (DPS)]\n";
+            if (WeaponManager.Instance != null)
+            {
+                var stats = WeaponManager.Instance.GetDamageStatistics();
+                if (stats.Count > 0)
+                {
+                    foreach (var ws in stats)
+                    {
+                        int barLength = Mathf.RoundToInt(ws.percentage / 10f);
+                        string bar = new string('■', barLength) + new string('□', Mathf.Max(0, 10 - barLength));
+                        weaponReport += $"{ws.icon} {ws.name,-12}: {bar} {ws.damage:N0} ({ws.percentage:F1}%)\n";
+                    }
+                }
+                else
+                {
+                    weaponReport += "  - 기록된 무기 대미지 데이터 없음\n";
+                }
+            }
+
+            int savedShorts = Mathf.Max(1, totalKills / 4);
 
             if (gameOverStatsText != null)
             {
                 gameOverStatsText.text =
-                    $"정화 구역: {Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance?.SelectedMapId ?? "map_hospital").name}\n" +
-                    $"생존 시간: {sec / 60:D2}:{sec % 60:D2}  |  처치: {GameManager.Instance.TotalKills}마리\n\n" +
-                    $"[정산 회수 내역]\n" +
-                    $"💰 정화 지원금: +{gold:N0} G\n" +
-                    $"✨ 디톡스 포인트: +{karma} P";
+                    $"【 종합 진단 결과: {grade} 】\n" +
+                    $"─────────────────────────────────────\n" +
+                    $"⏱️ 사수한 집중 시간: {sec / 60:D2}:{sec % 60:D2}  |  👾 소독한 잡생각: {totalKills}마리\n" +
+                    $"📱 도파민 절약 효과: 오늘 숏폼 {savedShorts}편 시청 방지 효과 달성!\n" +
+                    $"💰 정산 지원금: +{gold:N0} G   |   ✨ 디톡스 포인트: +{karma} P\n" +
+                    $"─────────────────────────────────────\n" +
+                    $"{weaponReport}";
             }
         }
 
@@ -498,6 +558,68 @@ namespace DopamineCleaner.UI
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
             Time.timeScale = 1f;
             UnityEngine.SceneManagement.SceneManager.LoadScene("TownScene");
+        }
+
+        public void TogglePauseMenu()
+        {
+            if (GameManager.Instance == null) return;
+
+            // 게임오버나 레벨업 중에는 일시정지 불가
+            if (GameManager.Instance.CurrentState == GameState.GameOver || GameManager.Instance.CurrentState == GameState.LevelUp)
+                return;
+
+            if (GameManager.Instance.CurrentState == GameState.Paused)
+            {
+                ResumeGame();
+            }
+            else if (GameManager.Instance.CurrentState == GameState.Playing)
+            {
+                PauseGame();
+            }
+        }
+
+        public void PauseGame()
+        {
+            if (pausePanel == null || GameManager.Instance == null) return;
+
+            GameManager.Instance.SetState(GameState.Paused);
+            pausePanel.SetActive(true);
+
+            if (pauseEquipmentText != null && WeaponManager.Instance != null)
+            {
+                pauseEquipmentText.text = WeaponManager.Instance.GetEquipmentSummary();
+            }
+
+            UpdateMuteButtonText();
+        }
+
+        public void ResumeGame()
+        {
+            if (pausePanel != null) pausePanel.SetActive(false);
+            GameManager.Instance?.SetState(GameState.Playing);
+        }
+
+        public void OnToggleMuteClicked()
+        {
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.ToggleMute();
+                UpdateMuteButtonText();
+            }
+        }
+
+        private void UpdateMuteButtonText()
+        {
+            if (pauseMuteBtnText != null && SoundManager.Instance != null)
+            {
+                pauseMuteBtnText.text = SoundManager.Instance.IsMuted ? "🔈 효과음: OFF (음소거)" : "🔊 효과음: ON";
+            }
+        }
+
+        public void OnRetreatButtonClicked()
+        {
+            if (pausePanel != null) pausePanel.SetActive(false);
+            GameManager.Instance?.TriggerGameOver(false);
         }
     }
 }

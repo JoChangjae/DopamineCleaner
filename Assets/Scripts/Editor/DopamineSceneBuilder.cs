@@ -97,12 +97,14 @@ namespace DopamineCleaner.Editor
             SetPrivateField(weaponMgr, "mineWeapon", mineWeapon);
             SetPrivateField(weaponMgr, "shockWeapon", shockWeapon);
 
-            // 6. 게임 매니저 & 스포너 & 아이템 매니저 & 피버 매니저 & 데미지 텍스트 & 사운드 매니저
+            // 6. 게임 매니저 & 스포너 & 아이템 매니저 & 피버 매니저 & 데미지 텍스트 & 사운드 매니저 & 돌발 퀘스트
             GameObject sysObj = new GameObject("[Systems]");
             GameManager gameMgr = sysObj.AddComponent<GameManager>();
             FeverManager feverMgr = sysObj.AddComponent<FeverManager>();
             DamageTextManager dmgTextMgr = sysObj.AddComponent<DamageTextManager>();
             SoundManager soundMgr = sysObj.AddComponent<SoundManager>();
+            EmergencyQuestManager questMgr = sysObj.AddComponent<EmergencyQuestManager>();
+            MentalSanctuaryManager sanctuaryMgr = sysObj.AddComponent<MentalSanctuaryManager>();
 
             EnemySpawner spawner = sysObj.AddComponent<EnemySpawner>();
             SetPrivateField(spawner, "enemyPrefab", enemyPrefab);
@@ -128,7 +130,7 @@ namespace DopamineCleaner.Editor
 
             // UI Manager
             UIManager uiMgr = canvasObj.AddComponent<UIManager>();
-            BuildCanvasUI(canvasObj, uiMgr, cardPrefab);
+            BuildCanvasUI(canvasObj, uiMgr, cardPrefab, questMgr, sanctuaryMgr);
 
             // 8. 씬 저장
             Directory.CreateDirectory("Assets/Scenes");
@@ -164,8 +166,19 @@ namespace DopamineCleaner.Editor
             }
         }
 
-        private static void BuildCanvasUI(GameObject canvasObj, UIManager uiMgr, GameObject cardPrefab)
+        private static void BuildCanvasUI(GameObject canvasObj, UIManager uiMgr, GameObject cardPrefab, EmergencyQuestManager questMgr = null, MentalSanctuaryManager sanctuaryMgr = null)
         {
+            // 화면 전체 도파민 과부하 비네트 (최하단 레이어)
+            GameObject vignetteObj = CreateUIObject("OverloadVignette", canvasObj.transform);
+            RectTransform vRt = vignetteObj.GetComponent<RectTransform>();
+            vRt.anchorMin = Vector2.zero;
+            vRt.anchorMax = Vector2.one;
+            vRt.sizeDelta = Vector2.zero;
+            Image vImg = vignetteObj.AddComponent<Image>();
+            vImg.color = new Color(0.95f, 0.2f, 0.45f, 0f);
+            vImg.raycastTarget = false;
+            sanctuaryMgr?.BindVignette(vImg);
+
             // 상단 레이아웃 (어두운 반투명 HUD 글래스 패널)
             GameObject topHud = CreateUIObject("TopHUD", canvasObj.transform);
             RectTransform topRt = topHud.GetComponent<RectTransform>();
@@ -250,6 +263,25 @@ namespace DopamineCleaner.Editor
             feverBannerObj.SetActive(false);
             SetPrivateField(uiMgr, "feverBanner", feverBannerObj);
 
+            // 긴급 돌발 퀘스트 배너 (피버 배너 위쪽)
+            GameObject questBannerObj = CreateUIObject("QuestBanner", canvasObj.transform);
+            RectTransform qbRt = questBannerObj.GetComponent<RectTransform>();
+            qbRt.anchorMin = new Vector2(0.5f, 0.84f);
+            qbRt.anchorMax = new Vector2(0.5f, 0.84f);
+            qbRt.sizeDelta = new Vector2(820, 58);
+            Image qbImg = questBannerObj.AddComponent<Image>();
+            qbImg.color = new Color(0.12f, 0.08f, 0.20f, 0.94f);
+            Outline qbOut = questBannerObj.AddComponent<Outline>();
+            qbOut.effectColor = new Color(1f, 0.75f, 0.2f, 0.95f);
+            qbOut.effectDistance = new Vector2(2f, -2f);
+
+            Text qbTxt = CreateText("QbText", questBannerObj.transform, "⚠️ [긴급 작전] 미션 준비 중...", 19, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(800, 50));
+            qbTxt.color = new Color(1f, 0.88f, 0.35f);
+            qbTxt.fontStyle = FontStyle.Bold;
+            questBannerObj.SetActive(false);
+
+            questMgr?.BindUI(questBannerObj, qbTxt);
+
             // 하단 대시 / 구급약 텍스트
             GameObject bottomHud = CreateUIObject("BottomHUD", canvasObj.transform);
             RectTransform botRt = bottomHud.GetComponent<RectTransform>();
@@ -325,25 +357,80 @@ namespace DopamineCleaner.Editor
             Image goDim = goPanel.AddComponent<Image>();
             goDim.color = new Color(0.12f, 0.05f, 0.15f, 0.94f);
 
-            CreateText("GoTitle", goPanel.transform, "디톡스 세션 종료", 52, TextAnchor.MiddleCenter, new Vector2(0, 240));
-            Text goStats = CreateText("GoStats", goPanel.transform, "통계 정보", 28, TextAnchor.MiddleCenter, new Vector2(0, 60));
+            CreateText("GoTitle", goPanel.transform, "📋 도파민 디톡스 종합 검진표", 44, TextAnchor.MiddleCenter, new Vector2(0, 370));
+            Text goStats = CreateText("GoStats", goPanel.transform, "검진 데이터를 분석하는 중...", 22, TextAnchor.MiddleCenter, new Vector2(0, 20), new Vector2(980, 560));
+            goStats.lineSpacing = 1.25f;
 
             GameObject restartBtnObj = CreateUIObject("RestartButton", goPanel.transform);
             RectTransform rBtnRt = restartBtnObj.GetComponent<RectTransform>();
-            rBtnRt.sizeDelta = new Vector2(360, 80);
-            rBtnRt.anchoredPosition = new Vector2(0, -160);
+            rBtnRt.sizeDelta = new Vector2(380, 75);
+            rBtnRt.anchoredPosition = new Vector2(0, -360);
             Image btnImg = restartBtnObj.AddComponent<Image>();
-            btnImg.color = new Color(1f, 0.46f, 0.56f);
+            btnImg.color = new Color(0.35f, 0.75f, 0.65f);
             Button btn = restartBtnObj.AddComponent<Button>();
             btn.onClick.AddListener(uiMgr.OnRestartButtonClicked);
 
-            CreateText("BtnText", restartBtnObj.transform, "🔄 다시 도전하기", 30, TextAnchor.MiddleCenter, Vector2.zero);
+            CreateText("BtnText", restartBtnObj.transform, "🏠 본부로 귀환하기", 28, TextAnchor.MiddleCenter, Vector2.zero);
 
             SetPrivateField(uiMgr, "gameOverPanel", goPanel);
             SetPrivateField(uiMgr, "gameOverStatsText", goStats);
 
+            // 9. 일시정지(Pause) 패널
+            GameObject pausePanelObj = CreateUIObject("PausePanel", canvasObj.transform);
+            RectTransform pRt = pausePanelObj.GetComponent<RectTransform>();
+            pRt.anchorMin = Vector2.zero;
+            pRt.anchorMax = Vector2.one;
+            pRt.sizeDelta = Vector2.zero;
+
+            Image pDim = pausePanelObj.AddComponent<Image>();
+            pDim.color = new Color(0.08f, 0.06f, 0.12f, 0.94f);
+
+            CreateText("PauseTitle", pausePanelObj.transform, "⏸️ 작전 일시정지 (PAUSED)", 44, TextAnchor.MiddleCenter, new Vector2(0, 370));
+
+            Text pauseEquipTxt = CreateText("PauseEquipText", pausePanelObj.transform, "장비 정보를 불러오는 중...", 20, TextAnchor.MiddleCenter, new Vector2(0, 50), new Vector2(920, 520));
+            pauseEquipTxt.lineSpacing = 1.3f;
+            pauseEquipTxt.color = new Color(0.9f, 0.88f, 0.95f);
+
+            // 효과음 토글 버튼
+            GameObject muteBtnObj = CreateUIObject("MuteButton", pausePanelObj.transform);
+            RectTransform mRt = muteBtnObj.GetComponent<RectTransform>();
+            mRt.sizeDelta = new Vector2(280, 60);
+            mRt.anchoredPosition = new Vector2(-160, -290);
+            Image mImg = muteBtnObj.AddComponent<Image>();
+            mImg.color = new Color(0.24f, 0.20f, 0.32f);
+            Button mBtn = muteBtnObj.AddComponent<Button>();
+            mBtn.onClick.AddListener(uiMgr.OnToggleMuteClicked);
+            Text mMuteTxt = CreateText("MuteBtnText", muteBtnObj.transform, "🔊 효과음: ON", 20, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(260, 50));
+
+            // 계속하기 버튼
+            GameObject resumeBtnObj = CreateUIObject("ResumeButton", pausePanelObj.transform);
+            RectTransform resRt = resumeBtnObj.GetComponent<RectTransform>();
+            resRt.sizeDelta = new Vector2(280, 60);
+            resRt.anchoredPosition = new Vector2(160, -290);
+            Image resImg = resumeBtnObj.AddComponent<Image>();
+            resImg.color = new Color(0.32f, 0.72f, 0.55f);
+            Button resBtn = resumeBtnObj.AddComponent<Button>();
+            resBtn.onClick.AddListener(uiMgr.ResumeGame);
+            CreateText("ResumeText", resumeBtnObj.transform, "▶ 계속하기 (ESC)", 22, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(260, 50));
+
+            // 조기 철수 버튼
+            GameObject retreatBtnObj = CreateUIObject("RetreatButton", pausePanelObj.transform);
+            RectTransform retRt = retreatBtnObj.GetComponent<RectTransform>();
+            retRt.sizeDelta = new Vector2(360, 50);
+            retRt.anchoredPosition = new Vector2(0, -370);
+            Image retImg = retreatBtnObj.AddComponent<Image>();
+            retImg.color = new Color(0.65f, 0.22f, 0.25f);
+            Button retBtn = retreatBtnObj.AddComponent<Button>();
+            retBtn.onClick.AddListener(uiMgr.OnRetreatButtonClicked);
+            CreateText("RetreatText", retreatBtnObj.transform, "🏠 본부로 조기 철수 (60% 정산)", 18, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(340, 45));
+
+            SetPrivateField(uiMgr, "pausePanel", pausePanelObj);
+            SetPrivateField(uiMgr, "pauseEquipmentText", pauseEquipTxt);
+            SetPrivateField(uiMgr, "pauseMuteBtnText", mMuteTxt);
+
             lvlPanel.SetActive(false);
             goPanel.SetActive(false);
+            pausePanelObj.SetActive(false);
         }
 
         private static Slider CreateSimpleSlider(string name, Transform parent, Color fillColor, Vector2 pos)
@@ -388,10 +475,15 @@ namespace DopamineCleaner.Editor
 
         private static Text CreateText(string name, Transform parent, string content, int size, TextAnchor align, Vector2 pos)
         {
+            return CreateText(name, parent, content, size, align, pos, new Vector2(700, 60));
+        }
+
+        private static Text CreateText(string name, Transform parent, string content, int size, TextAnchor align, Vector2 pos, Vector2 sizeDelta)
+        {
             GameObject obj = CreateUIObject(name, parent);
             RectTransform rt = obj.GetComponent<RectTransform>();
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(700, 60);
+            rt.sizeDelta = sizeDelta;
 
             Text txt = obj.AddComponent<Text>();
             txt.text = content;
