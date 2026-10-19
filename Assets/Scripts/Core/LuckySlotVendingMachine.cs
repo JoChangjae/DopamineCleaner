@@ -280,13 +280,10 @@ namespace DopamineCleaner.Core
             isSpinning = true;
             if (spinButton != null) spinButton.interactable = false;
 
-            float spinDuration = 1.3f;
-            float elapsed = 0f;
-
-            // Time.timeScale = 0 상태이므로 WaitForSecondsRealtime 및 unscaledDeltaTime 사용
-            while (elapsed < spinDuration)
+            // 12회 빠르고 경쾌하게 회전 (총 약 0.96초)
+            int totalTicks = 12;
+            for (int t = 0; t < totalTicks; t++)
             {
-                elapsed += Time.unscaledDeltaTime;
                 if (reel1Text != null) reel1Text.text = symbols[Random.Range(0, symbols.Length)];
                 if (reel2Text != null) reel2Text.text = symbols[Random.Range(0, symbols.Length)];
                 if (reel3Text != null) reel3Text.text = symbols[Random.Range(0, symbols.Length)];
@@ -334,45 +331,54 @@ namespace DopamineCleaner.Core
 
         private void EvaluateOutcome(string s1, string s2, string s3)
         {
+            Vector3 dropPos = transform.position + new Vector3(0f, -0.9f, 0f);
+
             if (s1 == "7️⃣" && s2 == "7️⃣" && s3 == "7️⃣")
             {
                 // 대박 잭팟!
                 if (resultMessageText != null)
                 {
-                    resultMessageText.text = "🎉 [초대박 잭팟!] 황금 상자 2개 + 150G + 피버 폭주!";
+                    resultMessageText.text = "🎉 [초대박 잭팟!] 황금 상자 2개 & 메가 보석 배출!";
                     resultMessageText.color = new Color(1f, 0.85f, 0.2f);
                 }
 
-                ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 1.5f, GemType.Chest, 0);
-                ItemManager.Instance?.SpawnGem(transform.position + Vector3.right * 1.5f, GemType.Chest, 0);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(-0.6f, -0.2f, 0f), GemType.Chest, 0);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(0.6f, -0.2f, 0f), GemType.Chest, 0);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(0f, -0.4f, 0f), GemType.MegaPink, 35);
                 GameManager.Instance?.AddBonusGold(150);
                 FeverManager.Instance?.ActivateFever();
                 AchievementManager.Instance?.ReportJackpot();
                 SoundManager.Instance?.Play(SoundEffect.Fever, 0.9f);
+                PixelParticleManager.Instance?.SpawnLevelUpFlash(dropPos);
             }
             else if (s1 == "💎" && s2 == "💎" && s3 == "💎")
             {
                 if (resultMessageText != null)
                 {
-                    resultMessageText.text = "💎 [다이아몬드 대박!] 대량 경험치 + 자석 흡수!";
+                    resultMessageText.text = "💎 [다이아몬드 대박!] 대량 보석 배출 & 자석 흡수!";
                     resultMessageText.color = new Color(0.3f, 0.9f, 1f);
                 }
 
-                PlayerController.Instance?.AddExp(250f);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(-0.5f, -0.2f, 0f), GemType.MegaPink, 30);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(0.5f, -0.2f, 0f), GemType.MegaPink, 30);
+                ItemManager.Instance?.SpawnGem(dropPos, GemType.Blue, 10);
                 ItemManager.Instance?.TriggerMagnet();
                 SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.8f);
+                PixelParticleManager.Instance?.SpawnLevelUpFlash(dropPos);
             }
             else if (s1 == "🍒" && s2 == "🍒" && s3 == "🍒")
             {
                 if (resultMessageText != null)
                 {
-                    resultMessageText.text = "🍒 [달콤한 체리!] 체력 100% 완전 회복 + 멘탈 케이크!";
+                    resultMessageText.text = "🍒 [달콤한 체리!] 멘탈 케이크 & 회복 보석 배출!";
                     resultMessageText.color = new Color(1f, 0.3f, 0.6f);
                 }
 
                 PlayerController.Instance?.Heal(999f);
-                ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 1.2f, GemType.Cake, 0);
+                ItemManager.Instance?.SpawnGem(dropPos, GemType.Cake, 0);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(0.5f, -0.2f, 0f), GemType.Blue, 10);
                 SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.8f);
+                PixelParticleManager.Instance?.SpawnLevelUpFlash(dropPos);
             }
             else if (s1 == "💀" && s2 == "💀" && s3 == "💀")
             {
@@ -389,23 +395,25 @@ namespace DopamineCleaner.Core
             {
                 if (resultMessageText != null)
                 {
-                    resultMessageText.text = "✨ [2개 일치!] 보너스 30G + 50 EXP 획득!";
+                    resultMessageText.text = "✨ [2개 일치!] 배출구로 보석 2개 & 30G 배출!";
                     resultMessageText.color = Color.white;
                 }
 
                 GameManager.Instance?.AddBonusGold(30);
-                PlayerController.Instance?.AddExp(50f);
-                SoundManager.Instance?.Play(SoundEffect.GemCollect, 0.5f);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(-0.4f, -0.2f, 0f), GemType.Blue, 6);
+                ItemManager.Instance?.SpawnGem(dropPos + new Vector3(0.4f, -0.2f, 0f), GemType.Green, 3);
+                SoundManager.Instance?.Play(SoundEffect.GemCollect, 0.6f);
             }
             else
             {
                 if (resultMessageText != null)
                 {
-                    resultMessageText.text = "💨 [다음 기회에!] 위로금 15 EXP 획득.";
-                    resultMessageText.color = new Color(0.8f, 0.8f, 0.8f);
+                    resultMessageText.text = "💨 [위로상] 배출구로 위로 보석 1개가 떨어졌습니다!";
+                    resultMessageText.color = new Color(0.85f, 0.85f, 0.85f);
                 }
 
-                PlayerController.Instance?.AddExp(15f);
+                ItemManager.Instance?.SpawnGem(dropPos, GemType.Green, 3);
+                SoundManager.Instance?.Play(SoundEffect.GemCollect, 0.4f);
             }
         }
 

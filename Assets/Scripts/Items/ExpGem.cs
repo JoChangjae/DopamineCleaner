@@ -37,6 +37,7 @@ namespace DopamineCleaner.Items
         private SpriteRenderer spriteRenderer;
         private bool isAttracted = false;
         private float bobOffset;
+        private Vector3 spawnPosition;
 
         private static readonly Dictionary<GemType, Sprite> RuntimeSpriteCache = new();
 
@@ -70,6 +71,7 @@ namespace DopamineCleaner.Items
             gemType = type;
             expValue = value;
             isAttracted = false;
+            spawnPosition = transform.position;
 
             gameObject.SetActive(true);
             UpdateVisual();
@@ -90,11 +92,11 @@ namespace DopamineCleaner.Items
 
         private void Update()
         {
-            // 바닥에 정지해 있을 때 부드러운 둥둥 떠있는 픽셀 애니메이션
-            if (!isAttracted && spriteRenderer != null)
+            // 바닥에 정지해 있을 때 스폰 위치 기준 부드러운 둥둥 떠있는 픽셀 애니메이션
+            if (!isAttracted)
             {
                 float bobY = Mathf.Sin((Time.time * 4f) + bobOffset) * 0.08f;
-                spriteRenderer.transform.localPosition = new Vector3(0, bobY, 0);
+                transform.position = new Vector3(spawnPosition.x, spawnPosition.y + bobY, 0f);
             }
 
             if (PlayerController.Instance == null) return;
@@ -107,8 +109,6 @@ namespace DopamineCleaner.Items
             if (distSq < magRadius * magRadius)
             {
                 isAttracted = true;
-                if (spriteRenderer != null)
-                    spriteRenderer.transform.localPosition = Vector3.zero;
             }
 
             if (isAttracted)
@@ -152,8 +152,6 @@ namespace DopamineCleaner.Items
         public void ForceAttract()
         {
             isAttracted = true;
-            if (spriteRenderer != null)
-                spriteRenderer.transform.localPosition = Vector3.zero;
         }
 
         public void SetSprites(Sprite green, Sprite blue, Sprite pink, Sprite mega, Sprite cake, Sprite bomb, Sprite magnet, Sprite chest)

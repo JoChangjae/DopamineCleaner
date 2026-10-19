@@ -81,22 +81,46 @@ namespace DopamineCleaner.Editor
             Image hBg = headerObj.AddComponent<Image>();
             hBg.color = new Color(0.18f, 0.15f, 0.24f);
 
-            CreateText("CorpTitle", headerObj.transform, "🧠 도파민 클리너 본부 (HQ)", 30, TextAnchor.MiddleLeft, new Vector2(-25, 18), new Vector2(500, 40));
-            Text activeCharTxt = CreateText("ActiveCharText", headerObj.transform, "요원증: 🧑‍💼 김인턴 (수습 클리너)", 20, TextAnchor.MiddleLeft, new Vector2(-25, -18), new Vector2(550, 35));
+            Text corpTitle = CreateText("CorpTitle", headerObj.transform, "🧠 도파민 클리너 본부 (HQ)", 28, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(500, 40));
+            RectTransform ctRt = corpTitle.GetComponent<RectTransform>();
+            ctRt.anchorMin = new Vector2(0f, 0.5f);
+            ctRt.anchorMax = new Vector2(0f, 0.5f);
+            ctRt.pivot = new Vector2(0f, 0.5f);
+            ctRt.anchoredPosition = new Vector2(30, 18);
+
+            Text activeCharTxt = CreateText("ActiveCharText", headerObj.transform, "요원증: 🧑‍💼 김인턴 (수습 클리너)", 19, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(550, 35));
             activeCharTxt.color = new Color(0.85f, 0.8f, 0.95f);
+            RectTransform acRt = activeCharTxt.GetComponent<RectTransform>();
+            acRt.anchorMin = new Vector2(0f, 0.5f);
+            acRt.anchorMax = new Vector2(0f, 0.5f);
+            acRt.pivot = new Vector2(0f, 0.5f);
+            acRt.anchoredPosition = new Vector2(30, -18);
 
-            Text goldTxt = CreateText("GoldText", headerObj.transform, "💰 보유 골드: 600 G", 22, TextAnchor.MiddleRight, new Vector2(25, 18), new Vector2(400, 40));
-            goldTxt.color = new Color(1f, 0.85f, 0.3f);
-
-            Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 22, TextAnchor.MiddleRight, new Vector2(25, -18), new Vector2(400, 35));
-            karmaTxt.color = new Color(0.6f, 0.85f, 1f);
-
-            // 상단 창모드 / 전체화면 토글 버튼 (헤더 중앙 우측)
+            // 상단 창모드 / 전체화면 토글 버튼 (헤더 우측 골드 텍스트 좌측에 배치)
             Button winModeBtn = CreateButton("WindowModeButton", headerObj.transform, "🖥️ 화면 모드 (F11)", 16, new Color(0.24f, 0.28f, 0.38f));
             RectTransform wRt = winModeBtn.GetComponent<RectTransform>();
-            wRt.sizeDelta = new Vector2(240, 48);
-            wRt.anchoredPosition = new Vector2(300, 0);
+            wRt.anchorMin = new Vector2(1f, 0.5f);
+            wRt.anchorMax = new Vector2(1f, 0.5f);
+            wRt.pivot = new Vector2(1f, 0.5f);
+            wRt.sizeDelta = new Vector2(210, 46);
+            wRt.anchoredPosition = new Vector2(-460, 0);
             Text winModeTxt = winModeBtn.GetComponentInChildren<Text>();
+
+            Text goldTxt = CreateText("GoldText", headerObj.transform, "💰 보유 골드: 600 G", 21, TextAnchor.MiddleRight, Vector2.zero, new Vector2(400, 38));
+            goldTxt.color = new Color(1f, 0.85f, 0.3f);
+            RectTransform gRt = goldTxt.GetComponent<RectTransform>();
+            gRt.anchorMin = new Vector2(1f, 0.5f);
+            gRt.anchorMax = new Vector2(1f, 0.5f);
+            gRt.pivot = new Vector2(1f, 0.5f);
+            gRt.anchoredPosition = new Vector2(-30, 18);
+
+            Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 21, TextAnchor.MiddleRight, Vector2.zero, new Vector2(400, 34));
+            karmaTxt.color = new Color(0.6f, 0.85f, 1f);
+            RectTransform kRt = karmaTxt.GetComponent<RectTransform>();
+            kRt.anchorMin = new Vector2(1f, 0.5f);
+            kRt.anchorMax = new Vector2(1f, 0.5f);
+            kRt.pivot = new Vector2(1f, 0.5f);
+            kRt.anchoredPosition = new Vector2(-30, -18);
 
             SetPrivateField(townMgr, "goldText", goldTxt);
             SetPrivateField(townMgr, "karmaText", karmaTxt);
@@ -632,29 +656,29 @@ namespace DopamineCleaner.Editor
             Image bg = card.AddComponent<Image>();
             bg.color = new Color(0.20f, 0.17f, 0.28f);
 
-            Text icon = CreateText("Icon", card.transform, "🩹", 50, TextAnchor.MiddleCenter, new Vector2(-125, 35), new Vector2(75, 75));
+            Text icon = CreateText("Icon", card.transform, "🩹", 50, TextAnchor.MiddleCenter, new Vector2(-130, 40), new Vector2(64, 64));
 
             GameObject imgObj = CreateUIObject("ItemImage", card.transform);
             RectTransform iRt = imgObj.GetComponent<RectTransform>();
             iRt.sizeDelta = new Vector2(64, 64);
-            iRt.anchoredPosition = new Vector2(-125, 35);
+            iRt.anchoredPosition = new Vector2(-130, 40);
             Image itemImg = imgObj.AddComponent<Image>();
             itemImg.preserveAspect = true;
             imgObj.SetActive(false);
 
-            Text name = CreateText("Name", card.transform, "응급 구급약", 22, TextAnchor.MiddleLeft, new Vector2(40, 55), new Vector2(230, 35));
+            Text name = CreateText("Name", card.transform, "응급 구급약", 20, TextAnchor.MiddleLeft, new Vector2(-15, 58), new Vector2(150, 32));
             name.fontStyle = FontStyle.Bold;
 
-            Text price = CreateText("Price", card.transform, "💰 150 G", 20, TextAnchor.MiddleLeft, new Vector2(40, 20), new Vector2(230, 30));
+            Text price = CreateText("Price", card.transform, "💰 150 G", 18, TextAnchor.MiddleLeft, new Vector2(-15, 24), new Vector2(150, 28));
             price.color = new Color(1f, 0.85f, 0.3f);
 
-            Text desc = CreateText("Desc", card.transform, "현장에서 체력 40 회복", 16, TextAnchor.UpperLeft, new Vector2(0, -40), new Vector2(340, 55));
+            Text desc = CreateText("Desc", card.transform, "현장에서 체력 40 회복", 15, TextAnchor.UpperLeft, new Vector2(0, -42), new Vector2(340, 60));
             desc.color = new Color(0.85f, 0.82f, 0.9f);
 
             Button buyBtn = CreateButton("BuyButton", card.transform, "구매", 18, new Color(0.3f, 0.65f, 0.45f));
             RectTransform bRt = buyBtn.GetComponent<RectTransform>();
-            bRt.sizeDelta = new Vector2(100, 45);
-            bRt.anchoredPosition = new Vector2(120, 35);
+            bRt.sizeDelta = new Vector2(90, 46);
+            bRt.anchoredPosition = new Vector2(125, 40);
 
             string path = "Assets/Prefabs/ShopItemPrefab.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(card, path);

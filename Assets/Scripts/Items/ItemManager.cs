@@ -79,8 +79,8 @@ namespace DopamineCleaner.Items
                 }
             }
 
-            // 근처 1.8 유닛 내에 기존 보석이 있거나, 활성 보석이 45개 이상이면 병합!
-            if (nearestGem != null && (minDistanceSq < 3.24f || activeCount >= 45))
+            // 근처 1.8 유닛 내에 기존 보석이 있거나, 활성 보석이 100개 이상으로 많을 때만 3.5 유닛 내 병합
+            if (nearestGem != null && (minDistanceSq < 3.24f || (activeCount >= 100 && minDistanceSq < 12.25f)))
             {
                 nearestGem.AddExp(exp);
                 return;

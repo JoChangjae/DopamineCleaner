@@ -395,31 +395,31 @@ namespace DopamineCleaner.Editor
             RectTransform smRt = slotModalObj.GetComponent<RectTransform>();
             smRt.anchorMin = new Vector2(0.5f, 0.5f);
             smRt.anchorMax = new Vector2(0.5f, 0.5f);
-            smRt.sizeDelta = new Vector2(650, 520);
+            smRt.sizeDelta = new Vector2(700, 560);
             Image smBg = slotModalObj.AddComponent<Image>();
             smBg.color = new Color(0.12f, 0.10f, 0.18f, 0.98f);
             Outline smOut = slotModalObj.AddComponent<Outline>();
             smOut.effectColor = new Color(1f, 0.3f, 0.8f);
             smOut.effectDistance = new Vector2(2f, -2f);
 
-            CreateText("SmTitle", slotModalObj.transform, "🎰 도파민 럭키 슬롯 & 암거래", 30, TextAnchor.MiddleCenter, new Vector2(0, 220), new Vector2(580, 45));
+            CreateText("SmTitle", slotModalObj.transform, "🎰 도파민 럭키 슬롯 & 암거래", 30, TextAnchor.MiddleCenter, new Vector2(0, 235), new Vector2(620, 45));
 
             GameObject reelsObj = CreateUIObject("ReelsGroup", slotModalObj.transform);
             RectTransform rgRt = reelsObj.GetComponent<RectTransform>();
-            rgRt.sizeDelta = new Vector2(460, 110);
-            rgRt.anchoredPosition = new Vector2(0, 120);
+            rgRt.sizeDelta = new Vector2(480, 110);
+            rgRt.anchoredPosition = new Vector2(0, 135);
             Image rgBg = reelsObj.AddComponent<Image>();
             rgBg.color = new Color(0.06f, 0.05f, 0.10f, 0.95f);
 
-            Text r1 = CreateText("Reel1", reelsObj.transform, "7️⃣", 52, TextAnchor.MiddleCenter, new Vector2(-140, 0), new Vector2(100, 100));
+            Text r1 = CreateText("Reel1", reelsObj.transform, "7️⃣", 52, TextAnchor.MiddleCenter, new Vector2(-150, 0), new Vector2(100, 100));
             Text r2 = CreateText("Reel2", reelsObj.transform, "💎", 52, TextAnchor.MiddleCenter, new Vector2(0, 0), new Vector2(100, 100));
-            Text r3 = CreateText("Reel3", reelsObj.transform, "🍒", 52, TextAnchor.MiddleCenter, new Vector2(140, 0), new Vector2(100, 100));
+            Text r3 = CreateText("Reel3", reelsObj.transform, "🍒", 52, TextAnchor.MiddleCenter, new Vector2(150, 0), new Vector2(100, 100));
 
-            Text resTxt = CreateText("ResText", slotModalObj.transform, "💰 50 골드로 레버를 당기세요!", 18, TextAnchor.MiddleCenter, new Vector2(0, 45), new Vector2(580, 35));
+            Text resTxt = CreateText("ResText", slotModalObj.transform, "💰 50 골드로 레버를 당기세요!", 18, TextAnchor.MiddleCenter, new Vector2(0, 50), new Vector2(640, 42));
 
             GameObject spinBtnObj = CreateUIObject("SpinBtn", slotModalObj.transform);
             RectTransform sbRt = spinBtnObj.GetComponent<RectTransform>();
-            sbRt.sizeDelta = new Vector2(240, 55);
+            sbRt.sizeDelta = new Vector2(250, 54);
             sbRt.anchoredPosition = new Vector2(0, -15);
             Image sbImg = spinBtnObj.AddComponent<Image>();
             sbImg.color = new Color(0.9f, 0.3f, 0.45f);
@@ -428,8 +428,8 @@ namespace DopamineCleaner.Editor
 
             GameObject c1BtnObj = CreateUIObject("Contract1Btn", slotModalObj.transform);
             RectTransform c1Rt = c1BtnObj.GetComponent<RectTransform>();
-            c1Rt.sizeDelta = new Vector2(260, 60);
-            c1Rt.anchoredPosition = new Vector2(-140, -95);
+            c1Rt.sizeDelta = new Vector2(270, 60);
+            c1Rt.anchoredPosition = new Vector2(-155, -95);
             Image c1Img = c1BtnObj.AddComponent<Image>();
             c1Img.color = new Color(0.25f, 0.15f, 0.22f);
             Button c1Btn = c1BtnObj.AddComponent<Button>();
@@ -437,8 +437,8 @@ namespace DopamineCleaner.Editor
 
             GameObject c2BtnObj = CreateUIObject("Contract2Btn", slotModalObj.transform);
             RectTransform c2Rt = c2BtnObj.GetComponent<RectTransform>();
-            c2Rt.sizeDelta = new Vector2(260, 60);
-            c2Rt.anchoredPosition = new Vector2(140, -95);
+            c2Rt.sizeDelta = new Vector2(270, 60);
+            c2Rt.anchoredPosition = new Vector2(155, -95);
             Image c2Img = c2BtnObj.AddComponent<Image>();
             c2Img.color = new Color(0.15f, 0.22f, 0.28f);
             Button c2Btn = c2BtnObj.AddComponent<Button>();
@@ -446,8 +446,8 @@ namespace DopamineCleaner.Editor
 
             GameObject closeBtnObj = CreateUIObject("CloseBtn", slotModalObj.transform);
             RectTransform cbRt = closeBtnObj.GetComponent<RectTransform>();
-            cbRt.sizeDelta = new Vector2(160, 42);
-            cbRt.anchoredPosition = new Vector2(0, -180);
+            cbRt.sizeDelta = new Vector2(180, 44);
+            cbRt.anchoredPosition = new Vector2(0, -190);
             Image cbImg = closeBtnObj.AddComponent<Image>();
             cbImg.color = new Color(0.35f, 0.35f, 0.45f);
             Button closeBtn = closeBtnObj.AddComponent<Button>();
@@ -541,7 +541,7 @@ namespace DopamineCleaner.Editor
 
             CreateText("PauseTitle", pausePanelObj.transform, "⏸️ 작전 일시정지 (PAUSED)", 44, TextAnchor.MiddleCenter, new Vector2(0, 370));
 
-            Text pauseEquipTxt = CreateText("PauseEquipText", pausePanelObj.transform, "장비 정보를 불러오는 중...", 20, TextAnchor.MiddleCenter, new Vector2(0, 50), new Vector2(920, 520));
+            Text pauseEquipTxt = CreateText("PauseEquipText", pausePanelObj.transform, "장비 정보를 불러오는 중...", 20, TextAnchor.MiddleCenter, new Vector2(0, 65), new Vector2(920, 440));
             pauseEquipTxt.lineSpacing = 1.3f;
             pauseEquipTxt.color = new Color(0.9f, 0.88f, 0.95f);
 
