@@ -45,7 +45,27 @@ namespace DopamineCleaner.Town
                 Text descText = card.transform.Find("Desc")?.GetComponent<Text>();
                 Button buyBtn = card.transform.Find("BuyButton")?.GetComponent<Button>();
 
-                if (iconText != null) iconText.text = item.iconEmoji;
+                Image iconImg = card.transform.Find("ItemImage")?.GetComponent<Image>();
+                if (iconImg != null)
+                {
+                    Sprite sp = Resources.Load<Sprite>($"Items/{item.id}") ??
+#if UNITY_EDITOR
+                        UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Items/{item.id}.png");
+#else
+                        null;
+#endif
+                    if (sp != null)
+                    {
+                        iconImg.sprite = sp;
+                        iconImg.gameObject.SetActive(true);
+                        if (iconText != null) iconText.gameObject.SetActive(false);
+                    }
+                }
+
+                if (iconText != null && (iconImg == null || !iconImg.gameObject.activeSelf))
+                {
+                    iconText.text = item.iconEmoji;
+                }
                 if (nameText != null) nameText.text = $"{item.name} ({item.rarity})";
                 if (priceText != null) priceText.text = $"💰 {item.buyPrice} G";
                 if (descText != null) descText.text = item.description;

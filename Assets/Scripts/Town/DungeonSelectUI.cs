@@ -20,6 +20,7 @@ namespace DopamineCleaner.Town
         [SerializeField] private Button diffNightmareBtn;
 
         [Header("정보 표시 영역")]
+        [SerializeField] private Image mapPreviewImage;
         [SerializeField] private Text mapTitleText;
         [SerializeField] private Text mapDescText;
         [SerializeField] private Text difficultySummaryText;
@@ -125,6 +126,27 @@ namespace DopamineCleaner.Town
 
             if (mapDescText != null)
                 mapDescText.text = $"{map.description}\n[목표 생존 시간: {map.targetSurvivalSec / 60f:F0}분]";
+
+            if (mapPreviewImage != null)
+            {
+                string spriteName = mapId switch
+                {
+                    "map_office" => "bg_office_carpet",
+                    "map_highway" => "bg_highway_road",
+                    _ => "bg_hospital_floor"
+                };
+                Sprite sp = Resources.Load<Sprite>($"Environment/{spriteName}") ??
+#if UNITY_EDITOR
+                    UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Environment/{spriteName}.png");
+#else
+                    null;
+#endif
+                if (sp != null)
+                {
+                    mapPreviewImage.sprite = sp;
+                    mapPreviewImage.gameObject.SetActive(true);
+                }
+            }
 
             UpdatePreview();
         }

@@ -481,6 +481,20 @@ namespace DopamineCleaner.Characters
                 magnetRadius = def.baseMagnetRadius * (1f + profile.researchMagLevel * 0.18f);
                 if (profile.researchRevLevel > 0) hasRevive = true;
 
+                // 캐릭터 도트 스프라이트 교체 적용
+                if (spriteRenderer != null)
+                {
+                    Sprite customSprite = Resources.Load<Sprite>($"Characters/{characterId}") ??
+#if UNITY_EDITOR
+                        UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Characters/{characterId}.png") ??
+#endif
+                        Resources.Load<Sprite>("Characters/player_brush");
+                    if (customSprite != null)
+                    {
+                        spriteRenderer.sprite = customSprite;
+                    }
+                }
+
                 // 궁극기 세팅
                 switch (characterId)
                 {

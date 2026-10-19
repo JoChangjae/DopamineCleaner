@@ -48,7 +48,24 @@ namespace DopamineCleaner.Town
             CareerRankDefinition currentRank = CareerDatabase.Get((CareerRank)career.rankLevel);
             CareerRankDefinition nextRank = CareerDatabase.GetNext((CareerRank)career.rankLevel);
 
-            if (iconText != null) iconText.text = def.iconEmoji;
+            Image portraitImg = card.transform.Find("Portrait")?.GetComponent<Image>();
+            if (portraitImg != null)
+            {
+                Sprite sp = Resources.Load<Sprite>($"Characters/{def.id}") ?? 
+                           Resources.Load<Sprite>($"Characters/{def.id.Replace("char_", "char_")}") ??
+                           AssetDatabaseLoadSprite($"Assets/Sprites/Characters/{def.id}.png");
+                if (sp != null)
+                {
+                    portraitImg.sprite = sp;
+                    portraitImg.gameObject.SetActive(true);
+                    if (iconText != null) iconText.gameObject.SetActive(false);
+                }
+            }
+
+            if (iconText != null && (portraitImg == null || !portraitImg.gameObject.activeSelf))
+            {
+                iconText.text = def.iconEmoji;
+            }
             if (nameText != null) nameText.text = def.name;
 
             if (titleText != null)
@@ -192,6 +209,15 @@ namespace DopamineCleaner.Town
             txt.color = Color.white;
 
             return btn;
+        }
+
+        private Sprite AssetDatabaseLoadSprite(string path)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+#else
+            return null;
+#endif
         }
     }
 }

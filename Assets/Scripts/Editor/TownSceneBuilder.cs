@@ -423,11 +423,18 @@ namespace DopamineCleaner.Editor
             Image bImg = briefingObj.AddComponent<Image>();
             bImg.color = new Color(0.20f, 0.17f, 0.27f);
 
-            Text mapTitle = CreateText("MapTitle", briefingObj.transform, "🏥 도파민 격리 병동", 26, TextAnchor.MiddleLeft, new Vector2(0, 60), new Vector2(1220, 35));
+            GameObject previewImgObj = CreateUIObject("MapPreview", briefingObj.transform);
+            RectTransform pImgRt = previewImgObj.GetComponent<RectTransform>();
+            pImgRt.sizeDelta = new Vector2(140, 140);
+            pImgRt.anchoredPosition = new Vector2(-520, 0);
+            Image mapPrevImg = previewImgObj.AddComponent<Image>();
+            mapPrevImg.preserveAspect = false;
+
+            Text mapTitle = CreateText("MapTitle", briefingObj.transform, "🏥 도파민 격리 병동", 26, TextAnchor.MiddleLeft, new Vector2(100, 60), new Vector2(1020, 35));
             mapTitle.color = new Color(1f, 0.9f, 0.5f);
             mapTitle.fontStyle = FontStyle.Bold;
 
-            Text mapDesc = CreateText("MapDesc", briefingObj.transform, "정화 작전 구역 설명", 20, TextAnchor.UpperLeft, new Vector2(0, 15), new Vector2(1220, 45));
+            Text mapDesc = CreateText("MapDesc", briefingObj.transform, "정화 작전 구역 설명", 20, TextAnchor.UpperLeft, new Vector2(100, 15), new Vector2(1020, 45));
             mapDesc.color = new Color(0.85f, 0.82f, 0.9f);
 
             Text diffSummary = CreateText("DiffSummary", briefingObj.transform, "난이도 계수 정보", 18, TextAnchor.MiddleLeft, new Vector2(0, -30), new Vector2(1220, 35));
@@ -494,6 +501,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(ui, "diffHardBtn", btnHard);
             SetPrivateField(ui, "diffNightmareBtn", btnNight);
 
+            SetPrivateField(ui, "mapPreviewImage", mapPrevImg);
             SetPrivateField(ui, "mapTitleText", mapTitle);
             SetPrivateField(ui, "mapDescText", mapDesc);
             SetPrivateField(ui, "difficultySummaryText", diffSummary);
@@ -577,6 +585,15 @@ namespace DopamineCleaner.Editor
             bg.color = new Color(0.20f, 0.17f, 0.28f);
 
             Text icon = CreateText("Icon", card.transform, "🧑‍💼", 68, TextAnchor.MiddleCenter, new Vector2(0, 230), new Vector2(120, 90));
+
+            GameObject portraitObj = CreateUIObject("Portrait", card.transform);
+            RectTransform portRt = portraitObj.GetComponent<RectTransform>();
+            portRt.sizeDelta = new Vector2(110, 110);
+            portRt.anchoredPosition = new Vector2(0, 230);
+            Image portImg = portraitObj.AddComponent<Image>();
+            portImg.preserveAspect = true;
+            portraitObj.SetActive(false); // CharacterSelectUI에서 스프라이트 로드 시 활성화
+
             Text name = CreateText("Name", card.transform, "김인턴", 28, TextAnchor.MiddleCenter, new Vector2(0, 160), new Vector2(360, 42));
             name.fontStyle = FontStyle.Bold;
 
@@ -616,6 +633,15 @@ namespace DopamineCleaner.Editor
             bg.color = new Color(0.20f, 0.17f, 0.28f);
 
             Text icon = CreateText("Icon", card.transform, "🩹", 50, TextAnchor.MiddleCenter, new Vector2(-125, 35), new Vector2(75, 75));
+
+            GameObject imgObj = CreateUIObject("ItemImage", card.transform);
+            RectTransform iRt = imgObj.GetComponent<RectTransform>();
+            iRt.sizeDelta = new Vector2(64, 64);
+            iRt.anchoredPosition = new Vector2(-125, 35);
+            Image itemImg = imgObj.AddComponent<Image>();
+            itemImg.preserveAspect = true;
+            imgObj.SetActive(false);
+
             Text name = CreateText("Name", card.transform, "응급 구급약", 22, TextAnchor.MiddleLeft, new Vector2(40, 55), new Vector2(230, 35));
             name.fontStyle = FontStyle.Bold;
 

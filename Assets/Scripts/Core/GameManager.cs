@@ -137,6 +137,35 @@ namespace DopamineCleaner.Core
             SetState(GameState.Playing);
             OnKillsUpdated?.Invoke(stageKills, totalKills);
             OnStageChanged?.Invoke(currentStage);
+
+            ApplyMapEnvironmentSprite();
+        }
+
+        private void ApplyMapEnvironmentSprite()
+        {
+            if (Meta.GameDataManager.Instance == null) return;
+            string mapId = Meta.GameDataManager.Instance.SelectedMapId;
+            string spriteName = mapId switch
+            {
+                "map_office" => "bg_office_carpet",
+                "map_highway" => "bg_highway_road",
+                _ => "bg_hospital_floor"
+            };
+
+            GameObject bgObj = GameObject.Find("Background");
+            if (bgObj != null && bgObj.TryGetComponent<SpriteRenderer>(out var sr))
+            {
+                Sprite mapSprite = Resources.Load<Sprite>($"Environment/{spriteName}") ??
+#if UNITY_EDITOR
+                    UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Environment/{spriteName}.png") ??
+#endif
+                    Resources.Load<Sprite>("Environment/bg_mental_garden");
+
+                if (mapSprite != null)
+                {
+                    sr.sprite = mapSprite;
+                }
+            }
         }
 
         public void SetState(GameState newState)

@@ -44,7 +44,7 @@ namespace DopamineCleaner.Editor
             CameraFollow camFollow = camObj.AddComponent<CameraFollow>();
 
             // 4. 예쁜 2D 도트 잔디 타일맵 배경 (Background Tiled)
-            GameObject bgObj = new GameObject("Background_MentalGarden");
+            GameObject bgObj = new GameObject("Background");
             bgObj.transform.position = Vector3.zero;
             Sprite bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Environment/bg_mental_garden.png");
             if (bgSprite != null)
