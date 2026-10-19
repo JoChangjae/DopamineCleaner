@@ -57,6 +57,7 @@ namespace DopamineCleaner.Town
                         {
                             if (GameDataManager.Instance.MoveInventoryToStash(index))
                             {
+                                Core.SoundManager.Instance?.Play(Core.SoundEffect.Dash, 0.45f);
                                 RefreshUI();
                             }
                         });
@@ -94,6 +95,7 @@ namespace DopamineCleaner.Town
                         {
                             if (GameDataManager.Instance.MoveStashToInventory(index))
                             {
+                                Core.SoundManager.Instance?.Play(Core.SoundEffect.Dash, 0.45f);
                                 RefreshUI();
                             }
                         });

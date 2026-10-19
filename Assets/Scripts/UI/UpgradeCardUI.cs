@@ -40,10 +40,19 @@ namespace DopamineCleaner.UI
 
             if (evoBadge != null) evoBadge.SetActive(info.isEvolution);
 
+            if (selectButton == null)
+            {
+                selectButton = GetComponent<Button>() ?? GetComponentInChildren<Button>();
+            }
+
             if (selectButton != null)
             {
                 selectButton.onClick.RemoveAllListeners();
-                selectButton.onClick.AddListener(() => onSelect?.Invoke());
+                selectButton.onClick.AddListener(() =>
+                {
+                    Core.SoundManager.Instance?.Play(Core.SoundEffect.LevelUp, 0.65f);
+                    onSelect?.Invoke();
+                });
             }
         }
     }

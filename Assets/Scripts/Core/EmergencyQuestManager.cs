@@ -53,6 +53,16 @@ namespace DopamineCleaner.Core
 
         private void Start()
         {
+            if (questBanner == null)
+            {
+                var qb = GameObject.Find("QuestBanner");
+                if (qb != null)
+                {
+                    questBanner = qb;
+                    questText = qb.GetComponentInChildren<Text>();
+                }
+            }
+
             if (questBanner != null) questBanner.SetActive(false);
 
             if (GameManager.Instance != null)

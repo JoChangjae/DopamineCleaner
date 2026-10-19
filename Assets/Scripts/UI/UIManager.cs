@@ -87,7 +87,7 @@ namespace DopamineCleaner.UI
             UpdateSynergyHUD();
 
             DisplayModeManager.OnDisplayModeChanged += HandleDisplayModeChanged;
-            EnsurePauseWindowModeButton();
+            EnsureAllButtonListeners();
             UpdateWindowModeButtonText();
 
             if (FeverManager.Instance != null)
@@ -756,6 +756,7 @@ namespace DopamineCleaner.UI
 
         public void ResumeGame()
         {
+            SoundManager.Instance?.Play(SoundEffect.Dash, 0.4f);
             if (pausePanel != null) pausePanel.SetActive(false);
             GameManager.Instance?.SetState(GameState.Playing);
         }
@@ -796,6 +797,62 @@ namespace DopamineCleaner.UI
             }
         }
 
+        private void EnsureAllButtonListeners()
+        {
+            if (pausePanel == null) pausePanel = GameObject.Find("PausePanel");
+            if (gameOverPanel == null) gameOverPanel = GameObject.Find("GameOverPanel");
+            if (levelUpPanel == null) levelUpPanel = GameObject.Find("LevelUpPanel");
+
+            EnsurePauseWindowModeButton();
+
+            // 1. 일시정지 패널 버튼들
+            if (pausePanel != null)
+            {
+                var resumeBtn = pausePanel.transform.Find("ResumeButton")?.GetComponent<Button>();
+                if (resumeBtn != null)
+                {
+                    resumeBtn.onClick.RemoveAllListeners();
+                    resumeBtn.onClick.AddListener(ResumeGame);
+                }
+
+                var retreatBtn = pausePanel.transform.Find("RetreatButton")?.GetComponent<Button>();
+                if (retreatBtn != null)
+                {
+                    retreatBtn.onClick.RemoveAllListeners();
+                    retreatBtn.onClick.AddListener(OnRetreatButtonClicked);
+                }
+
+                var muteBtn = pausePanel.transform.Find("MuteButton")?.GetComponent<Button>();
+                if (muteBtn != null)
+                {
+                    muteBtn.onClick.RemoveAllListeners();
+                    muteBtn.onClick.AddListener(OnToggleMuteClicked);
+                }
+            }
+
+            // 2. 게임오버 패널 버튼들
+            if (gameOverPanel != null)
+            {
+                var restartBtn = gameOverPanel.transform.Find("RestartButton")?.GetComponent<Button>();
+                if (restartBtn != null)
+                {
+                    restartBtn.onClick.RemoveAllListeners();
+                    restartBtn.onClick.AddListener(OnRestartButtonClicked);
+                }
+            }
+
+            // 3. 레벨업 패널 비상 건너뛰기 버튼
+            if (levelUpPanel != null)
+            {
+                var skipBtn = levelUpPanel.transform.Find("SkipButton")?.GetComponent<Button>();
+                if (skipBtn != null)
+                {
+                    skipBtn.onClick.RemoveAllListeners();
+                    skipBtn.onClick.AddListener(OnSkipLevelUpClicked);
+                }
+            }
+        }
+
         private void EnsurePauseWindowModeButton()
         {
             if (pauseWindowModeBtn == null && pausePanel != null)
@@ -817,6 +874,7 @@ namespace DopamineCleaner.UI
 
         public void OnRetreatButtonClicked()
         {
+            SoundManager.Instance?.Play(SoundEffect.Dash, 0.5f);
             if (pausePanel != null) pausePanel.SetActive(false);
             GameManager.Instance?.TriggerGameOver(false);
         }

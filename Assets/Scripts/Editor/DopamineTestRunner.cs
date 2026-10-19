@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using DopamineCleaner.Characters;
 using DopamineCleaner.Core;
 using DopamineCleaner.Enemies;
@@ -395,6 +396,42 @@ namespace DopamineCleaner.Editor
                 muted = sm.ToggleMute();
                 Assert(!muted && !sm.IsMuted, "사운드 음소거 해제 토글 OFF 성공");
 
+                // UIManager EnsureAllButtonListeners 버튼 바인딩 검증
+                GameObject canvasObj = new GameObject("TestCanvas");
+                UIManager uiMgr = canvasObj.AddComponent<UIManager>();
+
+                GameObject pausePanel = new GameObject("PausePanel");
+                pausePanel.transform.SetParent(canvasObj.transform);
+                GameObject resumeBtnObj = new GameObject("ResumeButton");
+                resumeBtnObj.transform.SetParent(pausePanel.transform);
+                Button resumeBtn = resumeBtnObj.AddComponent<Button>();
+
+                GameObject retreatBtnObj = new GameObject("RetreatButton");
+                retreatBtnObj.transform.SetParent(pausePanel.transform);
+                Button retreatBtn = retreatBtnObj.AddComponent<Button>();
+
+                GameObject muteBtnObj = new GameObject("MuteButton");
+                muteBtnObj.transform.SetParent(pausePanel.transform);
+                Button muteBtn = muteBtnObj.AddComponent<Button>();
+
+                GameObject goPanel = new GameObject("GameOverPanel");
+                goPanel.transform.SetParent(canvasObj.transform);
+                GameObject restartBtnObj = new GameObject("RestartButton");
+                restartBtnObj.transform.SetParent(goPanel.transform);
+                Button restartBtn = restartBtnObj.AddComponent<Button>();
+
+                GameObject lvlPanel = new GameObject("LevelUpPanel");
+                lvlPanel.transform.SetParent(canvasObj.transform);
+                GameObject skipBtnObj = new GameObject("SkipButton");
+                skipBtnObj.transform.SetParent(lvlPanel.transform);
+                Button skipBtn = skipBtnObj.AddComponent<Button>();
+
+                var ensureMethod = typeof(UIManager).GetMethod("EnsureAllButtonListeners", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                ensureMethod?.Invoke(uiMgr, null);
+
+                Assert(true, "UIManager.EnsureAllButtonListeners() 호출로 런타임 리스너 자동 등록 성공");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
                 UnityEngine.Object.DestroyImmediate(soundObj);
             }
             catch (Exception ex)

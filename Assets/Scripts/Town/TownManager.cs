@@ -50,12 +50,12 @@ namespace DopamineCleaner.Town
 
             GameDataManager.Instance.OnProfileUpdated += RefreshHeader;
 
-            tabCharBtn.onClick.AddListener(() => SwitchTab(0));
-            tabShopBtn.onClick.AddListener(() => SwitchTab(1));
-            tabStorageBtn.onClick.AddListener(() => SwitchTab(2));
+            if (tabCharBtn != null) tabCharBtn.onClick.AddListener(() => SwitchTab(0));
+            if (tabShopBtn != null) tabShopBtn.onClick.AddListener(() => SwitchTab(1));
+            if (tabStorageBtn != null) tabStorageBtn.onClick.AddListener(() => SwitchTab(2));
             if (tabResearchBtn != null) tabResearchBtn.onClick.AddListener(() => SwitchTab(3));
             if (tabAchievementBtn != null) tabAchievementBtn.onClick.AddListener(() => SwitchTab(4));
-            tabDungeonBtn.onClick.AddListener(() => SwitchTab(5));
+            if (tabDungeonBtn != null) tabDungeonBtn.onClick.AddListener(() => SwitchTab(5));
 
             if (windowModeBtn != null)
             {
@@ -115,6 +115,8 @@ namespace DopamineCleaner.Town
 
         public void SwitchTab(int tabIndex)
         {
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Dash, 0.4f);
+
             if (characterPanel != null) characterPanel.SetActive(tabIndex == 0);
             if (shopPanel != null) shopPanel.SetActive(tabIndex == 1);
             if (storagePanel != null) storagePanel.SetActive(tabIndex == 2);

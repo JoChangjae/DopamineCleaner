@@ -73,6 +73,7 @@ namespace DopamineCleaner.Town
                     actionBtn.interactable = true;
                     actionBtn.onClick.AddListener(() =>
                     {
+                        Core.SoundManager.Instance?.Play(Core.SoundEffect.Dash, 0.5f);
                         GameDataManager.Instance.SelectCharacter(def.id);
                         RefreshUI();
                     });
@@ -90,6 +91,7 @@ namespace DopamineCleaner.Town
                     {
                         if (GameDataManager.Instance.UnlockCharacter(def.id))
                         {
+                            Core.SoundManager.Instance?.Play(Core.SoundEffect.LevelUp, 0.8f);
                             RefreshUI();
                         }
                     });

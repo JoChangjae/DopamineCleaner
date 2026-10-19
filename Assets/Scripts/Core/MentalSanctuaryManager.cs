@@ -44,6 +44,16 @@ namespace DopamineCleaner.Core
             overloadPercent = 0f;
             sanctuaryTimer = 25f; // 첫 쉼터는 25초 후 스폰
             CreateSanctuaryObject();
+
+            if (overloadVignette == null)
+            {
+                var vigObj = GameObject.Find("OverloadVignette");
+                if (vigObj != null)
+                {
+                    var vigImg = vigObj.GetComponent<Image>();
+                    if (vigImg != null) BindVignette(vigImg);
+                }
+            }
         }
 
         private void Update()

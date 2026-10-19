@@ -61,6 +61,7 @@ namespace DopamineCleaner.Town
                     {
                         if (GameDataManager.Instance.BuyItem(item.id))
                         {
+                            Core.SoundManager.Instance?.Play(Core.SoundEffect.GemCollect, 0.7f);
                             RefreshUI();
                         }
                     });
@@ -103,6 +104,7 @@ namespace DopamineCleaner.Town
                     {
                         if (GameDataManager.Instance.SellItemFromInventory(index))
                         {
+                            Core.SoundManager.Instance?.Play(Core.SoundEffect.Dash, 0.5f);
                             RefreshUI();
                         }
                     });

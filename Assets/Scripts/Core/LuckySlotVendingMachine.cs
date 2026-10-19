@@ -417,7 +417,7 @@ namespace DopamineCleaner.Core
 
         private void ApplyContract(int index)
         {
-            var wm = Weapons.WeaponManager.Instance ?? FindFirstObjectByType<Weapons.WeaponManager>();
+            var wm = Weapons.WeaponManager.Instance ?? FindAnyObjectByType<Weapons.WeaponManager>();
 
             if (index == 1)
             {
