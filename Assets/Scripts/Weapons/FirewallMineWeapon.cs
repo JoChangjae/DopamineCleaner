@@ -148,7 +148,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "방화벽 지뢰";
-            baseCooldown = 2.0f;
+            baseCooldown = 1.8f;
             maxLevel = 5;
         }
 

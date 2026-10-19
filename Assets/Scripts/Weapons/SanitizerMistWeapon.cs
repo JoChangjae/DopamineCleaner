@@ -136,7 +136,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "멸균 소독 안개";
-            baseCooldown = 1.4f;
+            baseCooldown = 1.25f;
             currentLevel = 0;
             maxLevel = 5;
         }

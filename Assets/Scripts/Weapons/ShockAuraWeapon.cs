@@ -15,7 +15,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "쇼크 펄스";
-            baseCooldown = 1.6f;
+            baseCooldown = 1.4f;
             maxLevel = 5;
         }
 

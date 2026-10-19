@@ -534,3 +534,4 @@ MonoBehaviour:
   descriptionText: {fileID: 7447331206032032216}
   evoBadge: {fileID: 1035738202219048887}
   selectButton: {fileID: 8211211157058343437}
+  recipeGuideText: {fileID: 0}

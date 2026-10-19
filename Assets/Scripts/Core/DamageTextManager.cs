@@ -11,23 +11,39 @@ namespace DopamineCleaner.Core
 
         private void Awake()
         {
-            textMesh = gameObject.AddComponent<TextMesh>();
-            meshRenderer = GetComponent<MeshRenderer>();
+            EnsureComponents();
+        }
 
-            textMesh.fontSize = 24;
-            textMesh.characterSize = 0.15f;
-            textMesh.anchor = TextAnchor.MiddleCenter;
-            textMesh.alignment = TextAlignment.Center;
-            textMesh.fontStyle = FontStyle.Bold;
-
-            if (meshRenderer != null)
+        private void EnsureComponents()
+        {
+            if (textMesh == null)
             {
+                textMesh = GetComponent<TextMesh>();
+                if (textMesh == null)
+                {
+                    textMesh = gameObject.AddComponent<TextMesh>();
+                }
+                textMesh.fontSize = 24;
+                textMesh.characterSize = 0.15f;
+                textMesh.anchor = TextAnchor.MiddleCenter;
+                textMesh.alignment = TextAlignment.Center;
+                textMesh.fontStyle = FontStyle.Bold;
+            }
+
+            if (meshRenderer == null)
+            {
+                meshRenderer = GetComponent<MeshRenderer>();
+                if (meshRenderer == null)
+                {
+                    meshRenderer = gameObject.AddComponent<MeshRenderer>();
+                }
                 meshRenderer.sortingOrder = 50; // 최상단 노출
             }
         }
 
         public void Show(float damage, Vector2 position, bool isCritical)
         {
+            EnsureComponents();
             transform.position = position + new Vector2(Random.Range(-0.25f, 0.25f), Random.Range(0.2f, 0.5f));
             gameObject.SetActive(true);
 
@@ -35,6 +51,20 @@ namespace DopamineCleaner.Core
             textMesh.text = isCritical ? $"{dmgInt}!" : $"{dmgInt}";
             textMesh.color = isCritical ? new Color(1f, 0.35f, 0.15f, 1f) : new Color(1f, 0.95f, 0.5f, 1f);
             transform.localScale = isCritical ? Vector3.one * 1.35f : Vector3.one;
+
+            StopAllCoroutines();
+            StartCoroutine(AnimateRoutine());
+        }
+
+        public void ShowCustom(string customText, Vector2 position, Color color)
+        {
+            EnsureComponents();
+            transform.position = position + new Vector2(0f, 0.3f);
+            gameObject.SetActive(true);
+
+            textMesh.text = customText;
+            textMesh.color = color;
+            transform.localScale = Vector3.one * 1.15f;
 
             StopAllCoroutines();
             StartCoroutine(AnimateRoutine());
@@ -96,6 +126,8 @@ namespace DopamineCleaner.Core
         {
             GameObject obj = new GameObject("DamageText");
             obj.transform.SetParent(transform);
+            obj.AddComponent<TextMesh>();
+            obj.AddComponent<MeshRenderer>();
             DamageText dt = obj.AddComponent<DamageText>();
             obj.SetActive(false);
             pool.Enqueue(dt);
@@ -122,6 +154,29 @@ namespace DopamineCleaner.Core
             }
 
             dt.Show(damage, position, isCritical);
+            pool.Enqueue(dt);
+        }
+
+        public void SpawnCustomText(string text, Vector2 position, Color color)
+        {
+            DamageText dt = null;
+            while (pool.Count > 0)
+            {
+                var candidate = pool.Dequeue();
+                if (candidate != null)
+                {
+                    dt = candidate;
+                    break;
+                }
+            }
+
+            if (dt == null)
+            {
+                dt = CreateNewInstance();
+                pool.Dequeue();
+            }
+
+            dt.ShowCustom(text, position, color);
             pool.Enqueue(dt);
         }
     }

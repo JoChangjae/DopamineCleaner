@@ -15,7 +15,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "클린 탄환 (Clean Bullet)";
-            baseCooldown = 0.55f;
+            baseCooldown = 0.49f;
 
             if (projectilePrefab != null)
             {
@@ -33,7 +33,7 @@ namespace DopamineCleaner.Weapons
             if (currentLevel < maxLevel)
             {
                 currentLevel++;
-                baseCooldown = Mathf.Max(0.25f, 0.55f - (currentLevel - 1) * 0.06f);
+                baseCooldown = Mathf.Max(0.25f, 0.49f - (currentLevel - 1) * 0.055f);
             }
         }
 

@@ -18,7 +18,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "디톡스 레이저";
-            baseCooldown = 1.4f;
+            baseCooldown = 1.25f;
             maxLevel = 5;
 
             // 라인 렌더러 생성

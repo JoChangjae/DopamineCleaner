@@ -264,6 +264,16 @@ namespace DopamineCleaner.Core
             }
 
             Meta.GameDataManager.Instance?.ApplyDungeonSettlement(EarnedGold, EarnedKarma, null);
+            Meta.GameDataManager.Instance?.AddCombatRecord(new Meta.CombatRecord
+            {
+                characterId = Meta.GameDataManager.Instance?.Profile?.selectedCharacterId ?? "char_intern",
+                survivalSeconds = Mathf.FloorToInt(survivalTime),
+                kills = totalKills,
+                goldEarned = EarnedGold,
+                karmaEarned = EarnedKarma,
+                isCleared = victory,
+                timestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm")
+            });
         }
     }
 }

@@ -202,7 +202,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "디톡스 미사일";
-            baseCooldown = 1.8f;
+            baseCooldown = 1.6f;
             currentLevel = 0;
             maxLevel = 5;
         }

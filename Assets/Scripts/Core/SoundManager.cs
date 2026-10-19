@@ -145,12 +145,20 @@ namespace DopamineCleaner.Core
             return isMuted;
         }
 
-        public void Play(SoundEffect sfx, float volume = 0.5f)
+        public void Play(SoundEffect sfx, float volume = 0.5f, bool randomizePitch = true)
         {
             if (isMuted) return;
 
             if (clipCache.TryGetValue(sfx, out var clip) && clip != null)
             {
+                if (randomizePitch && audioSource != null)
+                {
+                    audioSource.pitch = Random.Range(0.93f, 1.07f);
+                }
+                else if (audioSource != null)
+                {
+                    audioSource.pitch = 1.0f;
+                }
                 audioSource.PlayOneShot(clip, volume * sfxVolume);
             }
         }

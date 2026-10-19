@@ -13,12 +13,31 @@ namespace DopamineCleaner.UI
         [SerializeField] private Text descriptionText;
         [SerializeField] private GameObject evoBadge;
         [SerializeField] private Button selectButton;
+        [SerializeField] private Text recipeGuideText;
 
         public void Setup(UpgradeCardInfo info, Action onSelect)
         {
             if (iconText != null) iconText.text = info.iconText;
             if (titleText != null) titleText.text = info.title;
-            if (descriptionText != null) descriptionText.text = info.description;
+
+            string guide = WeaponManager.Instance != null ? WeaponManager.Instance.GetEvolutionRecipeGuide(info.type) : "";
+
+            if (recipeGuideText != null)
+            {
+                recipeGuideText.text = guide;
+                recipeGuideText.gameObject.SetActive(!string.IsNullOrEmpty(guide));
+                if (descriptionText != null) descriptionText.text = info.description;
+            }
+            else
+            {
+                if (descriptionText != null)
+                {
+                    descriptionText.text = string.IsNullOrEmpty(guide)
+                        ? info.description
+                        : $"{info.description}\n<color=#5df0c2>{guide}</color>";
+                }
+            }
+
             if (evoBadge != null) evoBadge.SetActive(info.isEvolution);
 
             if (selectButton != null)

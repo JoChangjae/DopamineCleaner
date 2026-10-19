@@ -21,6 +21,7 @@ namespace DopamineCleaner.Weapons
         public int MaxLevel => maxLevel;
         public bool IsEvolved => isEvolved;
         public bool IsActive => currentLevel > 0;
+        public float BaseCooldown => baseCooldown;
         public float TotalDamageDealt { get; protected set; } = 0f;
 
         public virtual void RegisterDamage(float damage)

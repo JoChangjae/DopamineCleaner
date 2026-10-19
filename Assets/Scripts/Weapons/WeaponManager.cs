@@ -154,7 +154,96 @@ namespace DopamineCleaner.Weapons
             sb.AppendLine($"  💊 집중력 앰플 (전체공격력) : Lv.{damageBoostLevel} / 5");
             sb.AppendLine($"  👓 블루라이트 안경 (치명타율) : Lv.{critChanceLevel} / 5");
 
+            if (SynergyManager.Instance != null)
+            {
+                var activeSynergies = SynergyManager.Instance.GetActiveSynergies();
+                sb.AppendLine();
+                sb.AppendLine("✨ [활성화된 세트 시너지]");
+                if (activeSynergies.Count == 0)
+                {
+                    sb.AppendLine("  (현재 발동된 시너지 없음)");
+                }
+                else
+                {
+                    foreach (var syn in activeSynergies)
+                    {
+                        sb.AppendLine($"  {syn.icon} {syn.title}");
+                    }
+                }
+            }
+
             return sb.ToString();
+        }
+
+        public string GetEvolutionRecipeGuide(UpgradeType type)
+        {
+            switch (type)
+            {
+                case UpgradeType.CleanBullet:
+                    bool hasAtkSpd = attackSpeedLevel >= 1;
+                    return $"🔗 [진화 족보: ☕ 에스프레소(공속) {(hasAtkSpd ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.OrbitBarrier:
+                    bool hasHp = maxHPLevel >= 1;
+                    return $"🔗 [진화 족보: 💖 하트 비타민(체력) {(hasHp ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.LaserBeam:
+                    bool hasDmg = damageBoostLevel >= 1;
+                    return $"🔗 [진화 족보: 💊 집중력 앰플(공격력) {(hasDmg ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.FirewallMine:
+                    bool hasSpd = moveSpeedLevel >= 1;
+                    return $"🔗 [진화 족보: 🥾 달콤한 신발(이속) {(hasSpd ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.ShockAura:
+                    bool hasAtkSpd2 = attackSpeedLevel >= 1;
+                    return $"🔗 [진화 족보: ☕ 에스프레소(공속) {(hasAtkSpd2 ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.DetoxMissile:
+                    bool hasMissileMat = attackSpeedLevel >= 1 || damageBoostLevel >= 1;
+                    return $"🔗 [진화 족보: ☕공속 or 💊공격력 {(hasMissileMat ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.AlgorithmVortex:
+                    bool hasSpd2 = moveSpeedLevel >= 1;
+                    return $"🔗 [진화 족보: 🥾 달콤한 신발(이속) {(hasSpd2 ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.SanitizerMist:
+                    bool hasMag = magnetLevel >= 1;
+                    return $"🔗 [진화 족보: 🧲 도파민 자석(자석) {(hasMag ? "✅보유중" : "❌미보유")}]";
+
+                case UpgradeType.CyberScythe:
+                    bool hasScytheMat = critChanceLevel >= 1 || maxHPLevel >= 1;
+                    return $"🔗 [진화 족보: 👓치명타 or 💖체력 {(hasScytheMat ? "✅보유중" : "❌미보유")}]";
+
+                // 패시브 카드를 고를 때의 역방향 가이드
+                case UpgradeType.AttackSpeed:
+                    return "🔗 [진화 촉매: 💧클린 탄환, ⚡쇼크 펄스, 🚀미사일]";
+                case UpgradeType.MaxHP:
+                    return "🔗 [진화 촉매: 🛡️가디언 위성, 🪓사이버 낫]";
+                case UpgradeType.DamageBoost:
+                    return "🔗 [진화 촉매: 🔦레이저 빔, 🚀미사일]";
+                case UpgradeType.MoveSpeed:
+                    return "🔗 [진화 촉매: 💣방화벽 지뢰, 🌪️회오리]";
+                case UpgradeType.Magnet:
+                    return "🔗 [진화 촉매: 🧪소독 안개]";
+                case UpgradeType.CritChance:
+                    return "🔗 [진화 촉매: 🪓사이버 낫]";
+
+                // 진화 카드 자체
+                case UpgradeType.EvoGigaGatling:
+                case UpgradeType.EvoGalacticCleanse:
+                case UpgradeType.EvoPrismCannon:
+                case UpgradeType.EvoSecurityMatrix:
+                case UpgradeType.EvoTeslaDischarge:
+                case UpgradeType.EvoAegisBarrage:
+                case UpgradeType.EvoDetoxTyphoon:
+                case UpgradeType.EvoPlasmaCloud:
+                case UpgradeType.EvoShutdownBlade:
+                    return "✨ [궁극 한계돌파 진화 무기!]";
+
+                default:
+                    return "";
+            }
         }
 
         private void Awake()

@@ -86,6 +86,18 @@ namespace DopamineCleaner.Editor
             // 19. 오디오 및 환경 설정 옵션 검증
             TestAudioSettings();
 
+            // 20. 💥 타격감 극대화 & 피치 지터 & 히트스탑 검증
+            TestHitStopAndDamagePitch();
+
+            // 21. ⚖️ 레벨업 진화 족보 가이드 & 무기 쿨타임 완화 검증
+            TestEvolutionGuideAndWeaponCooldowns();
+
+            // 22. 📜 본부 작전 기록실 & Perk 100% 전액 환급 검증
+            TestRefundAndCombatHistory();
+
+            // 23. 🕹️ 본부 전체 탭 및 버튼 인터랙션 전수 검증
+            TestHQButtonsAndTownUI();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -739,6 +751,173 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "환경 설정 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestHitStopAndDamagePitch()
+        {
+            Debug.Log("--- 20. 💥 타격감 극대화 & 피치 지터 & 히트스탑 검증 ---");
+            try
+            {
+                // 1. HitStopManager 검증
+                GameObject hsObj = new GameObject("[TestHitStop]");
+                HitStopManager hsm = hsObj.AddComponent<HitStopManager>();
+                SetField(typeof(HitStopManager), "Instance", hsm);
+
+                hsm.TriggerHitStop(0.04f);
+                Assert(HitStopManager.Instance != null, "HitStopManager 인스턴스 정상 초기화 및 역경직 트리거 확인");
+
+                // 2. DamageTextManager 커스텀 텍스트 검증
+                GameObject dtmObj = new GameObject("[TestDamageText]");
+                DamageTextManager dtm = dtmObj.AddComponent<DamageTextManager>();
+                SetField(typeof(DamageTextManager), "Instance", dtm);
+
+                dtm.SpawnCustomText("🐶 [냠!]", Vector3.zero, Color.yellow);
+                Assert(DamageTextManager.Instance != null, "펫 이모지 & 상태 커스텀 텍스트 팝업 풀링 성공");
+
+                // 3. Enemy 머리 위 명찰(Nameplate) 검증
+                GameObject enemyObj = new GameObject("[TestEnemy_Nameplate]");
+                enemyObj.AddComponent<CircleCollider2D>();
+                Enemy enemy = enemyObj.AddComponent<Enemy>();
+                enemy.Initialize(EnemyType.MindDust, 1, 30f, EliteAffix.FirewallShield);
+
+                var npField = typeof(Enemy).GetField("nameplateText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                TextMesh np = (TextMesh)npField.GetValue(enemy);
+                Assert(np != null && np.text.Contains("방화벽"), "엘리트 몬스터 머리 위 실시간 네온 명찰 렌더링 확인");
+
+                UnityEngine.Object.DestroyImmediate(hsObj);
+                UnityEngine.Object.DestroyImmediate(dtmObj);
+                UnityEngine.Object.DestroyImmediate(enemyObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "히트스탑 및 명찰 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestEvolutionGuideAndWeaponCooldowns()
+        {
+            Debug.Log("--- 21. ⚖️ 레벨업 진화 족보 가이드 & 무기 쿨타임 완화 검증 ---");
+            try
+            {
+                GameObject wmObj = new GameObject("[TestWM_Guide]");
+                CleanBulletWeapon bullet = wmObj.AddComponent<CleanBulletWeapon>();
+                LaserBeamWeapon laser = wmObj.AddComponent<LaserBeamWeapon>();
+                FirewallMineWeapon mine = wmObj.AddComponent<FirewallMineWeapon>();
+                ShockAuraWeapon shock = wmObj.AddComponent<ShockAuraWeapon>();
+
+                WeaponManager wm = wmObj.AddComponent<WeaponManager>();
+                SetField(typeof(WeaponManager), "Instance", wm);
+                SetField(wm, "cleanBulletWeapon", bullet);
+                SetField(wm, "laserBeamWeapon", laser);
+                SetField(wm, "mineWeapon", mine);
+                SetField(wm, "shockWeapon", shock);
+
+                typeof(CleanBulletWeapon).GetMethod("Awake", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(bullet, null);
+                typeof(LaserBeamWeapon).GetMethod("Awake", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(laser, null);
+                typeof(FirewallMineWeapon).GetMethod("Awake", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(mine, null);
+                typeof(ShockAuraWeapon).GetMethod("Awake", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(shock, null);
+
+                // 1. 족보 가이드 검증
+                string bulletGuide = wm.GetEvolutionRecipeGuide(UpgradeType.CleanBullet);
+                Assert(bulletGuide.Contains("에스프레소"), "클린 탄환 진화 족보(에스프레소) 가이드 출력 확인");
+
+                string atkSpdGuide = wm.GetEvolutionRecipeGuide(UpgradeType.AttackSpeed);
+                Assert(atkSpdGuide.Contains("클린 탄환"), "공격속도 패시브 역방향 진화 촉매 족보 안내 확인");
+
+                // 2. 무기 쿨타임 10% 완화 검증
+                Assert(Mathf.Approximately(bullet.BaseCooldown, 0.49f), "클린 탄환 1레벨 쿨타임 10% 단축(0.49s) 적용 확인");
+                Assert(Mathf.Approximately(laser.BaseCooldown, 1.25f), "디톡스 레이저 1레벨 쿨타임 단축(1.25s) 적용 확인");
+                Assert(Mathf.Approximately(mine.BaseCooldown, 1.8f), "방화벽 지뢰 1레벨 쿨타임 단축(1.8s) 적용 확인");
+
+                UnityEngine.Object.DestroyImmediate(wmObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "진화 족보 및 쿨타임 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestRefundAndCombatHistory()
+        {
+            Debug.Log("--- 22. 📜 본부 작전 기록실 & Perk 100% 전액 환급 검증 ---");
+            try
+            {
+                GameObject gdmObj = new GameObject("[TestGDM_Refund]");
+                GameDataManager gdm = gdmObj.AddComponent<GameDataManager>();
+                SetField(typeof(GameDataManager), "Instance", gdm);
+
+                // 1. 연구소 강화 후 전액 100% 환급 검증
+                gdm.Profile.gold = 5000;
+                gdm.Profile.karmaPoints = 10;
+                int startGold = gdm.Profile.gold;
+
+                gdm.UpgradeResearch("atk");
+                gdm.UpgradeResearch("hp");
+                Assert(gdm.GetResearchLevel("atk") == 1 && gdm.GetResearchLevel("hp") == 1, "연구소 2종 강화 성공");
+
+                var (refundGold, refundKarma) = gdm.ResetAllResearch();
+                Assert(gdm.GetResearchLevel("atk") == 0 && gdm.GetResearchLevel("hp") == 0, "연구 레벨 0 초기화 확인");
+                Assert(gdm.Profile.gold == startGold && refundGold > 0, "연구 투자 골드 100% 전액 환급 확인");
+
+                // 2. 최근 5회 작전 기록실 검증
+                for (int i = 1; i <= 7; i++)
+                {
+                    gdm.AddCombatRecord(new CombatRecord
+                    {
+                        characterId = "char_intern",
+                        survivalSeconds = i * 60,
+                        kills = i * 50,
+                        goldEarned = i * 200,
+                        karmaEarned = 1,
+                        isCleared = (i % 2 == 0),
+                        timestamp = $"2026-10-19 12:0{i}"
+                    });
+                }
+
+                Assert(gdm.Profile.combatRecords.Count == 5, "최근 작전 일지 최대 5개 자동 제한 확인");
+                Assert(gdm.Profile.combatRecords[0].survivalSeconds == 7 * 60, "최신 작전 기록이 0번 인덱스에 저장되는 최신순 정렬 확인");
+
+                UnityEngine.Object.DestroyImmediate(gdmObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "환급 및 작전 일지 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestHQButtonsAndTownUI()
+        {
+            Debug.Log("--- 23. 🕹️ 본부 전체 탭 및 버튼 인터랙션 전수 검증 ---");
+            try
+            {
+                TownSceneBuilder.BuildTownScene();
+
+                GameObject canvasObj = GameObject.Find("TownCanvas");
+                Assert(canvasObj != null, "도파민 본부 TownCanvas 생성 확인");
+
+                Town.TownManager tm = canvasObj.GetComponent<Town.TownManager>();
+                Assert(tm != null, "본부 TownManager 컴포넌트 유효성 확인");
+
+                // 5대 탭 버튼 탐색 및 검증
+                string[] tabNames = { "TabChar", "TabShop", "TabStorage", "TabResearch", "TabAchieve", "TabDungeon" };
+                foreach (var tab in tabNames)
+                {
+                    var tabBtn = canvasObj.transform.Find($"TabNavBar/{tab}");
+                    Assert(tabBtn != null, $"본부 탭 버튼 [{tab}] 배치 및 클릭 영역 확인");
+                }
+
+                // 연구소 환급 버튼 검증
+                var refundBtn = canvasObj.transform.Find("ContentArea/ResearchPanel/ResetRefundBtn");
+                Assert(refundBtn != null, "본부 연구소 우측 상단 [🔄 전액 환급] 버튼 배치 확인");
+
+                // 출동처 대형 출동 버튼 검증
+                var startBtn = canvasObj.transform.Find("ContentArea/DungeonSelectPanel/StartMissionButton");
+                Assert(startBtn != null, "본부 출동처 [🚀 정화 작전 출동] 버튼 배치 확인");
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "본부 UI 및 버튼 테스트 예외", ex.ToString());
             }
         }
 

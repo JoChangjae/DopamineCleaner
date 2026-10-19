@@ -38,6 +38,7 @@ namespace DopamineCleaner.Enemies
         private Color originalColor;
         private Coroutine flashCoroutine;
         private float specialActionTimer = 0f;
+        private TextMesh nameplateText;
 
         public EnemyType Type => enemyType;
         public EliteAffix Affix => eliteAffix;
@@ -52,6 +53,58 @@ namespace DopamineCleaner.Enemies
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             if (spriteRenderer != null)
                 originalColor = spriteRenderer.color;
+        }
+
+        private void EnsureNameplate()
+        {
+            if (nameplateText == null)
+            {
+                GameObject npObj = new GameObject("EliteNameplate");
+                npObj.transform.SetParent(transform, false);
+                npObj.transform.localPosition = new Vector3(0f, 0.75f, 0f);
+                nameplateText = npObj.AddComponent<TextMesh>();
+                nameplateText.fontSize = 20;
+                nameplateText.characterSize = 0.12f;
+                nameplateText.anchor = TextAnchor.MiddleCenter;
+                nameplateText.alignment = TextAlignment.Center;
+                nameplateText.fontStyle = FontStyle.Bold;
+                var mr = npObj.GetComponent<MeshRenderer>();
+                if (mr != null) mr.sortingOrder = 45;
+            }
+        }
+
+        public void UpdateNameplate()
+        {
+            if (!IsElite)
+            {
+                if (nameplateText != null) nameplateText.gameObject.SetActive(false);
+                return;
+            }
+
+            EnsureNameplate();
+            nameplateText.gameObject.SetActive(true);
+
+            string title = eliteAffix.GetDisplayName();
+            if (eliteAffix == EliteAffix.FirewallShield)
+            {
+                title = shieldCount > 0 ? $"🛡️ [방화벽: {shieldCount}]" : "💥 [실드 파괴!]";
+                nameplateText.color = shieldCount > 0 ? new Color(0.2f, 0.95f, 1f) : Color.gray;
+            }
+            else if (eliteAffix == EliteAffix.GemThief)
+            {
+                title = $"🧲 [도둑: +{stolenGemsCount}]";
+                nameplateText.color = new Color(0.95f, 0.4f, 1f);
+            }
+            else if (eliteAffix == EliteAffix.HasteSprinter)
+            {
+                nameplateText.color = new Color(1f, 0.95f, 0.2f);
+            }
+            else if (eliteAffix == EliteAffix.SpamReflector)
+            {
+                nameplateText.color = new Color(1f, 0.35f, 0.35f);
+            }
+
+            nameplateText.text = title;
         }
 
         public void Initialize(EnemyType type, int stage, float survivalSec, EliteAffix affix = EliteAffix.None)
@@ -155,6 +208,7 @@ namespace DopamineCleaner.Enemies
             }
 
             currentHP = maxHP;
+            UpdateNameplate();
             gameObject.SetActive(true);
         }
 
@@ -240,6 +294,7 @@ namespace DopamineCleaner.Enemies
                     stolenGemsCount++;
                     currentHP = Mathf.Min(maxHP, currentHP + 6f);
                     transform.localScale *= 1.015f;
+                    UpdateNameplate();
                     Destroy(g.gameObject);
                     break; // 1틱당 1개 흡수
                 }
@@ -306,12 +361,19 @@ namespace DopamineCleaner.Enemies
             if (IsElite && eliteAffix == EliteAffix.FirewallShield && shieldCount > 0)
             {
                 shieldCount--;
+                UpdateNameplate();
                 Core.DamageTextManager.Instance?.SpawnDamageText(0f, transform.position + Vector3.up * 0.4f, false);
                 Core.SoundManager.Instance?.Play(Core.SoundEffect.Hit, 0.35f);
                 return;
             }
 
             currentHP -= amount;
+
+            // 중타격/엘리트 피격 시 0.04초 역경직(Hit-Stop) 발동
+            if (amount >= 35f || IsElite || enemyType == EnemyType.DopamineBoss)
+            {
+                Core.HitStopManager.Instance?.TriggerHitStop(0.04f);
+            }
 
             // 엘리트: 알림 폭풍 반사 사격
             if (IsElite && eliteAffix == EliteAffix.SpamReflector && Random.value < 0.35f)

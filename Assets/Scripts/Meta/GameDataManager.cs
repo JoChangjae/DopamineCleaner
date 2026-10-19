@@ -39,6 +39,21 @@ namespace DopamineCleaner.Meta
         public int lifetimeBossKills = 0;
         public int lifetimeGamesPlayed = 0;
         public int lifetimeGoldEarned = 0;
+
+        // 최근 5회 작전 기록실
+        public List<CombatRecord> combatRecords = new();
+    }
+
+    [Serializable]
+    public class CombatRecord
+    {
+        public string characterId = "char_intern";
+        public int survivalSeconds = 0;
+        public int kills = 0;
+        public int goldEarned = 0;
+        public int karmaEarned = 0;
+        public bool isCleared = false;
+        public string timestamp = "";
     }
 
     public class GameDataManager : MonoBehaviour
@@ -128,6 +143,9 @@ namespace DopamineCleaner.Meta
 
             if (Profile.stashStorage == null)
                 Profile.stashStorage = new() { "artifact_golden_calc", "item_speed_booster" };
+
+            if (Profile.combatRecords == null)
+                Profile.combatRecords = new();
 
             OnProfileUpdated?.Invoke();
         }
@@ -299,6 +317,59 @@ namespace DopamineCleaner.Meta
                     else if (Profile.inventory.Count < 6)
                         Profile.inventory.Add(item);
                 }
+            }
+
+            SaveProfile();
+        }
+
+        // ==========================================
+        // 연구 100% 전액 환급 초기화
+        // ==========================================
+        public (int refundedGold, int refundedKarma) ResetAllResearch()
+        {
+            int totalRefundGold = 0;
+            int totalRefundKarma = 0;
+
+            string[] researchIds = { "atk", "hp", "spd", "mag", "rev" };
+            foreach (var id in researchIds)
+            {
+                var def = ResearchDatabase.Get(id);
+                if (def == null) continue;
+                int currentLvl = GetResearchLevel(id);
+                for (int lvl = 0; lvl < currentLvl; lvl++)
+                {
+                    totalRefundGold += def.GetGoldCost(lvl);
+                    totalRefundKarma += def.GetKarmaCost(lvl);
+                }
+            }
+
+            Profile.researchAtkLevel = 0;
+            Profile.researchHpLevel = 0;
+            Profile.researchSpdLevel = 0;
+            Profile.researchMagLevel = 0;
+            Profile.researchRevLevel = 0;
+
+            Profile.gold += totalRefundGold;
+            Profile.karmaPoints += totalRefundKarma;
+
+            SaveProfile();
+            OnProfileUpdated?.Invoke();
+
+            return (totalRefundGold, totalRefundKarma);
+        }
+
+        // ==========================================
+        // 최근 5회 작전 기록 관리
+        // ==========================================
+        public void AddCombatRecord(CombatRecord record)
+        {
+            if (record == null) return;
+            if (Profile.combatRecords == null) Profile.combatRecords = new();
+
+            Profile.combatRecords.Insert(0, record);
+            while (Profile.combatRecords.Count > 5)
+            {
+                Profile.combatRecords.RemoveAt(Profile.combatRecords.Count - 1);
             }
 
             SaveProfile();

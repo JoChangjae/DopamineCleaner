@@ -85,6 +85,13 @@ namespace DopamineCleaner.Characters
                 transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime * Mathf.Min(dist * 1.5f, 3.0f));
             }
 
+            // 아기자기한 바운스(Bobbing) 애니메이션
+            float bob = Mathf.Sin(Time.time * 8f) * 0.06f;
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.transform.localPosition = new Vector3(0f, bob, 0f);
+            }
+
             // 2. 고유 스킬 주기적 발동
             ExecuteCompanionSkill();
         }
@@ -121,6 +128,7 @@ namespace DopamineCleaner.Characters
                         isPomodoroFocus = !isPomodoroFocus;
                         pomodoroCycleTimer = isPomodoroFocus ? 25.0f : 5.0f;
                         SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.4f);
+                        DamageTextManager.Instance?.SpawnCustomText(isPomodoroFocus ? "🤖 25분 집중!" : "☕ 5분 휴식!", transform.position + Vector3.up * 0.6f, new Color(0.2f, 0.9f, 1f));
                     }
 
                     if (isPomodoroFocus)
@@ -150,12 +158,17 @@ namespace DopamineCleaner.Characters
                     if (collected >= 5) break;
                 }
             }
+
+            if (collected > 0)
+            {
+                DamageTextManager.Instance?.SpawnCustomText("🐕 냠!", transform.position + Vector3.up * 0.5f, new Color(1f, 0.85f, 0.3f));
+            }
         }
 
         private void DeployNapSanctuary()
         {
             PlayerController.Instance?.Heal(22f);
-            DamageTextManager.Instance?.SpawnDamageText(22f, transform.position + Vector3.up * 0.5f, false);
+            DamageTextManager.Instance?.SpawnCustomText("💤 힐링!", transform.position + Vector3.up * 0.5f, new Color(0.9f, 0.4f, 0.9f));
             SoundManager.Instance?.Play(SoundEffect.GemCollect, 0.7f);
         }
 
@@ -181,7 +194,7 @@ namespace DopamineCleaner.Characters
             if (closest != null)
             {
                 closest.TakeDamage(40f);
-                DamageTextManager.Instance?.SpawnDamageText(40f, closest.transform.position, true);
+                DamageTextManager.Instance?.SpawnCustomText("🎯 집중사격!", transform.position + Vector3.up * 0.5f, new Color(0.3f, 0.9f, 1f));
                 SoundManager.Instance?.Play(SoundEffect.Shoot, 0.3f);
             }
         }

@@ -147,7 +147,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "알고리즘 회오리";
-            baseCooldown = 2.6f;
+            baseCooldown = 2.3f;
             currentLevel = 0;
             maxLevel = 5;
         }

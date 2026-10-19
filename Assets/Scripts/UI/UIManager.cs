@@ -24,6 +24,10 @@ namespace DopamineCleaner.UI
         [SerializeField] private GameObject achievementToastPanel;
         [SerializeField] private Text achievementToastText;
 
+        [Header("세트 시너지 좌측 HUD")]
+        [SerializeField] private GameObject synergyHudPanel;
+        [SerializeField] private Text synergyHudText;
+
         [Header("피버 & 콤보 HUD")]
         [SerializeField] private Slider feverSlider;
         [SerializeField] private Text feverText;
@@ -75,6 +79,10 @@ namespace DopamineCleaner.UI
                 GameManager.Instance.OnKillsUpdated += UpdateKillsHUD;
                 GameManager.Instance.OnStateChanged += HandleStateChanged;
             }
+
+            SynergyManager.OnSynergyActivated += HandleSynergyActivated;
+            EnsureSynergyHudUI();
+            UpdateSynergyHUD();
 
             if (FeverManager.Instance != null)
             {
@@ -158,6 +166,7 @@ namespace DopamineCleaner.UI
                 PlayerController.Instance.OnUltimateCooldownChanged -= UpdateUltimateHUD;
             }
             Meta.AchievementManager.OnAchievementUnlocked -= ShowAchievementToast;
+            SynergyManager.OnSynergyActivated -= HandleSynergyActivated;
 
             if (GameManager.Instance != null)
             {
@@ -334,6 +343,90 @@ namespace DopamineCleaner.UI
         private void HideAchievementToast()
         {
             if (achievementToastPanel != null) achievementToastPanel.SetActive(false);
+        }
+
+        private void EnsureSynergyHudUI()
+        {
+            if (synergyHudPanel == null)
+            {
+                var canvas = GetComponentInParent<Canvas>();
+                if (canvas != null)
+                {
+                    synergyHudPanel = new GameObject("SynergyHUDPanel");
+                    synergyHudPanel.transform.SetParent(canvas.transform, false);
+
+                    var rt = synergyHudPanel.AddComponent<RectTransform>();
+                    rt.anchorMin = new Vector2(0f, 1f);
+                    rt.anchorMax = new Vector2(0f, 1f);
+                    rt.pivot = new Vector2(0f, 1f);
+                    rt.sizeDelta = new Vector2(320, 130);
+                    rt.anchoredPosition = new Vector2(25, -230);
+
+                    var img = synergyHudPanel.AddComponent<Image>();
+                    img.color = new Color(0.10f, 0.08f, 0.16f, 0.85f);
+
+                    var txtObj = new GameObject("SynergyText");
+                    txtObj.transform.SetParent(synergyHudPanel.transform, false);
+                    synergyHudText = txtObj.AddComponent<Text>();
+                    synergyHudText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    synergyHudText.fontSize = 15;
+                    synergyHudText.color = new Color(0.4f, 0.95f, 1f);
+                    synergyHudText.lineSpacing = 1.15f;
+                    synergyHudText.alignment = TextAnchor.UpperLeft;
+
+                    var txtRt = txtObj.GetComponent<RectTransform>();
+                    txtRt.anchorMin = Vector2.zero;
+                    txtRt.anchorMax = Vector2.one;
+                    txtRt.offsetMin = new Vector2(12, 10);
+                    txtRt.offsetMax = new Vector2(-12, -10);
+
+                    var outl = txtObj.AddComponent<Outline>();
+                    outl.effectColor = new Color(0f, 0f, 0f, 0.95f);
+                    outl.effectDistance = new Vector2(1f, -1f);
+                }
+            }
+        }
+
+        public void HandleSynergyActivated(SynergyInfo info)
+        {
+            UpdateSynergyHUD();
+
+            if (achievementToastPanel != null && achievementToastText != null)
+            {
+                achievementToastText.text = $"✨ [세트 시너지 개화!] {info.title}\n{info.description}";
+                achievementToastPanel.SetActive(true);
+                CancelInvoke(nameof(HideAchievementToast));
+                Invoke(nameof(HideAchievementToast), 4.0f);
+            }
+        }
+
+        public void UpdateSynergyHUD()
+        {
+            if (SynergyManager.Instance == null)
+            {
+                if (synergyHudPanel != null) synergyHudPanel.SetActive(false);
+                return;
+            }
+
+            var activeList = SynergyManager.Instance.GetActiveSynergies();
+            if (activeList == null || activeList.Count == 0)
+            {
+                if (synergyHudPanel != null) synergyHudPanel.SetActive(false);
+                return;
+            }
+
+            if (synergyHudPanel != null) synergyHudPanel.SetActive(true);
+
+            if (synergyHudText != null)
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("<color=#FFE082>✨ [활성 세트 시너지]</color>");
+                foreach (var syn in activeList)
+                {
+                    sb.AppendLine($"{syn.icon} <color=#64FFDA>{syn.title}</color>");
+                }
+                synergyHudText.text = sb.ToString().TrimEnd();
+            }
         }
 
         public void ShowLevelUpUI(int newLevel)

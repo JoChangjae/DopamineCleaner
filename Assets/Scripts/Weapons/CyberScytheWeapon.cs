@@ -139,7 +139,7 @@ namespace DopamineCleaner.Weapons
         private void Awake()
         {
             weaponName = "셧다운 단두대";
-            baseCooldown = 2.2f;
+            baseCooldown = 1.95f;
             currentLevel = 0;
             maxLevel = 5;
         }

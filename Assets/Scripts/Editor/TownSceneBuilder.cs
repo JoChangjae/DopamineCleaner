@@ -319,7 +319,13 @@ namespace DopamineCleaner.Editor
 
             ResearchUI ui = panel.AddComponent<ResearchUI>();
 
-            CreateText("ResTitle", panel.transform, "🔬 본부 연구소 (영구 능력치 강화)", 26, TextAnchor.MiddleLeft, new Vector2(0, 375), new Vector2(1650, 35));
+            CreateText("ResTitle", panel.transform, "🔬 본부 연구소 (영구 능력치 강화)", 26, TextAnchor.MiddleLeft, new Vector2(-280, 375), new Vector2(1000, 35));
+
+            Button refundBtn = CreateButton("ResetRefundBtn", panel.transform, "🔄 연구 100% 전액 환급 초기화", 18, new Color(0.75f, 0.25f, 0.28f));
+            RectTransform rRt = refundBtn.GetComponent<RectTransform>();
+            rRt.sizeDelta = new Vector2(340, 48);
+            rRt.anchoredPosition = new Vector2(650, 375);
+            SetPrivateField(ui, "refundAllButton", refundBtn);
 
             GameObject cont = CreateUIObject("ResearchContainer", panel.transform);
             RectTransform cRt = cont.GetComponent<RectTransform>();

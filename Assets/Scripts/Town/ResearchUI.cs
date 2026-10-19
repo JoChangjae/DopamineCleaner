@@ -9,9 +9,41 @@ namespace DopamineCleaner.Town
     {
         [SerializeField] private Transform researchContainer;
         [SerializeField] private GameObject researchCardPrefab;
+        [SerializeField] private Button refundAllButton;
+
+        private void Awake()
+        {
+            if (refundAllButton == null)
+            {
+                refundAllButton = transform.Find("ResetRefundBtn")?.GetComponent<Button>();
+            }
+
+            if (refundAllButton != null)
+            {
+                refundAllButton.onClick.RemoveAllListeners();
+                refundAllButton.onClick.AddListener(OnResetRefundClicked);
+            }
+        }
 
         private void OnEnable()
         {
+            if (refundAllButton == null)
+            {
+                refundAllButton = transform.Find("ResetRefundBtn")?.GetComponent<Button>();
+                if (refundAllButton != null)
+                {
+                    refundAllButton.onClick.RemoveAllListeners();
+                    refundAllButton.onClick.AddListener(OnResetRefundClicked);
+                }
+            }
+            RefreshUI();
+        }
+
+        public void OnResetRefundClicked()
+        {
+            if (GameDataManager.Instance == null) return;
+            var (refundGold, refundKarma) = GameDataManager.Instance.ResetAllResearch();
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Fever, 0.4f);
             RefreshUI();
         }
 
