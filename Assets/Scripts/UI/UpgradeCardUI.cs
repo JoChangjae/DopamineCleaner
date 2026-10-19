@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DopamineCleaner.Weapons;
@@ -17,6 +18,7 @@ namespace DopamineCleaner.UI
         [SerializeField] private Text typeBadgeText;
 
         [Header("아이콘 및 타이틀")]
+        [SerializeField] private Image iconImage;
         [SerializeField] private Text iconText;
         [SerializeField] private Text titleText;
         [SerializeField] private Text descriptionText;
@@ -30,14 +32,115 @@ namespace DopamineCleaner.UI
         [SerializeField] private Image selectButtonBg;
         [SerializeField] private Text selectButtonText;
 
+        private static readonly Dictionary<UpgradeType, Sprite> iconCache = new();
+
+        public static Sprite GetUpgradeSprite(UpgradeType type)
+        {
+            if (iconCache.TryGetValue(type, out var s) && s != null) return s;
+
+            string resName = GetIconResourceName(type);
+            Sprite loaded = Resources.Load<Sprite>("SkillIcons/" + resName);
+            if (loaded != null)
+            {
+                iconCache[type] = loaded;
+                return loaded;
+            }
+            return null;
+        }
+
+        public static string GetIconResourceName(UpgradeType type)
+        {
+            switch (type)
+            {
+                case UpgradeType.CleanBullet: return "icon_clean_bullet";
+                case UpgradeType.OrbitBarrier: return "icon_orbit_barrier";
+                case UpgradeType.LaserBeam: return "icon_laser_beam";
+                case UpgradeType.FirewallMine: return "icon_firewall_mine";
+                case UpgradeType.ShockAura: return "icon_shock_aura";
+                case UpgradeType.DetoxMissile: return "icon_detox_missile";
+                case UpgradeType.AlgorithmVortex: return "icon_algorithm_vortex";
+                case UpgradeType.SanitizerMist: return "icon_sanitizer_mist";
+                case UpgradeType.CyberScythe: return "icon_cyber_scythe";
+
+                case UpgradeType.AttackSpeed: return "icon_attack_speed";
+                case UpgradeType.MaxHP: return "icon_max_hp";
+                case UpgradeType.DamageBoost: return "icon_damage_boost";
+                case UpgradeType.MoveSpeed: return "icon_move_speed";
+                case UpgradeType.Magnet: return "icon_magnet";
+                case UpgradeType.CritChance: return "icon_crit_chance";
+
+                case UpgradeType.EvoGigaGatling: return "icon_evo_giga_gatling";
+                case UpgradeType.EvoGalacticCleanse: return "icon_evo_galactic_cleanse";
+                case UpgradeType.EvoPrismCannon: return "icon_evo_prism_cannon";
+                case UpgradeType.EvoSecurityMatrix: return "icon_evo_security_matrix";
+                case UpgradeType.EvoTeslaDischarge: return "icon_evo_tesla_discharge";
+                case UpgradeType.EvoAegisBarrage: return "icon_evo_aegis_barrage";
+                case UpgradeType.EvoDetoxTyphoon: return "icon_evo_detox_typhoon";
+                case UpgradeType.EvoPlasmaCloud: return "icon_evo_plasma_cloud";
+                case UpgradeType.EvoShutdownBlade: return "icon_evo_shutdown_blade";
+
+                case UpgradeType.BonusGold: return "icon_bonus_gold";
+                case UpgradeType.BonusHeal: return "icon_bonus_heal";
+                case UpgradeType.BonusBomb: return "icon_bonus_bomb";
+                default: return "icon_clean_bullet";
+            }
+        }
+
         public void Setup(UpgradeCardInfo info, Action onSelect)
         {
             // 1. 카드 카테고리별 테마 적용 (색상, 테두리, 뱃지)
             ApplyCardTheme(info);
 
-            // 2. 아이콘 및 타이틀
-            if (iconText != null)
+            // 2. 도트 아이콘 이미지 및 타이틀
+            if (iconImage == null)
             {
+                Transform plate = iconText != null ? iconText.transform.parent : transform.Find("IconPlate");
+                if (plate != null)
+                {
+                    Transform existing = plate.Find("IconImage");
+                    if (existing != null)
+                    {
+                        iconImage = existing.GetComponent<Image>();
+                    }
+                    else
+                    {
+                        GameObject imgObj = new GameObject("IconImage");
+                        imgObj.transform.SetParent(plate, false);
+                        RectTransform rt = imgObj.AddComponent<RectTransform>();
+                        rt.sizeDelta = new Vector2(60, 60);
+                        rt.anchoredPosition = Vector2.zero;
+                        iconImage = imgObj.AddComponent<Image>();
+                        iconImage.preserveAspect = true;
+                    }
+                }
+            }
+
+            Sprite dotSprite = info.iconSprite != null ? info.iconSprite : GetUpgradeSprite(info.type);
+
+            if (iconImage != null)
+            {
+                if (dotSprite != null)
+                {
+                    iconImage.sprite = dotSprite;
+                    iconImage.color = Color.white;
+                    iconImage.preserveAspect = true;
+                    iconImage.gameObject.SetActive(true);
+                    if (iconText != null) iconText.gameObject.SetActive(false);
+                }
+                else
+                {
+                    iconImage.gameObject.SetActive(false);
+                    if (iconText != null)
+                    {
+                        iconText.gameObject.SetActive(true);
+                        iconText.text = string.IsNullOrEmpty(info.iconText) ? "✨" : info.iconText;
+                        iconText.color = Color.white;
+                    }
+                }
+            }
+            else if (iconText != null)
+            {
+                iconText.gameObject.SetActive(true);
                 iconText.text = string.IsNullOrEmpty(info.iconText) ? "✨" : info.iconText;
                 iconText.color = Color.white;
             }

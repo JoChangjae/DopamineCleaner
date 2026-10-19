@@ -620,8 +620,17 @@ namespace DopamineCleaner.UI
             Image ipImg = iconPlate.AddComponent<Image>();
             ipImg.color = new Color(0.18f, 0.16f, 0.26f, 1f);
 
+            GameObject iconImgObj = new GameObject("IconImage");
+            iconImgObj.transform.SetParent(iconPlate.transform, false);
+            RectTransform iconImgRt = iconImgObj.AddComponent<RectTransform>();
+            iconImgRt.sizeDelta = new Vector2(60, 60);
+            iconImgRt.anchoredPosition = Vector2.zero;
+            Image iconImg = iconImgObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+
             Text icon = CreateFallbackText("Icon", iconPlate.transform, info.iconText, 46, Vector2.zero, new Vector2(76, 76));
             icon.color = Color.white;
+            icon.gameObject.SetActive(false);
 
             // 4. 스킬 타이틀
             Text title = CreateFallbackText("Title", cardObj.transform, info.title, 20, new Vector2(0, 55), new Vector2(260, 34));
@@ -673,6 +682,7 @@ namespace DopamineCleaner.UI
             var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
             typeof(UpgradeCardUI).GetField("cardBackground", flags)?.SetValue(cardUI, img);
             typeof(UpgradeCardUI).GetField("cardOutline", flags)?.SetValue(cardUI, cardOutline);
+            typeof(UpgradeCardUI).GetField("iconImage", flags)?.SetValue(cardUI, iconImg);
             typeof(UpgradeCardUI).GetField("iconText", flags)?.SetValue(cardUI, icon);
             typeof(UpgradeCardUI).GetField("titleText", flags)?.SetValue(cardUI, title);
             typeof(UpgradeCardUI).GetField("descriptionText", flags)?.SetValue(cardUI, desc);

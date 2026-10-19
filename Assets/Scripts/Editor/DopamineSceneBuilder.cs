@@ -793,7 +793,7 @@ namespace DopamineCleaner.Editor
             bText.color = new Color(0.85f, 0.75f, 1f);
             bText.fontStyle = FontStyle.Bold;
 
-            // 3. 아이콘 프레임 & 아이콘
+            // 3. 아이콘 프레임 & 도트 스프라이트 이미지
             GameObject iconPlate = CreateUIObject("IconPlate", cardObj.transform);
             RectTransform ipRt = iconPlate.GetComponent<RectTransform>();
             ipRt.sizeDelta = new Vector2(80, 80);
@@ -804,8 +804,18 @@ namespace DopamineCleaner.Editor
             ipOutline.effectColor = new Color(0.35f, 0.32f, 0.48f, 0.6f);
             ipOutline.effectDistance = new Vector2(1, -1);
 
+            // 도트 스프라이트 표시용 Image
+            GameObject iconImgObj = CreateUIObject("IconImage", iconPlate.transform);
+            RectTransform iconImgRt = iconImgObj.GetComponent<RectTransform>();
+            iconImgRt.sizeDelta = new Vector2(60, 60);
+            iconImgRt.anchoredPosition = Vector2.zero;
+            Image iconImg = iconImgObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+
+            // 텍스트 폴백 (도트 미로드 시)
             Text icon = CreateText("CardIcon", iconPlate.transform, "💧", 46, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(76, 76));
             icon.color = Color.white;
+            icon.gameObject.SetActive(false);
 
             // 4. 스킬 타이틀 (선명한 화이트)
             Text title = CreateText("CardTitle", cardObj.transform, "스킬 이름", 20, TextAnchor.MiddleCenter, new Vector2(0, 55), new Vector2(260, 34));
@@ -852,6 +862,7 @@ namespace DopamineCleaner.Editor
             // 필드 바인딩
             SetPrivateField(cardUI, "cardBackground", cardBg);
             SetPrivateField(cardUI, "cardOutline", cardOutline);
+            SetPrivateField(cardUI, "iconImage", iconImg);
             SetPrivateField(cardUI, "iconText", icon);
             SetPrivateField(cardUI, "titleText", title);
             SetPrivateField(cardUI, "descriptionText", desc);
