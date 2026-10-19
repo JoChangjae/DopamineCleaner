@@ -21,11 +21,17 @@ namespace DopamineCleaner.Enemies
     {
         [Header("몬스터 스탯")]
         [SerializeField] private EnemyType enemyType = EnemyType.MindDust;
+        [SerializeField] private EliteAffix eliteAffix = EliteAffix.None;
         [SerializeField] private float maxHP = 15f;
         [SerializeField] private float currentHP;
         [SerializeField] private float moveSpeed = 2.5f;
         [SerializeField] private float damage = 5f;
         [SerializeField] private int baseExp = 1;
+
+        [Header("엘리트 상태")]
+        private int shieldCount = 0;
+        private int stolenGemsCount = 0;
+        private float affixActionTimer = 0f;
 
         [Header("컴포넌트")]
         private SpriteRenderer spriteRenderer;
@@ -34,6 +40,8 @@ namespace DopamineCleaner.Enemies
         private float specialActionTimer = 0f;
 
         public EnemyType Type => enemyType;
+        public EliteAffix Affix => eliteAffix;
+        public bool IsElite => eliteAffix != EliteAffix.None;
         public float HP => currentHP;
         public float MaxHP => maxHP;
         public float Damage => damage;
@@ -46,9 +54,13 @@ namespace DopamineCleaner.Enemies
                 originalColor = spriteRenderer.color;
         }
 
-        public void Initialize(EnemyType type, int stage, float survivalSec)
+        public void Initialize(EnemyType type, int stage, float survivalSec, EliteAffix affix = EliteAffix.None)
         {
             enemyType = type;
+            eliteAffix = affix;
+            shieldCount = 0;
+            stolenGemsCount = 0;
+            affixActionTimer = 0.5f;
             specialActionTimer = Random.Range(1.0f, 2.5f);
             float stageMult = 1.0f + (stage - 1) * 0.32f;
 
@@ -117,6 +129,31 @@ namespace DopamineCleaner.Enemies
                 moveSpeed *= diff.enemySpeedMult;
             }
 
+            if (IsElite)
+            {
+                maxHP *= 2.2f;
+                damage *= 1.35f;
+                transform.localScale *= 1.3f;
+
+                switch (eliteAffix)
+                {
+                    case EliteAffix.FirewallShield:
+                        shieldCount = 3;
+                        SetVisualColor(new Color(0.2f, 0.95f, 1f)); // 네온 시안
+                        break;
+                    case EliteAffix.HasteSprinter:
+                        moveSpeed *= 1.55f;
+                        SetVisualColor(new Color(1f, 0.95f, 0.2f)); // 네온 옐로우
+                        break;
+                    case EliteAffix.GemThief:
+                        SetVisualColor(new Color(0.9f, 0.2f, 0.9f)); // 네온 퍼플
+                        break;
+                    case EliteAffix.SpamReflector:
+                        SetVisualColor(new Color(1f, 0.3f, 0.3f)); // 네온 레드
+                        break;
+                }
+            }
+
             currentHP = maxHP;
             gameObject.SetActive(true);
         }
@@ -180,6 +217,33 @@ namespace DopamineCleaner.Enemies
             {
                 spriteRenderer.flipX = dir.x < 0;
             }
+
+            // 엘리트: 보석 강탈자(GemThief) 주변 경험치 보석 흡수
+            if (IsElite && eliteAffix == EliteAffix.GemThief)
+            {
+                affixActionTimer -= Time.deltaTime;
+                if (affixActionTimer <= 0f)
+                {
+                    affixActionTimer = 0.75f;
+                    TryStealNearbyGems();
+                }
+            }
+        }
+
+        private void TryStealNearbyGems()
+        {
+            var gems = FindObjectsByType<ExpGem>();
+            foreach (var g in gems)
+            {
+                if (g != null && g.gameObject.activeInHierarchy && Vector2.Distance(transform.position, g.transform.position) <= 2.6f)
+                {
+                    stolenGemsCount++;
+                    currentHP = Mathf.Min(maxHP, currentHP + 6f);
+                    transform.localScale *= 1.015f;
+                    Destroy(g.gameObject);
+                    break; // 1틱당 1개 흡수
+                }
+            }
         }
 
         private void ShootProjectile(Vector2 dir)
@@ -205,6 +269,22 @@ namespace DopamineCleaner.Enemies
             }
         }
 
+        private void FireSpamRadialReflection()
+        {
+            int bulletCount = 6;
+            for (int i = 0; i < bulletCount; i++)
+            {
+                float angle = i * (360f / bulletCount) * Mathf.Deg2Rad;
+                Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+
+                GameObject projObj = new GameObject("ReflectSpamBullet");
+                projObj.transform.position = transform.position;
+                EnemyProjectile ep = projObj.AddComponent<EnemyProjectile>();
+                ep.Initialize(dir, 4.2f, damage * 0.7f);
+            }
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Shoot, 0.4f);
+        }
+
         private void OnTriggerStay2D(Collider2D other)
         {
             if (other.CompareTag("Player") && IsAlive)
@@ -222,7 +302,22 @@ namespace DopamineCleaner.Enemies
         {
             if (!IsAlive) return;
 
+            // 엘리트: 방화벽 쉴드 피해 무효화
+            if (IsElite && eliteAffix == EliteAffix.FirewallShield && shieldCount > 0)
+            {
+                shieldCount--;
+                Core.DamageTextManager.Instance?.SpawnDamageText(0f, transform.position + Vector3.up * 0.4f, false);
+                Core.SoundManager.Instance?.Play(Core.SoundEffect.Hit, 0.35f);
+                return;
+            }
+
             currentHP -= amount;
+
+            // 엘리트: 알림 폭풍 반사 사격
+            if (IsElite && eliteAffix == EliteAffix.SpamReflector && Random.value < 0.35f)
+            {
+                FireSpamRadialReflection();
+            }
 
             // 넉백 적용
             if (knockbackForce > 0f)
@@ -281,6 +376,24 @@ namespace DopamineCleaner.Enemies
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.left * 1.2f, GemType.Cake, 0);
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.right * 1.2f, GemType.Magnet, 0);
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 1.0f, GemType.Pink, 35);
+            }
+            else if (IsElite)
+            {
+                // 엘리트 몬스터 격파 시 확정 황금상자 + 보너스 골드 드랍!
+                ItemManager.Instance?.SpawnGem(transform.position, GemType.Chest, 0);
+                GameManager.Instance?.AddBonusGold(Random.Range(30, 55));
+                Core.SoundManager.Instance?.Play(Core.SoundEffect.LevelUp, 0.6f);
+
+                // 보석 강탈자였을 경우 훔친 보석 환급
+                if (eliteAffix == EliteAffix.GemThief && stolenGemsCount > 0)
+                {
+                    int returnGems = Mathf.Min(16, stolenGemsCount * 2);
+                    for (int g = 0; g < returnGems; g++)
+                    {
+                        Vector3 jitter = (Vector3)Random.insideUnitCircle * 1.6f;
+                        ItemManager.Instance?.SpawnGem(transform.position + jitter, GemType.Blue, 5);
+                    }
+                }
             }
             else
             {

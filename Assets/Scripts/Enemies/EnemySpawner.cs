@@ -122,7 +122,7 @@ namespace DopamineCleaner.Enemies
             }
         }
 
-        private void SpawnSingleEnemy(EnemyType type, int stage, float survivalSec)
+        public void SpawnSingleEnemy(EnemyType type, int stage, float survivalSec, EliteAffix forcedAffix = EliteAffix.None)
         {
             int activeCount = GetActiveEnemyCount();
 
@@ -137,7 +137,14 @@ namespace DopamineCleaner.Enemies
             {
                 Vector3 spawnPos = GetPerimeterSpawnPosition();
                 enemy.transform.position = spawnPos;
-                enemy.Initialize(type, stage, survivalSec);
+
+                EliteAffix affix = forcedAffix;
+                if (affix == EliteAffix.None && type != EnemyType.DopamineBoss && survivalSec >= 25f && Random.value < 0.16f)
+                {
+                    affix = (EliteAffix)Random.Range(1, 5); // 1~4
+                }
+
+                enemy.Initialize(type, stage, survivalSec, affix);
             }
         }
 

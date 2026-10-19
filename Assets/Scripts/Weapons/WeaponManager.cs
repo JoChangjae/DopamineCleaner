@@ -50,6 +50,19 @@ namespace DopamineCleaner.Weapons
         public bool isEvolution;
     }
 
+    public enum WeaponType
+    {
+        CleanBullet,
+        OrbitBarrier,
+        LaserBeam,
+        FirewallMine,
+        ShockPulse,
+        DetoxMissile,
+        AlgorithmVortex,
+        SanitizerMist,
+        CyberScythe
+    }
+
     public class WeaponManager : MonoBehaviour
     {
         public static WeaponManager Instance { get; private set; }
@@ -89,6 +102,28 @@ namespace DopamineCleaner.Weapons
         public int MagnetLevel => magnetLevel;
         public int DamageBoostLevel => damageBoostLevel;
         public int CritChanceLevel => critChanceLevel;
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        public bool IsWeaponActive(WeaponType type)
+        {
+            return type switch
+            {
+                WeaponType.CleanBullet => cleanBulletWeapon != null && cleanBulletWeapon.Level > 0,
+                WeaponType.OrbitBarrier => orbitWeapon != null && orbitWeapon.Level > 0,
+                WeaponType.LaserBeam => laserBeamWeapon != null && laserBeamWeapon.Level > 0,
+                WeaponType.FirewallMine => mineWeapon != null && mineWeapon.Level > 0,
+                WeaponType.ShockPulse => shockWeapon != null && shockWeapon.Level > 0,
+                WeaponType.DetoxMissile => missileWeapon != null && missileWeapon.Level > 0,
+                WeaponType.AlgorithmVortex => vortexWeapon != null && vortexWeapon.Level > 0,
+                WeaponType.SanitizerMist => mistWeapon != null && mistWeapon.Level > 0,
+                WeaponType.CyberScythe => scytheWeapon != null && scytheWeapon.Level > 0,
+                _ => false
+            };
+        }
 
         public string GetEquipmentSummary()
         {

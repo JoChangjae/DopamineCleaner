@@ -25,7 +25,9 @@ namespace DopamineCleaner.Town
         [SerializeField] private Text difficultySummaryText;
         [SerializeField] private Text rewardPreviewText;
 
-        [Header("출동 버튼")]
+        [Header("하이퍼 모드 & 출동 버튼")]
+        [SerializeField] private Button hyperModeToggleBtn;
+        [SerializeField] private Text hyperModeText;
         [SerializeField] private Button startMissionButton;
 
         private string currentMapId = "map_hospital";
@@ -33,18 +35,31 @@ namespace DopamineCleaner.Town
 
         private void Start()
         {
-            mapHospitalBtn.onClick.AddListener(() => SelectMap("map_hospital"));
-            mapOfficeBtn.onClick.AddListener(() => SelectMap("map_office"));
-            mapHighwayBtn.onClick.AddListener(() => SelectMap("map_highway"));
+            if (mapHospitalBtn != null) mapHospitalBtn.onClick.AddListener(() => SelectMap("map_hospital"));
+            if (mapOfficeBtn != null) mapOfficeBtn.onClick.AddListener(() => SelectMap("map_office"));
+            if (mapHighwayBtn != null) mapHighwayBtn.onClick.AddListener(() => SelectMap("map_highway"));
 
-            diffEasyBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Easy));
-            diffNormalBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Normal));
-            diffHardBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Hard));
-            diffNightmareBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Nightmare));
+            if (diffEasyBtn != null) diffEasyBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Easy));
+            if (diffNormalBtn != null) diffNormalBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Normal));
+            if (diffHardBtn != null) diffHardBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Hard));
+            if (diffNightmareBtn != null) diffNightmareBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Nightmare));
 
-            startMissionButton.onClick.AddListener(OnStartMissionClicked);
+            if (hyperModeToggleBtn != null)
+                hyperModeToggleBtn.onClick.AddListener(ToggleHyperMode);
+
+            if (startMissionButton != null)
+                startMissionButton.onClick.AddListener(OnStartMissionClicked);
 
             RefreshUI();
+        }
+
+        private void ToggleHyperMode()
+        {
+            if (GameDataManager.Instance != null)
+            {
+                GameDataManager.Instance.IsHyperMode = !GameDataManager.Instance.IsHyperMode;
+                UpdatePreview();
+            }
         }
 
         public void RefreshUI()
@@ -85,11 +100,19 @@ namespace DopamineCleaner.Town
                     $"• 몬스터 스폰 주기: x{mult.spawnIntervalMult:F2}";
             }
 
+            bool isHyper = GameDataManager.Instance != null && GameDataManager.Instance.IsHyperMode;
+            if (hyperModeText != null)
+            {
+                hyperModeText.text = isHyper ? "⚡ [하이퍼 모드: ON] (보상 200% / 속도 1.25x)" : "⚡ [하이퍼 모드: OFF]";
+                hyperModeText.color = isHyper ? new Color(1f, 0.85f, 0.2f) : Color.white;
+            }
+
             if (rewardPreviewText != null)
             {
-                int finalGold = Mathf.RoundToInt(map.baseGoldReward * mult.rewardGoldMult);
-                int finalKarma = Mathf.RoundToInt(map.baseKarmaReward * mult.rewardKarmaMult);
-                rewardPreviewText.text = $"🎯 클리어 성공 예상 보상:  💰 +{finalGold:N0} G  |  ✨ +{finalKarma} P";
+                float hyperMult = isHyper ? 2.0f : 1.0f;
+                int finalGold = Mathf.RoundToInt(map.baseGoldReward * mult.rewardGoldMult * hyperMult);
+                int finalKarma = Mathf.RoundToInt(map.baseKarmaReward * mult.rewardKarmaMult * hyperMult);
+                rewardPreviewText.text = $"🎯 클리어 성공 예상 보상:  💰 +{finalGold:N0} G  |  ✨ +{finalKarma} P" + (isHyper ? " 🔥 (하이퍼 2배 적용)" : "");
             }
         }
 

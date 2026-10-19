@@ -50,6 +50,7 @@ namespace DopamineCleaner.Meta
         // 현재 던전 세션 설정 (마을에서 던전으로 전달)
         public string SelectedMapId { get; set; } = "map_hospital";
         public DungeonDifficulty SelectedDifficulty { get; set; } = DungeonDifficulty.Normal;
+        public bool IsHyperMode { get; set; } = false;
 
         public event Action OnProfileUpdated;
 

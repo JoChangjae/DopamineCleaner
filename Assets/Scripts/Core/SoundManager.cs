@@ -108,6 +108,28 @@ namespace DopamineCleaner.Core
         [SerializeField] private bool isMuted = false;
         public bool IsMuted => isMuted;
 
+        [SerializeField] private float bgmVolume = 0.35f;
+        [SerializeField] private float sfxVolume = 1.0f;
+
+        public float BGMVolume => bgmVolume;
+        public float SFXVolume => sfxVolume;
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        public void SetBGMVolume(float vol)
+        {
+            bgmVolume = Mathf.Clamp01(vol);
+            if (bgmSource != null) bgmSource.volume = bgmVolume;
+        }
+
+        public void SetSFXVolume(float vol)
+        {
+            sfxVolume = Mathf.Clamp01(vol);
+        }
+
         public bool ToggleMute()
         {
             isMuted = !isMuted;
@@ -129,7 +151,7 @@ namespace DopamineCleaner.Core
 
             if (clipCache.TryGetValue(sfx, out var clip) && clip != null)
             {
-                audioSource.PlayOneShot(clip, volume);
+                audioSource.PlayOneShot(clip, volume * sfxVolume);
             }
         }
 

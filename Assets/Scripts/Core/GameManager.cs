@@ -59,6 +59,16 @@ namespace DopamineCleaner.Core
             StartNewGame();
         }
 
+        [Header("특수 모드 상태")]
+        [SerializeField] private bool isEndlessMode = false;
+        [SerializeField] private bool endlessPromptShown = false;
+
+        public bool IsEndlessMode => isEndlessMode;
+        public bool EndlessPromptShown => endlessPromptShown;
+        public bool IsHyperMode => Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.IsHyperMode;
+
+        public event Action OnEndlessChoicePrompt;
+
         private void Update()
         {
             if (currentState == GameState.Playing)
@@ -71,10 +81,34 @@ namespace DopamineCleaner.Core
                     targetSec = Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance.SelectedMapId).targetSurvivalSec;
                 }
 
-                if (survivalTime >= targetSec)
+                if (survivalTime >= targetSec && !isEndlessMode && !endlessPromptShown)
                 {
-                    TriggerGameOver(true);
+                    endlessPromptShown = true;
+                    if (OnEndlessChoicePrompt != null)
+                    {
+                        SetState(GameState.Paused);
+                        OnEndlessChoicePrompt.Invoke();
+                    }
+                    else
+                    {
+                        TriggerGameOver(true);
+                    }
                 }
+            }
+        }
+
+        public void ChooseEndlessMode(bool goEndless)
+        {
+            if (goEndless)
+            {
+                isEndlessMode = true;
+                AddBonusGold(100); // 야근 수당
+                SetState(GameState.Playing);
+                SoundManager.Instance?.Play(SoundEffect.Fever, 0.85f);
+            }
+            else
+            {
+                TriggerGameOver(true);
             }
         }
 
@@ -87,6 +121,8 @@ namespace DopamineCleaner.Core
             survivalTime = 0f;
             bossActive = false;
             BonusGold = 0;
+            isEndlessMode = false;
+            endlessPromptShown = false;
 
             Time.timeScale = 1f;
             SetState(GameState.Playing);
@@ -195,14 +231,29 @@ namespace DopamineCleaner.Core
                 {
                     goldMult *= 1.25f;
                 }
+
+                // 하이퍼 모드 시 보상 2.0배 폭증
+                if (IsHyperMode)
+                {
+                    goldMult *= 2.0f;
+                    karmaMult *= 2.0f;
+                }
             }
 
             int killBonusGold = totalKills * 3;
             int survivalBonusGold = Mathf.FloorToInt(survivalTime * 1.5f);
 
+            // 철야 야근 모드: 5분 초과 생존 초당 4.5G 추가 성과급
+            int overtimeGold = 0;
+            if (isEndlessMode && survivalTime > targetSec)
+            {
+                overtimeGold = Mathf.FloorToInt((survivalTime - targetSec) * 4.5f);
+                victory = true; // 야근 도전자는 사망하더라도 승리 정산
+            }
+
             if (victory)
             {
-                EarnedGold = Mathf.RoundToInt((baseGold + killBonusGold + survivalBonusGold) * goldMult) + BonusGold;
+                EarnedGold = Mathf.RoundToInt((baseGold + killBonusGold + survivalBonusGold) * goldMult) + BonusGold + overtimeGold;
                 EarnedKarma = Mathf.Max(1, Mathf.RoundToInt(baseKarma * karmaMult));
             }
             else

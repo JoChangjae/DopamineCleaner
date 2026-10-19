@@ -200,6 +200,10 @@ namespace DopamineCleaner.Characters
             {
                 speed *= 1.3f;
             }
+            if (GameManager.Instance != null && GameManager.Instance.IsHyperMode)
+            {
+                speed *= 1.25f; // 하이퍼 모드 기동력 증폭
+            }
             if (MentalSanctuaryManager.Instance != null)
             {
                 if (MentalSanctuaryManager.Instance.IsInSanctuary)

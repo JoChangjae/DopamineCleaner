@@ -71,6 +71,21 @@ namespace DopamineCleaner.Editor
             // 14. 런타임 8-Bit BGM 신스 엔진 검증
             TestBGM();
 
+            // 15. 엘리트 몬스터 변이 수식어 검증
+            TestEliteAffixes();
+
+            // 16. 히든 세트 시너지 시스템 검증
+            TestSetSynergies();
+
+            // 17. 철야 야근 모드 & 하이퍼 모드 검증
+            TestEndlessAndHyperMode();
+
+            // 18. 디톡스 서포트 펫 / 뽀모도로 드론 검증
+            TestCompanionPet();
+
+            // 19. 오디오 및 환경 설정 옵션 검증
+            TestAudioSettings();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -581,6 +596,149 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "BGM 신스 엔진 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestEliteAffixes()
+        {
+            Debug.Log("--- 15. 엘리트 몬스터 변이 수식어 검증 ---");
+            try
+            {
+                GameObject enemyObj = new GameObject("[TestEnemy_Elite]");
+                enemyObj.AddComponent<CircleCollider2D>();
+                Enemy enemy = enemyObj.AddComponent<Enemy>();
+
+                // 방화벽 쉴드 엘리트 테스트
+                enemy.Initialize(EnemyType.MindDust, 1, 30f, EliteAffix.FirewallShield);
+                Assert(enemy.IsElite, "엘리트 몬스터 판정 플래그(IsElite) 확인");
+                Assert(enemy.Affix == EliteAffix.FirewallShield, "방화벽 쉴드 수식어 정상 부여 확인");
+
+                float initHP = enemy.HP;
+                enemy.TakeDamage(10f); // 쉴드로 1회 흡수
+                Assert(enemy.HP == initHP, "방화벽 쉴드에 의한 대미지 100% 무효화 방어 확인");
+
+                UnityEngine.Object.DestroyImmediate(enemyObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "엘리트 수식어 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestSetSynergies()
+        {
+            Debug.Log("--- 16. 히든 세트 시너지 시스템 검증 ---");
+            try
+            {
+                GameObject root = new GameObject("[TestSynergy_Weapons]");
+                WeaponManager wm = root.AddComponent<WeaponManager>();
+                SetField(typeof(WeaponManager), "Instance", wm);
+
+                CleanBulletWeapon bullet = root.AddComponent<CleanBulletWeapon>();
+                FirewallMineWeapon mine = root.AddComponent<FirewallMineWeapon>();
+                SetField(wm, "cleanBulletWeapon", bullet);
+                SetField(wm, "mineWeapon", mine);
+
+                bullet.Upgrade();
+                mine.Upgrade();
+                wm.ApplyUpgrade(UpgradeType.DamageBoost);
+
+                GameObject smObj = new GameObject("[TestSynergyManager]");
+                SynergyManager sm = smObj.AddComponent<SynergyManager>();
+                SetField(typeof(SynergyManager), "Instance", sm);
+
+                sm.EvaluateSynergies();
+                Assert(sm.HasSynergy(SynergyType.OfficeFury), "사무직의 분노(클린탄환+지뢰+공격력) 세트 시너지 정상 발동 확인");
+                Assert(sm.GetActiveSynergies().Count >= 1, "활성화된 시너지 목록에 정상 등록 확인");
+
+                UnityEngine.Object.DestroyImmediate(smObj);
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "세트 시너지 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestEndlessAndHyperMode()
+        {
+            Debug.Log("--- 17. 철야 야근 모드 & 하이퍼 모드 검증 ---");
+            try
+            {
+                GameObject gdmObj = new GameObject("[TestGDM_Mode]");
+                GameDataManager gdm = gdmObj.AddComponent<GameDataManager>();
+                SetField(typeof(GameDataManager), "Instance", gdm);
+                gdm.IsHyperMode = true;
+
+                GameObject gmObj = new GameObject("[TestGM_Mode]");
+                GameManager gm = gmObj.AddComponent<GameManager>();
+                SetField(typeof(GameManager), "Instance", gm);
+
+                Assert(gm.IsHyperMode, "하이퍼 모드 플래그 GameDataManager 연동 확인");
+
+                // 야근 선택
+                gm.ChooseEndlessMode(true);
+                Assert(gm.IsEndlessMode, "야근 선택 시 무한 생존 모드 전환 확인");
+                Assert(gm.BonusGold >= 100, "야근 수당 보너스 골드 100G 즉시 지급 확인");
+
+                UnityEngine.Object.DestroyImmediate(gmObj);
+                UnityEngine.Object.DestroyImmediate(gdmObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "철야 야근 및 하이퍼 모드 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestCompanionPet()
+        {
+            Debug.Log("--- 18. 디톡스 서포트 펫 / 뽀모도로 드론 검증 ---");
+            try
+            {
+                var companions = CompanionDatabase.GetAll();
+                Assert(companions.Count == 3, "반려 펫 3종(댕댕이, 냥이, 드론) DB 등록 확인");
+
+                GameObject petObj = new GameObject("[TestPet]");
+                CompanionPet pet = petObj.AddComponent<CompanionPet>();
+
+                pet.Initialize(CompanionType.HappyDog);
+                Assert(pet.Type == CompanionType.HappyDog, "산책견 댕댕이 펫 초기화 성공");
+
+                pet.Initialize(CompanionType.PomodoroDrone);
+                Assert(pet.Type == CompanionType.PomodoroDrone, "뽀모도로 드론 펫 전환 초기화 성공");
+
+                UnityEngine.Object.DestroyImmediate(petObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "서포트 펫 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestAudioSettings()
+        {
+            Debug.Log("--- 19. 오디오 및 환경 설정 옵션 검증 ---");
+            try
+            {
+                GameObject smObj = new GameObject("[TestSound_Opt]");
+                SoundManager sm = smObj.AddComponent<SoundManager>();
+                SetField(typeof(SoundManager), "Instance", sm);
+
+                sm.SetBGMVolume(0.85f);
+                Assert(Mathf.Approximately(sm.BGMVolume, 0.85f), "BGM 볼륨 85% 설정 및 동기화 확인");
+
+                sm.SetSFXVolume(0.45f);
+                Assert(Mathf.Approximately(sm.SFXVolume, 0.45f), "SFX 볼륨 45% 설정 및 동기화 확인");
+
+                SettingsModalUI.CameraShakeEnabled = false;
+                Assert(!SettingsModalUI.CameraShakeEnabled, "화면 흔들림(Camera Shake) 옵션 토글 확인");
+                SettingsModalUI.CameraShakeEnabled = true;
+
+                UnityEngine.Object.DestroyImmediate(smObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "환경 설정 테스트 예외", ex.ToString());
             }
         }
 

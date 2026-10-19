@@ -143,6 +143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DopamineCleaner.Enemies.Enemy
   enemyType: 0
+  eliteAffix: 0
   maxHP: 15
   currentHP: 0
   moveSpeed: 2.5
