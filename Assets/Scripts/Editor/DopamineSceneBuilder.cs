@@ -89,6 +89,10 @@ namespace DopamineCleaner.Editor
             LaserBeamWeapon laserWeapon = weaponsObj.AddComponent<LaserBeamWeapon>();
             FirewallMineWeapon mineWeapon = weaponsObj.AddComponent<FirewallMineWeapon>();
             ShockAuraWeapon shockWeapon = weaponsObj.AddComponent<ShockAuraWeapon>();
+            DetoxMissileWeapon missileWeapon = weaponsObj.AddComponent<DetoxMissileWeapon>();
+            AlgorithmVortexWeapon vortexWeapon = weaponsObj.AddComponent<AlgorithmVortexWeapon>();
+            SanitizerMistWeapon mistWeapon = weaponsObj.AddComponent<SanitizerMistWeapon>();
+            CyberScytheWeapon scytheWeapon = weaponsObj.AddComponent<CyberScytheWeapon>();
 
             WeaponManager weaponMgr = weaponsObj.AddComponent<WeaponManager>();
             SetPrivateField(weaponMgr, "cleanBulletWeapon", bulletWeapon);
@@ -96,6 +100,10 @@ namespace DopamineCleaner.Editor
             SetPrivateField(weaponMgr, "laserBeamWeapon", laserWeapon);
             SetPrivateField(weaponMgr, "mineWeapon", mineWeapon);
             SetPrivateField(weaponMgr, "shockWeapon", shockWeapon);
+            SetPrivateField(weaponMgr, "missileWeapon", missileWeapon);
+            SetPrivateField(weaponMgr, "vortexWeapon", vortexWeapon);
+            SetPrivateField(weaponMgr, "mistWeapon", mistWeapon);
+            SetPrivateField(weaponMgr, "scytheWeapon", scytheWeapon);
 
             // 6. 게임 매니저 & 스포너 & 아이템 매니저 & 피버 매니저 & 데미지 텍스트 & 사운드 매니저 & 돌발 퀘스트
             GameObject sysObj = new GameObject("[Systems]");

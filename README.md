@@ -26,12 +26,16 @@
 
 ## ⚔️ 핵심 시스템 및 특징
 
-1. **자동 조준 & 5대 무기 진화 (Weapon Evolutions)**
-   * **클린 탄환 (Clean Bullet)** $\rightarrow$ **기가 개틀링 (Giga Gatling)**: 8방향 고속 연사 탄막
-   * **가디언 위성 (Orbit Barrier)** $\rightarrow$ **은하계 정화 결계 (Galactic Cleanse)**: 6개의 황금 위성 넉백 배리어
-   * **디톡스 레이저 (Laser Beam)** $\rightarrow$ **프리즘 정화포 (Prism Cannon)**: 십자 4방향 고출력 관통 레이저
+1. **자동 조준 & 9대 무기 진화 (Weapon Evolutions)**
+   * **클린 탄환 (Clean Bullet)** $\rightarrow$ **기가 개틀링 (Giga Gatling)**: 8방향 고속 연사 탄막 융단 폭격
+   * **가디언 위성 (Orbit Barrier)** $\rightarrow$ **은하계 정화 결계 (Galactic Cleanse)**: 6개의 황금 위성 넉백 절대 결계
+   * **디톡스 레이저 (Laser Beam)** $\rightarrow$ **프리즘 정화포 (Prism Cannon)**: 십자 4방향 고출력 관통 프리즘 레이저
    * **방화벽 지뢰 (Firewall Mine)** $\rightarrow$ **절대 보안 결계 (Security Matrix)**: 초대형 폭발 트랩 투하
    * **쇼크 펄스 (Shock Aura)** $\rightarrow$ **테슬라 뇌파 방전 (Tesla Discharge)**: 화면 전체 연쇄 벼락 폭풍
+   * **디톡스 미사일 (Detox Missile)** $\rightarrow$ **궤도 폭격 이지스 (Orbital Aegis Barrage)**: 스마트 유도 미사일 & 궤도 융단 폭격
+   * **알고리즘 회오리 (Algorithm Vortex)** $\rightarrow$ **하이퍼 디톡스 타이푼 (Hyper Detox Typhoon)**: 몬스터 강력 흡입 분쇄 디지털 태풍
+   * **멸균 소독 안개 (Sanitizer Mist)** $\rightarrow$ **절대 멸균 플라즈마 (Sterilization Plasma Cloud)**: 광역 감속(슬로우) 및 상시 멸균 오라
+   * **셧다운 단두대 (Cyber Scythe)** $\rightarrow$ **절대 셧다운 엑스칼리버 (Infinite Shutdown Blade)**: 360도 전방위 거대 참격 & 약화된 적 즉사 처형
 2. **🔥 초집중 디톡스 피버 (Fever Mode) & 콤보 시스템**
    * 몬스터 연속 처치 시 콤보 누적 및 디톡스 피버 게이지 충전!
    * 100% 도달 시 **피버 모드 발동**: 공격속도 1.8배 폭주, 이동속도 +30%, 피격 대미지 60% 경감, 화면 내 모든 보석 자동 흡수!

@@ -63,5 +63,43 @@ namespace DopamineCleaner.Weapons
 
             return Mathf.Max(0.08f, baseCooldown / rate);
         }
+
+        public virtual float CalculateDamage(float rawDamage, out bool isCrit)
+        {
+            float dmg = rawDamage;
+
+            // 1. 패시브 공격력 증가
+            if (WeaponManager.Instance != null)
+            {
+                dmg *= (1f + WeaponManager.Instance.DamageBoostLevel * 0.12f);
+            }
+
+            // 2. 본부 영구 연구소 공격력 보너스
+            if (Meta.GameDataManager.Instance != null)
+            {
+                dmg *= (1f + Meta.GameDataManager.Instance.Profile.researchAtkLevel * 0.08f);
+            }
+
+            // 3. 디톡스 피버 모드 데미지 증폭 (+40%)
+            if (Core.FeverManager.Instance != null && Core.FeverManager.Instance.IsFever)
+            {
+                dmg *= 1.4f;
+            }
+
+            // 4. 치명타 확률 계산 (기본 5% + 패시브 레벨당 8%)
+            float critChance = 0.05f;
+            if (WeaponManager.Instance != null)
+            {
+                critChance += WeaponManager.Instance.CritChanceLevel * 0.08f;
+            }
+
+            isCrit = Random.value < critChance;
+            if (isCrit)
+            {
+                dmg *= 2.0f;
+            }
+
+            return dmg;
+        }
     }
 }

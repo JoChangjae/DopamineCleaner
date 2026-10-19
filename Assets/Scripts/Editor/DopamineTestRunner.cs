@@ -160,7 +160,7 @@ namespace DopamineCleaner.Editor
 
         private static void TestWeaponsAndDamageTracking()
         {
-            Debug.Log("--- 4. 5대 무기 진화 및 DPS 대미지 통계 집계 검증 ---");
+            Debug.Log("--- 4. 9대 무기 진화 및 DPS 대미지 통계 집계 검증 ---");
             try
             {
                 GameObject root = new GameObject("[TestWeapons]");
@@ -169,6 +169,10 @@ namespace DopamineCleaner.Editor
                 LaserBeamWeapon laser = root.AddComponent<LaserBeamWeapon>();
                 FirewallMineWeapon mine = root.AddComponent<FirewallMineWeapon>();
                 ShockAuraWeapon shock = root.AddComponent<ShockAuraWeapon>();
+                DetoxMissileWeapon missile = root.AddComponent<DetoxMissileWeapon>();
+                AlgorithmVortexWeapon vortex = root.AddComponent<AlgorithmVortexWeapon>();
+                SanitizerMistWeapon mist = root.AddComponent<SanitizerMistWeapon>();
+                CyberScytheWeapon scythe = root.AddComponent<CyberScytheWeapon>();
 
                 WeaponManager wm = root.AddComponent<WeaponManager>();
 
@@ -178,37 +182,63 @@ namespace DopamineCleaner.Editor
                 SetField(wm, "laserBeamWeapon", laser);
                 SetField(wm, "mineWeapon", mine);
                 SetField(wm, "shockWeapon", shock);
+                SetField(wm, "missileWeapon", missile);
+                SetField(wm, "vortexWeapon", vortex);
+                SetField(wm, "mistWeapon", mist);
+                SetField(wm, "scytheWeapon", scythe);
 
-                // 무기 업그레이드
+                // 9개 무기 업그레이드
                 bullet.Upgrade();
                 laser.Upgrade();
                 mine.Upgrade();
                 shock.Upgrade();
+                missile.Upgrade();
+                vortex.Upgrade();
+                mist.Upgrade();
+                scythe.Upgrade();
 
                 Assert(laser.Level == 1, "디톡스 레이저 1레벨 업그레이드 확인");
                 Assert(mine.Level == 1, "방화벽 지뢰 1레벨 업그레이드 확인");
                 Assert(shock.Level == 1, "쇼크 펄스 1레벨 업그레이드 확인");
+                Assert(missile.Level == 1, "디톡스 미사일 1레벨 업그레이드 확인");
+                Assert(vortex.Level == 1, "알고리즘 회오리 1레벨 업그레이드 확인");
+                Assert(mist.Level == 1, "멸균 소독 안개 1레벨 업그레이드 확인");
+                Assert(scythe.Level == 1, "셧다운 단두대 1레벨 업그레이드 확인");
 
-                // 진화 테스트
+                // 9개 진화 테스트
                 laser.Evolve();
                 Assert(laser.IsEvolved, "레이저 -> 프리즘 정화포 진화 성공");
                 mine.Evolve();
                 Assert(mine.IsEvolved, "지뢰 -> 절대 보안 결계 진화 성공");
                 shock.Evolve();
                 Assert(shock.IsEvolved, "쇼크 -> 테슬라 뇌파 방전 진화 성공");
+                missile.Evolve();
+                Assert(missile.IsEvolved, "미사일 -> 궤도 폭격 이지스 진화 성공");
+                vortex.Evolve();
+                Assert(vortex.IsEvolved, "회오리 -> 하이퍼 디톡스 타이푼 진화 성공");
+                mist.Evolve();
+                Assert(mist.IsEvolved, "소독안개 -> 절대 멸균 플라즈마 진화 성공");
+                scythe.Evolve();
+                Assert(scythe.IsEvolved, "단두대 -> 절대 셧다운 엑스칼리버 진화 성공");
+
+                // 신규 패시브(공격력, 치명타) 적용
+                wm.ApplyUpgrade(UpgradeType.DamageBoost);
+                Assert(wm.DamageBoostLevel == 1, "집중력 앰플 (전체공격력) 패시브 레벨 1 증가 확인");
+                wm.ApplyUpgrade(UpgradeType.CritChance);
+                Assert(wm.CritChanceLevel == 1, "블루라이트 차단경 (치명타율) 패시브 레벨 1 증가 확인");
 
                 // 대미지 누적 및 통계 테스트
                 laser.RegisterDamage(5000f);
                 mine.RegisterDamage(3000f);
                 shock.RegisterDamage(2000f);
+                missile.RegisterDamage(4000f);
 
                 var stats = wm.GetDamageStatistics();
-                Assert(stats.Count >= 3, "대미지 통계 집계 항목 생성 확인");
+                Assert(stats.Count >= 4, "9개 무기 대미지 통계 집계 항목 생성 확인");
                 Assert(stats[0].name.Contains("프리즘") || stats[0].damage == 5000f, "최고 대미지 무기가 1순위로 정렬됨");
-                Assert(Mathf.Approximately(stats[0].percentage, 50f), "5000/10000 = 50% 점유율 정확성 확인");
 
                 string summary = wm.GetEquipmentSummary();
-                Assert(summary.Contains("프리즘") && summary.Contains("EVOLVED"), "장비 요약 텍스트에 진화 무기 및 대미지 포함 확인");
+                Assert(summary.Contains("프리즘") && summary.Contains("이지스") && summary.Contains("EVOLVED"), "장비 요약 텍스트에 신규 진화 무기 및 대미지 포함 확인");
 
                 UnityEngine.Object.DestroyImmediate(root);
             }

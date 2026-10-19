@@ -11,7 +11,11 @@ namespace DopamineCleaner.Core
         GemCollect,
         LevelUp,
         Fever,
-        Dash
+        Dash,
+        Missile,
+        Whirlwind,
+        Mist,
+        Slash
     }
 
     public class SoundManager : MonoBehaviour
@@ -49,6 +53,10 @@ namespace DopamineCleaner.Core
             clipCache[SoundEffect.Dash] = GenerateTone(0.12f, 300f, 600f, WaveType.Noise);
             clipCache[SoundEffect.LevelUp] = GenerateFanfare(0.4f);
             clipCache[SoundEffect.Fever] = GenerateFanfare(0.55f);
+            clipCache[SoundEffect.Missile] = GenerateTone(0.2f, 250f, 750f, WaveType.Square);
+            clipCache[SoundEffect.Whirlwind] = GenerateTone(0.28f, 180f, 90f, WaveType.Noise);
+            clipCache[SoundEffect.Mist] = GenerateTone(0.18f, 900f, 400f, WaveType.Noise);
+            clipCache[SoundEffect.Slash] = GenerateTone(0.14f, 850f, 150f, WaveType.Sine);
         }
 
         [SerializeField] private bool isMuted = false;

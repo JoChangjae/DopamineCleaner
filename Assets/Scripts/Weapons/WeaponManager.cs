@@ -13,15 +13,28 @@ namespace DopamineCleaner.Weapons
         LaserBeam,
         FirewallMine,
         ShockAura,
+        DetoxMissile,
+        AlgorithmVortex,
+        SanitizerMist,
+        CyberScythe,
+
         MoveSpeed,
         MaxHP,
         Magnet,
         AttackSpeed,
+        DamageBoost,
+        CritChance,
+
         EvoGigaGatling,
         EvoGalacticCleanse,
         EvoPrismCannon,
         EvoSecurityMatrix,
         EvoTeslaDischarge,
+        EvoAegisBarrage,
+        EvoDetoxTyphoon,
+        EvoPlasmaCloud,
+        EvoShutdownBlade,
+
         BonusGold,
         BonusHeal,
         BonusBomb
@@ -41,45 +54,61 @@ namespace DopamineCleaner.Weapons
     {
         public static WeaponManager Instance { get; private set; }
 
-        [Header("무기 컴포넌트")]
+        [Header("무기 컴포넌트 9종")]
         [SerializeField] private CleanBulletWeapon cleanBulletWeapon;
         [SerializeField] private OrbitWeapon orbitWeapon;
         [SerializeField] private LaserBeamWeapon laserBeamWeapon;
         [SerializeField] private FirewallMineWeapon mineWeapon;
         [SerializeField] private ShockAuraWeapon shockWeapon;
+        [SerializeField] private DetoxMissileWeapon missileWeapon;
+        [SerializeField] private AlgorithmVortexWeapon vortexWeapon;
+        [SerializeField] private SanitizerMistWeapon mistWeapon;
+        [SerializeField] private CyberScytheWeapon scytheWeapon;
 
-        [Header("패시브 레벨")]
+        [Header("패시브 레벨 6종")]
         [SerializeField] private int moveSpeedLevel = 0;
         [SerializeField] private int maxHPLevel = 0;
         [SerializeField] private int magnetLevel = 0;
         [SerializeField] private int attackSpeedLevel = 0;
+        [SerializeField] private int damageBoostLevel = 0;
+        [SerializeField] private int critChanceLevel = 0;
 
         public CleanBulletWeapon BulletWeapon => cleanBulletWeapon;
         public OrbitWeapon OrbitWeapon => orbitWeapon;
         public LaserBeamWeapon LaserWeapon => laserBeamWeapon;
         public FirewallMineWeapon MineWeapon => mineWeapon;
         public ShockAuraWeapon ShockWeapon => shockWeapon;
+        public DetoxMissileWeapon MissileWeapon => missileWeapon;
+        public AlgorithmVortexWeapon VortexWeapon => vortexWeapon;
+        public SanitizerMistWeapon MistWeapon => mistWeapon;
+        public CyberScytheWeapon ScytheWeapon => scytheWeapon;
+
         public int AttackSpeedLevel => attackSpeedLevel;
         public int MoveSpeedLevel => moveSpeedLevel;
         public int MaxHPLevel => maxHPLevel;
         public int MagnetLevel => magnetLevel;
+        public int DamageBoostLevel => damageBoostLevel;
+        public int CritChanceLevel => critChanceLevel;
 
         public string GetEquipmentSummary()
         {
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("⚔️ [장착 무기 현황]");
+            sb.AppendLine("⚔️ [장착 무기 현황 (총 9종 아스날)]");
 
-            WeaponBase[] weapons = { cleanBulletWeapon, orbitWeapon, laserBeamWeapon, mineWeapon, shockWeapon };
-            string[] icons = { "💧", "🛡️", "🔦", "💣", "⚡" };
+            WeaponBase[] weapons = { cleanBulletWeapon, orbitWeapon, laserBeamWeapon, mineWeapon, shockWeapon, missileWeapon, vortexWeapon, mistWeapon, scytheWeapon };
+            string[] icons = { "💧", "🛡️", "🔦", "💣", "⚡", "🚀", "🌪️", "🧪", "🪓" };
 
+            int activeCount = 0;
             for (int i = 0; i < weapons.Length; i++)
             {
                 if (weapons[i] != null && weapons[i].IsActive)
                 {
+                    activeCount++;
                     string status = weapons[i].IsEvolved ? "✨ EVOLVED (진화 완료)" : $"Lv.{weapons[i].Level}";
                     sb.AppendLine($"  {icons[i]} {weapons[i].WeaponName} [{status}] - 대미지: {weapons[i].TotalDamageDealt:N0}");
                 }
             }
+            if (activeCount == 0) sb.AppendLine("  (장착된 무기 없음)");
 
             sb.AppendLine();
             sb.AppendLine("🧬 [패시브 훈련 현황]");
@@ -87,6 +116,8 @@ namespace DopamineCleaner.Weapons
             sb.AppendLine($"  💖 하트 비타민 (최대체력) : Lv.{maxHPLevel} / 5");
             sb.AppendLine($"  🧲 도파민 자석 (흡수반경) : Lv.{magnetLevel} / 5");
             sb.AppendLine($"  ☕ 에스프레소 (공격속도) : Lv.{attackSpeedLevel} / 5");
+            sb.AppendLine($"  💊 집중력 앰플 (전체공격력) : Lv.{damageBoostLevel} / 5");
+            sb.AppendLine($"  👓 블루라이트 안경 (치명타율) : Lv.{critChanceLevel} / 5");
 
             return sb.ToString();
         }
@@ -103,11 +134,19 @@ namespace DopamineCleaner.Weapons
             if (laserBeamWeapon == null) laserBeamWeapon = GetComponentInChildren<LaserBeamWeapon>();
             if (mineWeapon == null) mineWeapon = GetComponentInChildren<FirewallMineWeapon>();
             if (shockWeapon == null) shockWeapon = GetComponentInChildren<ShockAuraWeapon>();
+            if (missileWeapon == null) missileWeapon = GetComponentInChildren<DetoxMissileWeapon>();
+            if (vortexWeapon == null) vortexWeapon = GetComponentInChildren<AlgorithmVortexWeapon>();
+            if (mistWeapon == null) mistWeapon = GetComponentInChildren<SanitizerMistWeapon>();
+            if (scytheWeapon == null) scytheWeapon = GetComponentInChildren<CyberScytheWeapon>();
 
             // 없으면 동적 추가
             if (laserBeamWeapon == null) laserBeamWeapon = gameObject.AddComponent<LaserBeamWeapon>();
             if (mineWeapon == null) mineWeapon = gameObject.AddComponent<FirewallMineWeapon>();
             if (shockWeapon == null) shockWeapon = gameObject.AddComponent<ShockAuraWeapon>();
+            if (missileWeapon == null) missileWeapon = gameObject.AddComponent<DetoxMissileWeapon>();
+            if (vortexWeapon == null) vortexWeapon = gameObject.AddComponent<AlgorithmVortexWeapon>();
+            if (mistWeapon == null) mistWeapon = gameObject.AddComponent<SanitizerMistWeapon>();
+            if (scytheWeapon == null) scytheWeapon = gameObject.AddComponent<CyberScytheWeapon>();
         }
 
         private void Start()
@@ -126,7 +165,7 @@ namespace DopamineCleaner.Weapons
         {
             List<UpgradeCardInfo> candidates = new();
 
-            // 1. 진화 후보 체크
+            // 1. 진화 후보 체크 (총 9종)
             if (cleanBulletWeapon != null && cleanBulletWeapon.Level >= 5 && !cleanBulletWeapon.IsEvolved && attackSpeedLevel >= 1)
             {
                 candidates.Add(new UpgradeCardInfo
@@ -187,7 +226,55 @@ namespace DopamineCleaner.Weapons
                 });
             }
 
-            // 2. 일반 무기 후보
+            if (missileWeapon != null && missileWeapon.Level >= 5 && !missileWeapon.IsEvolved && (attackSpeedLevel >= 1 || damageBoostLevel >= 1))
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.EvoAegisBarrage,
+                    title = "✨ 궤도 폭격 이지스",
+                    description = "위성 궤도에서 대량의 스마트 탄도 미사일이 화면 전체를 맹폭합니다!",
+                    iconText = "🚀",
+                    isEvolution = true
+                });
+            }
+
+            if (vortexWeapon != null && vortexWeapon.Level >= 5 && !vortexWeapon.IsEvolved && moveSpeedLevel >= 1)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.EvoDetoxTyphoon,
+                    title = "✨ 하이퍼 디톡스 타이푼",
+                    description = "황금빛 거대 회오리가 화면을 휩쓸며 몬스터를 영구 흡입 분쇄합니다!",
+                    iconText = "🌪️",
+                    isEvolution = true
+                });
+            }
+
+            if (mistWeapon != null && mistWeapon.Level >= 5 && !mistWeapon.IsEvolved && magnetLevel >= 1)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.EvoPlasmaCloud,
+                    title = "✨ 절대 멸균 플라즈마",
+                    description = "플레이어 주위에 거대한 청록색 플라즈마 멸균 영역이 상시 유지됩니다!",
+                    iconText = "🧪",
+                    isEvolution = true
+                });
+            }
+
+            if (scytheWeapon != null && scytheWeapon.Level >= 5 && !scytheWeapon.IsEvolved && (maxHPLevel >= 1 || critChanceLevel >= 1))
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.EvoShutdownBlade,
+                    title = "✨ 절대 셧다운 엑스칼리버",
+                    description = "화면 전체를 360도로 베어 넘기며 약화된 일반 몬스터를 즉사시킵니다!",
+                    iconText = "🪓",
+                    isEvolution = true
+                });
+            }
+
+            // 2. 일반 무기 후보 (총 9종)
             if (cleanBulletWeapon != null && cleanBulletWeapon.Level < 5 && !cleanBulletWeapon.IsEvolved)
             {
                 candidates.Add(new UpgradeCardInfo
@@ -248,7 +335,55 @@ namespace DopamineCleaner.Weapons
                 });
             }
 
-            // 3. 패시브 스킬 후보
+            if (missileWeapon != null && missileWeapon.Level < 5 && !missileWeapon.IsEvolved)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.DetoxMissile,
+                    title = missileWeapon.Level == 0 ? "디톡스 미사일 (신규)" : $"디톡스 미사일 Lv.{missileWeapon.Level + 1}",
+                    description = "스마트 패킷 미사일을 발사하여 적을 자동 추적 폭격합니다.",
+                    iconText = "🚀",
+                    isEvolution = false
+                });
+            }
+
+            if (vortexWeapon != null && vortexWeapon.Level < 5 && !vortexWeapon.IsEvolved)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.AlgorithmVortex,
+                    title = vortexWeapon.Level == 0 ? "알고리즘 회오리 (신규)" : $"알고리즘 회오리 Lv.{vortexWeapon.Level + 1}",
+                    description = "적들을 중심으로 끌어당기며 지속 피해를 주는 소용돌이를 날립니다.",
+                    iconText = "🌪️",
+                    isEvolution = false
+                });
+            }
+
+            if (mistWeapon != null && mistWeapon.Level < 5 && !mistWeapon.IsEvolved)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.SanitizerMist,
+                    title = mistWeapon.Level == 0 ? "멸균 소독 안개 (신규)" : $"멸균 소독 안개 Lv.{mistWeapon.Level + 1}",
+                    description = "이동 경로에 소독 연무를 뿌려 적을 감속시키고 도트 피해를 줍니다.",
+                    iconText = "🧪",
+                    isEvolution = false
+                });
+            }
+
+            if (scytheWeapon != null && scytheWeapon.Level < 5 && !scytheWeapon.IsEvolved)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.CyberScythe,
+                    title = scytheWeapon.Level == 0 ? "셧다운 단두대 (신규)" : $"셧다운 단두대 Lv.{scytheWeapon.Level + 1}",
+                    description = "주변을 넓게 회전 베기하여 강력한 넉백과 피해를 줍니다.",
+                    iconText = "🪓",
+                    isEvolution = false
+                });
+            }
+
+            // 3. 패시브 스킬 후보 (총 6종)
             if (moveSpeedLevel < 5)
             {
                 candidates.Add(new UpgradeCardInfo
@@ -297,6 +432,30 @@ namespace DopamineCleaner.Weapons
                 });
             }
 
+            if (damageBoostLevel < 5)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.DamageBoost,
+                    title = $"집중력 앰플 Lv.{damageBoostLevel + 1}",
+                    description = "모든 무기의 피해량이 12% 영구 증가합니다.",
+                    iconText = "💊",
+                    isEvolution = false
+                });
+            }
+
+            if (critChanceLevel < 5)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.CritChance,
+                    title = $"블루라이트 차단경 Lv.{critChanceLevel + 1}",
+                    description = "치명타 확률이 +8% 증가하고 200% 피해를 입힙니다.",
+                    iconText = "👓",
+                    isEvolution = false
+                });
+            }
+
             // 4. 업그레이드 후보가 부족하거나 만렙일 때 제공되는 '한계 돌파 / 보너스 카드' 보충
             if (candidates.Count < count)
             {
@@ -328,7 +487,6 @@ namespace DopamineCleaner.Weapons
                     }
                 };
 
-                // 부족한 수만큼 보너스 카드 추가
                 for (int b = 0; b < bonusCards.Count && candidates.Count < count; b++)
                 {
                     candidates.Add(bonusCards[b]);
@@ -365,6 +523,19 @@ namespace DopamineCleaner.Weapons
                 case UpgradeType.ShockAura:
                     shockWeapon?.Upgrade();
                     break;
+                case UpgradeType.DetoxMissile:
+                    missileWeapon?.Upgrade();
+                    break;
+                case UpgradeType.AlgorithmVortex:
+                    vortexWeapon?.Upgrade();
+                    break;
+                case UpgradeType.SanitizerMist:
+                    mistWeapon?.Upgrade();
+                    break;
+                case UpgradeType.CyberScythe:
+                    scytheWeapon?.Upgrade();
+                    break;
+
                 case UpgradeType.EvoGigaGatling:
                     cleanBulletWeapon?.Evolve();
                     break;
@@ -380,6 +551,19 @@ namespace DopamineCleaner.Weapons
                 case UpgradeType.EvoTeslaDischarge:
                     shockWeapon?.Evolve();
                     break;
+                case UpgradeType.EvoAegisBarrage:
+                    missileWeapon?.Evolve();
+                    break;
+                case UpgradeType.EvoDetoxTyphoon:
+                    vortexWeapon?.Evolve();
+                    break;
+                case UpgradeType.EvoPlasmaCloud:
+                    mistWeapon?.Evolve();
+                    break;
+                case UpgradeType.EvoShutdownBlade:
+                    scytheWeapon?.Evolve();
+                    break;
+
                 case UpgradeType.MoveSpeed:
                     moveSpeedLevel++;
                     PlayerController.Instance?.UpgradeMoveSpeed(1.15f);
@@ -395,6 +579,13 @@ namespace DopamineCleaner.Weapons
                 case UpgradeType.AttackSpeed:
                     attackSpeedLevel++;
                     break;
+                case UpgradeType.DamageBoost:
+                    damageBoostLevel++;
+                    break;
+                case UpgradeType.CritChance:
+                    critChanceLevel++;
+                    break;
+
                 case UpgradeType.BonusGold:
                     GameManager.Instance?.AddBonusGold(100);
                     break;
@@ -425,8 +616,8 @@ namespace DopamineCleaner.Weapons
             var list = new List<WeaponDamageStat>();
             float total = 0f;
 
-            WeaponBase[] weapons = { cleanBulletWeapon, orbitWeapon, laserBeamWeapon, mineWeapon, shockWeapon };
-            string[] icons = { "💧", "🛡️", "🔦", "💣", "⚡" };
+            WeaponBase[] weapons = { cleanBulletWeapon, orbitWeapon, laserBeamWeapon, mineWeapon, shockWeapon, missileWeapon, vortexWeapon, mistWeapon, scytheWeapon };
+            string[] icons = { "💧", "🛡️", "🔦", "💣", "⚡", "🚀", "🌪️", "🧪", "🪓" };
 
             for (int i = 0; i < weapons.Length; i++)
             {
