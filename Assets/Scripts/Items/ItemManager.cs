@@ -62,8 +62,14 @@ namespace DopamineCleaner.Items
             ExpGem nearestGem = null;
             float minDistanceSq = 9999f;
 
-            for (int i = 0; i < gemPool.Count; i++)
+            for (int i = gemPool.Count - 1; i >= 0; i--)
             {
+                if (gemPool[i] == null)
+                {
+                    gemPool.RemoveAt(i);
+                    continue;
+                }
+
                 if (gemPool[i].gameObject.activeSelf)
                 {
                     activeCount++;
@@ -96,7 +102,7 @@ namespace DopamineCleaner.Items
         {
             for (int i = 0; i < gemPool.Count; i++)
             {
-                if (!gemPool[i].gameObject.activeSelf)
+                if (gemPool[i] != null && !gemPool[i].gameObject.activeSelf)
                     return gemPool[i];
             }
 

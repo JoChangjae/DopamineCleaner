@@ -368,7 +368,7 @@ namespace DopamineCleaner.Enemies
                     currentHP = Mathf.Min(maxHP, currentHP + 6f);
                     transform.localScale *= 1.015f;
                     UpdateNameplate();
-                    Destroy(g.gameObject);
+                    g.gameObject.SetActive(false);
                     break; // 1틱당 1개 흡수
                 }
             }
