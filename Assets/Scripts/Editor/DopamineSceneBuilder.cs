@@ -16,7 +16,7 @@ namespace DopamineCleaner.Editor
     {
         private static Font koreanFont;
 
-        [MenuItem("Dopamine Cleaner/✨ Build Complete Gameplay Scene (원클릭 자동 구성)")]
+        [MenuItem("Dopamine Cleaner/2. 🎮 인게임 던전 씬 구축 (Build MainGame Scene)")]
         public static void BuildScene()
         {
             EnsureTagsExist();
@@ -173,7 +173,7 @@ namespace DopamineCleaner.Editor
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Dopamine Cleaner/🚀 Build Complete Game (Town + Dungeon)")]
+        [MenuItem("Dopamine Cleaner/3. 🚀 원클릭 전체 구축 (Town + MainGame)")]
         public static void BuildCompleteGame()
         {
             TownSceneBuilder.BuildTownScene();

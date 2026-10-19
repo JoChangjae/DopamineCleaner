@@ -12,7 +12,7 @@ namespace DopamineCleaner.Editor
     {
         private static Font koreanFont;
 
-        [MenuItem("Dopamine Cleaner/🧠 Build Dopamine HQ Scene")]
+        [MenuItem("Dopamine Cleaner/1. 🏰 타운 본부 씬 구축 (Build HQ Scene)")]
         public static void BuildTownScene()
         {
             LoadKoreanFont();
