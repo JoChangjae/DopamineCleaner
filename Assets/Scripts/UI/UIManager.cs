@@ -772,7 +772,7 @@ namespace DopamineCleaner.UI
 
         public void OnToggleWindowModeClicked()
         {
-            DisplayModeManager.Instance?.ToggleDisplayMode();
+            DisplayModeManager.Instance?.CycleDisplayMode();
             UpdateWindowModeButtonText();
         }
 

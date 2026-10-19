@@ -934,13 +934,24 @@ namespace DopamineCleaner.Editor
                 DisplayModeManager dmm = dmmObj.AddComponent<DisplayModeManager>();
                 SetField(typeof(DisplayModeManager), "Instance", dmm);
 
+                // 1. 다양한 창 크기 프리셋 검증 (대형, HD, 미니)
                 dmm.SetDisplayMode(true, 1600, 900);
-                Assert(dmm.IsWindowed, "창모드(1600x900) 설정 적용 확인");
-                Assert(dmm.GetDisplayModeLabel().Contains("창모드") && dmm.GetDisplayModeLabel().Contains("F11"), "창모드 라벨 및 F11 단축키 안내 텍스트 확인");
+                Assert(dmm.IsWindowed && dmm.WindowWidth == 1600, "대형 창모드(1600x900) 설정 적용 확인");
 
-                dmm.ToggleDisplayMode();
-                Assert(!dmm.IsWindowed, "창모드 -> 전체화면 즉시 토글 성공 확인");
-                Assert(dmm.GetDisplayModeLabel().Contains("전체화면"), "전체화면 라벨 표기 확인");
+                dmm.SetDisplayMode(true, 1280, 720);
+                Assert(dmm.IsWindowed && dmm.WindowWidth == 1280 && dmm.WindowHeight == 720, "표준HD 창모드(1280x720) 설정 적용 확인");
+                Assert(dmm.GetDisplayModeLabel().Contains("1280x720"), "1280x720 창모드 라벨 표기 확인");
+
+                dmm.SetDisplayMode(true, 960, 540);
+                Assert(dmm.IsWindowed && dmm.WindowWidth == 960 && dmm.WindowHeight == 540, "초소형 미니 창모드(960x540) 설정 적용 확인");
+                Assert(dmm.GetDisplayModeLabel().Contains("960x540"), "960x540 미니 창모드 라벨 표기 확인");
+
+                // 2. 단계별 순환(Cycle) 검증
+                dmm.CycleDisplayMode(); // 960x540 다음은 전체화면
+                Assert(!dmm.IsWindowed, "미니 창모드 후 Cycle 시 전체화면 전환 확인");
+
+                dmm.CycleDisplayMode(); // 전체화면 다음은 1600x900
+                Assert(dmm.IsWindowed && dmm.WindowWidth == 1600, "전체화면 후 Cycle 시 1600x900 창모드 전환 확인");
 
                 // 2. 도파민 본부 헤더의 창모드 버튼 검증
                 GameObject townCanvas = GameObject.Find("TownCanvas");

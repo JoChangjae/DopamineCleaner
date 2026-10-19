@@ -132,7 +132,7 @@ namespace DopamineCleaner.UI
 
         private void OnWindowModeClicked()
         {
-            DisplayModeManager.Instance?.ToggleDisplayMode();
+            DisplayModeManager.Instance?.CycleDisplayMode();
             UpdateLabels();
         }
 

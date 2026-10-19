@@ -79,7 +79,7 @@ namespace DopamineCleaner.Town
 
         public void OnWindowModeToggleClicked()
         {
-            Core.DisplayModeManager.Instance?.ToggleDisplayMode();
+            Core.DisplayModeManager.Instance?.CycleDisplayMode();
             UpdateWindowModeText();
         }
 
