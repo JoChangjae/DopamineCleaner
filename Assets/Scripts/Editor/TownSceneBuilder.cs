@@ -36,9 +36,10 @@ namespace DopamineCleaner.Editor
             cam.clearFlags = CameraClearFlags.SolidColor;
             camObj.AddComponent<AudioListener>();
 
-            // 4. GameDataManager 생성
+            // 4. GameDataManager & MutationRouletteManager 생성
             GameObject gdmObj = new GameObject("[GameDataManager]");
             gdmObj.AddComponent<GameDataManager>();
+            gdmObj.AddComponent<MutationRouletteManager>();
 
             // 5. 캔버스 및 UI 생성
             GameObject canvasObj = new GameObject("TownCanvas");
@@ -118,18 +119,20 @@ namespace DopamineCleaner.Editor
             tabHlg.childControlWidth = true;
             tabHlg.childControlHeight = true;
 
-            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 클리너 요원실", 18, new Color(0.24f, 0.28f, 0.42f));
-            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 디톡스 보급소", 18, new Color(0.24f, 0.28f, 0.42f));
-            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 본부 창고", 18, new Color(0.24f, 0.28f, 0.42f));
-            Button tabResearch = CreateButton("TabResearch", tabNavObj.transform, "🔬 본부 연구소", 18, new Color(0.24f, 0.28f, 0.42f));
-            Button tabAchieve = CreateButton("TabAchieve", tabNavObj.transform, "🏆 디톡스 실적/도감", 18, new Color(0.24f, 0.28f, 0.42f));
-            Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 정화 작전 출동처", 18, new Color(0.85f, 0.35f, 0.38f));
+            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 요원실", 17, new Color(0.24f, 0.28f, 0.42f));
+            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 보급소", 17, new Color(0.24f, 0.28f, 0.42f));
+            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 창고", 17, new Color(0.24f, 0.28f, 0.42f));
+            Button tabResearch = CreateButton("TabResearch", tabNavObj.transform, "🔬 연구소", 17, new Color(0.24f, 0.28f, 0.42f));
+            Button tabAchieve = CreateButton("TabAchieve", tabNavObj.transform, "🏆 도감/실적", 17, new Color(0.24f, 0.28f, 0.42f));
+            Button tabFame = CreateButton("TabHallOfFame", tabNavObj.transform, "👑 명예의 전당", 17, new Color(0.38f, 0.32f, 0.15f));
+            Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 작전 출동처", 17, new Color(0.85f, 0.35f, 0.38f));
 
             SetPrivateField(townMgr, "tabCharBtn", tabChar);
             SetPrivateField(townMgr, "tabShopBtn", tabShop);
             SetPrivateField(townMgr, "tabStorageBtn", tabStorage);
             SetPrivateField(townMgr, "tabResearchBtn", tabResearch);
             SetPrivateField(townMgr, "tabAchievementBtn", tabAchieve);
+            SetPrivateField(townMgr, "tabHallOfFameBtn", tabFame);
             SetPrivateField(townMgr, "tabDungeonBtn", tabDungeon);
 
             // 메인 콘텐츠 영역 (중앙)
@@ -164,7 +167,12 @@ namespace DopamineCleaner.Editor
             SetPrivateField(townMgr, "achievementPanel", achievePanel);
             achievePanel.SetActive(false);
 
-            // 6. 정화 구역 출동처 패널
+            // 6. 명예의 전당 패널
+            GameObject famePanel = CreateHallOfFamePanel(contentArea.transform);
+            SetPrivateField(townMgr, "hallOfFamePanel", famePanel);
+            famePanel.SetActive(false);
+
+            // 7. 정화 구역 출동처 패널
             GameObject dungeonPanel = CreateDungeonSelectPanel(contentArea.transform);
             SetPrivateField(townMgr, "dungeonPanel", dungeonPanel);
             dungeonPanel.SetActive(false);
@@ -429,13 +437,24 @@ namespace DopamineCleaner.Editor
             rewardPreview.color = new Color(0.4f, 1f, 0.6f);
             rewardPreview.fontStyle = FontStyle.Bold;
 
-            // 4. 대형 출동 버튼
+            // 4. 돌연변이 룰렛 영역
+            Button spinBtn = CreateButton("MutationSpinBtn", panel.transform, "🎰 돌연변이 룰렛 추첨", 20, new Color(0.48f, 0.28f, 0.65f));
+            RectTransform spRt = spinBtn.GetComponent<RectTransform>();
+            spRt.anchorMin = new Vector2(0.5f, 0.5f);
+            spRt.anchorMax = new Vector2(0.5f, 0.5f);
+            spRt.sizeDelta = new Vector2(380, 50);
+            spRt.anchoredPosition = new Vector2(-280, -215);
+
+            Text mutStatus = CreateText("MutationStatus", panel.transform, "🎰 [출격 돌연변이]: 🛡️ 표준 모드 (특이 변이 없음)", 18, TextAnchor.MiddleLeft, new Vector2(210, -215), new Vector2(650, 45));
+            mutStatus.color = new Color(0.8f, 0.85f, 1f);
+
+            // 5. 대형 출동 버튼
             GameObject startBtnObj = CreateUIObject("StartMissionButton", panel.transform);
             RectTransform sBtnRt = startBtnObj.GetComponent<RectTransform>();
             sBtnRt.anchorMin = new Vector2(0.5f, 0.5f);
             sBtnRt.anchorMax = new Vector2(0.5f, 0.5f);
-            sBtnRt.sizeDelta = new Vector2(650, 80);
-            sBtnRt.anchoredPosition = new Vector2(0, -250);
+            sBtnRt.sizeDelta = new Vector2(650, 75);
+            sBtnRt.anchoredPosition = new Vector2(0, -285);
             Image sBtnImg = startBtnObj.AddComponent<Image>();
             sBtnImg.color = new Color(0.92f, 0.32f, 0.38f);
             Button startBtn = startBtnObj.AddComponent<Button>();
@@ -458,8 +477,62 @@ namespace DopamineCleaner.Editor
             SetPrivateField(ui, "difficultySummaryText", diffSummary);
             SetPrivateField(ui, "rewardPreviewText", rewardPreview);
 
+            SetPrivateField(ui, "mutationSpinButton", spinBtn);
+            SetPrivateField(ui, "mutationStatusText", mutStatus);
             SetPrivateField(ui, "startMissionButton", startBtn);
 
+            return panel;
+        }
+
+        private static GameObject CreateHallOfFamePanel(Transform parent)
+        {
+            GameObject panel = CreateUIObject("HallOfFamePanel", parent);
+            RectTransform rt = panel.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+
+            HallOfFameUI ui = panel.AddComponent<HallOfFameUI>();
+
+            CreateText("Header", panel.transform, "👑 디톡스 최고 명예의 전당 (Top 10 Cleaner Records)", 28, TextAnchor.MiddleCenter, new Vector2(0, 340), new Vector2(900, 40));
+            CreateText("SubGuide", panel.transform, "역대 정화 요원들의 생존 시간과 잡생각 소독 실적 순위표입니다.", 18, TextAnchor.MiddleCenter, new Vector2(0, 300), new Vector2(900, 30));
+
+            // 스크롤뷰
+            GameObject scrollObj = CreateUIObject("ScrollView", panel.transform);
+            RectTransform scrt = scrollObj.GetComponent<RectTransform>();
+            scrt.anchorMin = new Vector2(0.5f, 0.5f);
+            scrt.anchorMax = new Vector2(0.5f, 0.5f);
+            scrt.anchoredPosition = new Vector2(0, -20);
+            scrt.sizeDelta = new Vector2(1360, 560);
+
+            ScrollRect sr = scrollObj.AddComponent<ScrollRect>();
+            sr.horizontal = false;
+            sr.vertical = true;
+
+            Image maskImg = scrollObj.AddComponent<Image>();
+            maskImg.color = new Color(0.1f, 0.08f, 0.15f, 0.6f);
+            Mask mask = scrollObj.AddComponent<Mask>();
+            mask.showMaskGraphic = true;
+
+            GameObject contentObj = CreateUIObject("Content", scrollObj.transform);
+            RectTransform crt = contentObj.GetComponent<RectTransform>();
+            crt.anchorMin = new Vector2(0f, 1f);
+            crt.anchorMax = new Vector2(1f, 1f);
+            crt.pivot = new Vector2(0.5f, 1f);
+            crt.anchoredPosition = Vector2.zero;
+
+            VerticalLayoutGroup vlg = contentObj.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 8;
+            vlg.padding = new RectOffset(15, 15, 15, 15);
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+
+            ContentSizeFitter csf = contentObj.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            sr.content = crt;
+
+            SetPrivateField(ui, "recordListContainer", contentObj.transform);
             return panel;
         }
 

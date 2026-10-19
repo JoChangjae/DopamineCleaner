@@ -16,7 +16,7 @@ namespace DopamineCleaner.Enemies
         DopamineBoss       // 도파민 거대 보스
     }
 
-    [RequireComponent(typeof(Collider2D))]
+    [RequireComponent(typeof(CircleCollider2D))]
     public class Enemy : MonoBehaviour
     {
         [Header("몬스터 스탯")]
@@ -38,6 +38,9 @@ namespace DopamineCleaner.Enemies
         private Color originalColor;
         private Coroutine flashCoroutine;
         private float specialActionTimer = 0f;
+        private float bossPatternTimer = 4.0f;
+        private bool isBossSpecialActing = false;
+        private int bossPatternIndex = 0;
         private TextMesh nameplateText;
 
         public EnemyType Type => enemyType;
@@ -250,14 +253,34 @@ namespace DopamineCleaner.Enemies
             }
             else if (enemyType == EnemyType.DopamineBoss)
             {
-                // 보스: 추적 이동 + 주기적 8방향 탄막 폭풍
-                transform.position += dir * (moveSpeed * Time.deltaTime);
-
-                specialActionTimer -= Time.deltaTime;
-                if (specialActionTimer <= 0f)
+                if (!isBossSpecialActing)
                 {
-                    specialActionTimer = 3.8f;
-                    FireBossRadialBurst();
+                    // 일반 추적 이동
+                    transform.position += dir * (moveSpeed * Time.deltaTime);
+
+                    // 1. 기본 8방향 탄막 사격
+                    specialActionTimer -= Time.deltaTime;
+                    if (specialActionTimer <= 0f)
+                    {
+                        specialActionTimer = 3.6f;
+                        FireBossRadialBurst(8);
+                    }
+
+                    // 2. 6초 주기 특수 텔레그래프 필살기 패턴 (돌진 vs 원형 충격파 교대)
+                    bossPatternTimer -= Time.deltaTime;
+                    if (bossPatternTimer <= 0f)
+                    {
+                        bossPatternTimer = 6.5f;
+                        bossPatternIndex++;
+                        if (bossPatternIndex % 2 == 1)
+                        {
+                            StartCoroutine(BossTelegraphDashRoutine(playerPos));
+                        }
+                        else
+                        {
+                            StartCoroutine(BossTelegraphShockwaveRoutine());
+                        }
+                    }
                 }
             }
             else
@@ -309,9 +332,8 @@ namespace DopamineCleaner.Enemies
             ep.Initialize(dir, 4.5f, damage);
         }
 
-        private void FireBossRadialBurst()
+        private void FireBossRadialBurst(int bulletCount = 8)
         {
-            int bulletCount = 8;
             for (int i = 0; i < bulletCount; i++)
             {
                 float angle = i * (360f / bulletCount) * Mathf.Deg2Rad;
@@ -322,6 +344,71 @@ namespace DopamineCleaner.Enemies
                 EnemyProjectile ep = projObj.AddComponent<EnemyProjectile>();
                 ep.Initialize(dir, 5.0f, damage * 0.8f);
             }
+        }
+
+        private IEnumerator BossTelegraphDashRoutine(Vector3 targetPos)
+        {
+            isBossSpecialActing = true;
+            // 1. 텔레그래프 장판 표시 (0.8초)
+            Core.BossTelegraphManager.Instance?.SpawnLineTelegraph(transform.position, targetPos, 1.8f, 0.8f);
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Dash, 0.7f);
+
+            if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.35f, 0.35f);
+            yield return new WaitForSeconds(0.8f);
+            if (spriteRenderer != null) spriteRenderer.color = originalColor;
+
+            // 2. 고속 돌진 (0.28초간 4.2배 속도)
+            Vector3 dashDir = (targetPos - transform.position).normalized;
+            float dashTime = 0.28f;
+            float elapsed = 0f;
+            while (elapsed < dashTime && IsAlive)
+            {
+                elapsed += Time.deltaTime;
+                transform.position += dashDir * (moveSpeed * 4.2f * Time.deltaTime);
+                yield return null;
+            }
+
+            Core.PixelParticleManager.Instance?.SpawnDeathPop(transform.position, new Color(1f, 0.3f, 0.3f), 15);
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Explosion, 0.6f);
+
+            yield return new WaitForSeconds(0.35f);
+            isBossSpecialActing = false;
+        }
+
+        private IEnumerator BossTelegraphShockwaveRoutine()
+        {
+            isBossSpecialActing = true;
+            float radius = 4.5f;
+            // 1. 원형 텔레그래프 장판 표시 (1.0초)
+            Core.BossTelegraphManager.Instance?.SpawnCircleTelegraph(transform.position, radius, 1.0f);
+
+            Vector3 baseScale = transform.localScale;
+            float t = 0f;
+            while (t < 1.0f && IsAlive)
+            {
+                t += Time.deltaTime;
+                float s = 1.0f + Mathf.Sin(t * 15f) * 0.12f;
+                transform.localScale = baseScale * s;
+                yield return null;
+            }
+            transform.localScale = baseScale;
+
+            // 2. 충격파 발동: 14방향 탄막 + 광역 폭발
+            FireBossRadialBurst(14);
+            Core.PixelParticleManager.Instance?.SpawnDeathPop(transform.position, new Color(1f, 0.85f, 0.2f), 28);
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Explosion, 0.85f);
+
+            if (PlayerController.Instance != null)
+            {
+                float dist = Vector2.Distance(transform.position, PlayerController.Instance.transform.position);
+                if (dist <= radius)
+                {
+                    PlayerController.Instance.TakeDamage(damage * 1.5f);
+                }
+            }
+
+            yield return new WaitForSeconds(0.4f);
+            isBossSpecialActing = false;
         }
 
         private void FireSpamRadialReflection()
@@ -387,9 +474,10 @@ namespace DopamineCleaner.Enemies
                 transform.position += (Vector3)(knockbackDir.normalized * knockbackForce);
             }
 
-            // 데미지 텍스트 팝업 및 피격음
+            // 데미지 텍스트 팝업 및 피격음, 네온 스파크 분사
             Core.DamageTextManager.Instance?.SpawnDamageText(amount, transform.position, amount >= 35f);
             Core.SoundManager.Instance?.Play(Core.SoundEffect.Hit, 0.4f);
+            Core.PixelParticleManager.Instance?.SpawnSparkHit(transform.position, knockbackDir, new Color(1f, 0.9f, 0.2f), 4);
 
             // 피격 플래시
             if (Application.isPlaying && gameObject.activeInHierarchy)
@@ -422,6 +510,10 @@ namespace DopamineCleaner.Enemies
             // 킬 카운트 등록
             GameManager.Instance?.RegisterKill(isBoss);
             Core.EmergencyQuestManager.Instance?.ReportEnemyKilled(enemyType);
+
+            // 팝콘 네온 파티클 폭발 연출
+            int popCount = isBoss ? 45 : (IsElite ? 22 : 12);
+            Core.PixelParticleManager.Instance?.SpawnDeathPop(transform.position, originalColor, popCount);
 
             // 아이템 및 경험치 드랍
             DropLoot(isBoss);

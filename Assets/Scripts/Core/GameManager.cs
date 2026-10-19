@@ -78,7 +78,8 @@ namespace DopamineCleaner.Core
                 float targetSec = 300f;
                 if (Meta.GameDataManager.Instance != null)
                 {
-                    targetSec = Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance.SelectedMapId).targetSurvivalSec;
+                    var mapDef = Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance.SelectedMapId);
+                    if (mapDef != null) targetSec = mapDef.targetSurvivalSec;
                 }
 
                 if (survivalTime >= targetSec && !isEndlessMode && !endlessPromptShown)
@@ -187,13 +188,13 @@ namespace DopamineCleaner.Core
         public int EarnedGold { get; private set; } = 0;
         public int EarnedKarma { get; private set; } = 0;
         public int BonusGold { get; private set; } = 0;
-        public int CurrentGold => Meta.GameDataManager.Instance != null ? Meta.GameDataManager.Instance.Profile.gold : BonusGold;
+        public int CurrentGold => (Meta.GameDataManager.Instance?.Profile != null) ? Meta.GameDataManager.Instance.Profile.gold : BonusGold;
 
         public void AddBonusGold(int amount)
         {
             BonusGold += amount;
             EarnedGold += amount;
-            if (Meta.GameDataManager.Instance != null)
+            if (Meta.GameDataManager.Instance?.Profile != null)
             {
                 Meta.GameDataManager.Instance.Profile.gold += amount;
             }
@@ -220,14 +221,21 @@ namespace DopamineCleaner.Core
             {
                 var map = Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance.SelectedMapId);
                 var diff = Meta.DungeonDatabase.GetDifficultyMultiplier(Meta.GameDataManager.Instance.SelectedDifficulty);
-                targetSec = map.targetSurvivalSec;
-                baseGold = map.baseGoldReward;
-                baseKarma = map.baseKarmaReward;
-                goldMult = diff.rewardGoldMult;
-                karmaMult = diff.rewardKarmaMult;
+                if (map != null)
+                {
+                    targetSec = map.targetSurvivalSec;
+                    baseGold = map.baseGoldReward;
+                    baseKarma = map.baseKarmaReward;
+                }
+                if (diff != null)
+                {
+                    goldMult = diff.rewardGoldMult;
+                    karmaMult = diff.rewardKarmaMult;
+                }
 
                 // 유물 황금 계산기 보유 시 추가 25% 보너스
-                if (Meta.GameDataManager.Instance.Profile.inventory.Contains("artifact_golden_calc"))
+                var profile = Meta.GameDataManager.Instance.Profile;
+                if (profile != null && profile.inventory != null && profile.inventory.Contains("artifact_golden_calc"))
                 {
                     goldMult *= 1.25f;
                 }

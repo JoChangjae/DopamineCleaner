@@ -114,6 +114,8 @@ namespace DopamineCleaner.Editor
             EmergencyQuestManager questMgr = sysObj.AddComponent<EmergencyQuestManager>();
             MentalSanctuaryManager sanctuaryMgr = sysObj.AddComponent<MentalSanctuaryManager>();
             Meta.AchievementManager achieveMgr = sysObj.AddComponent<Meta.AchievementManager>();
+            PixelParticleManager pixelParticleMgr = sysObj.AddComponent<PixelParticleManager>();
+            BossTelegraphManager bossTelegraphMgr = sysObj.AddComponent<BossTelegraphManager>();
 
             // 7. 필드 럭키 슬롯 자판기
             GameObject slotMachineObj = new GameObject("LuckySlotMachine");
@@ -137,6 +139,9 @@ namespace DopamineCleaner.Editor
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0.5f;
             canvasObj.AddComponent<GraphicRaycaster>();
+
+            // 실시간 무기 진화 계통도 모달 (Tab 키)
+            canvasObj.AddComponent<UI.EvolutionTreeModalUI>();
 
             // EventSystem
             GameObject esObj = new GameObject("EventSystem");

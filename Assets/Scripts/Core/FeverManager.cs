@@ -25,6 +25,7 @@ namespace DopamineCleaner.Core
         public float CurrentFever => currentFever;
         public float MaxFever => maxFever;
         public bool IsFever => isFever;
+        public bool IsOverdrive => isFever && comboCount >= 25;
         public int ComboCount => comboCount;
         public float FeverRatio => maxFever > 0f ? Mathf.Clamp01(currentFever / maxFever) : 0f;
 

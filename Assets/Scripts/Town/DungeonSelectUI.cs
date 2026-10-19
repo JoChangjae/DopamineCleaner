@@ -30,6 +30,10 @@ namespace DopamineCleaner.Town
         [SerializeField] private Text hyperModeText;
         [SerializeField] private Button startMissionButton;
 
+        [Header("도파민 돌연변이 룰렛")]
+        [SerializeField] private Button mutationSpinButton;
+        [SerializeField] private Text mutationStatusText;
+
         private string currentMapId = "map_hospital";
         private DungeonDifficulty currentDiff = DungeonDifficulty.Normal;
 
@@ -47,10 +51,31 @@ namespace DopamineCleaner.Town
             if (hyperModeToggleBtn != null)
                 hyperModeToggleBtn.onClick.AddListener(ToggleHyperMode);
 
+            if (mutationSpinButton != null)
+                mutationSpinButton.onClick.AddListener(SpinMutationRoulette);
+
             if (startMissionButton != null)
                 startMissionButton.onClick.AddListener(OnStartMissionClicked);
 
             RefreshUI();
+        }
+
+        private void SpinMutationRoulette()
+        {
+            if (MutationRouletteManager.Instance != null)
+            {
+                var mut = MutationRouletteManager.Instance.SpinRoulette();
+                UpdateMutationUI(mut);
+            }
+        }
+
+        private void UpdateMutationUI(MutationDefinition mut)
+        {
+            if (mutationStatusText != null && mut != null)
+            {
+                mutationStatusText.text = $"🎰 [출격 돌연변이 룰렛]: {mut.icon} <b>{mut.title}</b> ({mut.benefit} / {mut.penalty})";
+                mutationStatusText.color = mut.themeColor;
+            }
         }
 
         private void ToggleHyperMode()

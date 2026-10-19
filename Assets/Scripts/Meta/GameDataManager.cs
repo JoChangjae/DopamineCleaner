@@ -58,7 +58,25 @@ namespace DopamineCleaner.Meta
 
     public class GameDataManager : MonoBehaviour
     {
-        public static GameDataManager Instance { get; private set; }
+        private static GameDataManager instance;
+        public static GameDataManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindAnyObjectByType<GameDataManager>();
+                    if (instance == null)
+                    {
+                        GameObject go = new GameObject("[GameDataManager]");
+                        instance = go.AddComponent<GameDataManager>();
+                        if (Application.isPlaying) DontDestroyOnLoad(go);
+                    }
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         public PlayerProfileData Profile { get; private set; } = new();
 
@@ -73,15 +91,18 @@ namespace DopamineCleaner.Meta
 
         private void Awake()
         {
-            if (Instance == null)
+            if (instance == null || instance == this)
             {
-                Instance = this;
-                DontDestroyOnLoad(gameObject);
+                instance = this;
+                if (Application.isPlaying) DontDestroyOnLoad(gameObject);
                 LoadProfile();
             }
             else
             {
-                Destroy(gameObject);
+                if (Application.isPlaying)
+                    Destroy(gameObject);
+                else
+                    DestroyImmediate(gameObject);
             }
         }
 

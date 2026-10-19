@@ -10,6 +10,7 @@ using DopamineCleaner.Items;
 using DopamineCleaner.Meta;
 using DopamineCleaner.UI;
 using DopamineCleaner.Weapons;
+using DopamineCleaner.Town;
 
 namespace DopamineCleaner.Editor
 {
@@ -101,6 +102,21 @@ namespace DopamineCleaner.Editor
 
             // 24. 🖥️ 창모드 (Windowed Mode) & 전체화면 토글 및 F11 단축키 검증
             TestDisplayMode();
+
+            // 25. 🛣️ 심야 고속도로 & 나이트메어 난이도 구동 및 정산 시뮬레이션
+            TestHighwayNightmare();
+
+            // 26. 💥 네온 픽셀 파티클 FX (팝콘 폭발, 스파크, 피버 화염) 검증
+            TestPixelParticles();
+
+            // 27. ⚠️ 보스전 사이렌 경고 & 돌진/충격파 텔레그래프 검증
+            TestBossTelegraph();
+
+            // 28. 📜 실시간 무기 진화 계통도 트리 (Tab 키) 검증
+            TestEvolutionTreeModal();
+
+            // 29. 🎰 도파민 돌연변이 룰렛 & 👑 명예의 전당 TOP 10 랭킹 검증
+            TestMutationRouletteAndHallOfFame();
 
             // 최종 리포트
             Debug.Log("==================================================================");
@@ -1035,6 +1051,168 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "창모드 및 디스플레이 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestHighwayNightmare()
+        {
+            Debug.Log("--- 25. 심야 고속도로 & 나이트메어 난이도 구동 및 정산 시뮬레이션 ---");
+            try
+            {
+                if (GameDataManager.Instance == null)
+                {
+                    new GameObject("[GDM]").AddComponent<GameDataManager>();
+                }
+
+                GameDataManager.Instance.SelectedMapId = "map_highway";
+                GameDataManager.Instance.SelectedDifficulty = DungeonDifficulty.Nightmare;
+
+                // 맵 및 난이도 정의 검증
+                var map = DungeonDatabase.Get("map_highway");
+                Assert(map != null && map.id == "map_highway", "고속도로 맵 정의 정상 확인");
+                var diff = DungeonDatabase.GetDifficultyMultiplier(DungeonDifficulty.Nightmare);
+                Assert(diff != null && diff.enemyHpMult > 2f, "나이트메어 난이도 계수 정상 확인");
+
+                // 적 생성 및 스탯 검증
+                GameObject enemyPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/EnemyPrefab.prefab");
+                GameObject enemyObj = enemyPrefab != null ? UnityEngine.Object.Instantiate(enemyPrefab) : new GameObject("TestEnemy_Nightmare");
+                Enemy enemy = enemyObj.GetComponent<Enemy>();
+                if (enemy == null)
+                {
+                    if (enemyObj.GetComponent<CircleCollider2D>() == null) enemyObj.AddComponent<CircleCollider2D>();
+                    enemy = enemyObj.AddComponent<Enemy>();
+                }
+                enemy.Initialize(EnemyType.ShortsRunner, 1, 0f);
+                Assert(enemy.HP > 0f, "나이트메어 고속도로 적 초기화 성공");
+
+                // 게임 매니저 정산 시뮬레이션
+                GameObject gmObj = new GameObject("TestGM");
+                GameManager gm = gmObj.AddComponent<GameManager>();
+                gm.StartNewGame();
+                gm.TriggerGameOver(false);
+                Assert(gm.EarnedGold > 0, "나이트메어 패배 정산 성공");
+
+                gm.StartNewGame();
+                gm.TriggerGameOver(true);
+                Assert(gm.EarnedGold > 0, "나이트메어 승리 정산 성공");
+
+                UnityEngine.Object.DestroyImmediate(enemyObj);
+                UnityEngine.Object.DestroyImmediate(gmObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "고속도로 나이트메어 테스트 예외 발생!", ex.ToString());
+            }
+        }
+
+        private static void TestPixelParticles()
+        {
+            Debug.Log("--- 26. 💥 네온 픽셀 파티클 FX 검증 ---");
+            try
+            {
+                GameObject obj = new GameObject("TestPixelParticleManager");
+                PixelParticleManager mgr = obj.AddComponent<PixelParticleManager>();
+                Assert(PixelParticleManager.Instance != null, "PixelParticleManager 싱글톤 인스턴스 생성 성공");
+
+                mgr.SpawnDeathPop(Vector3.zero, Color.magenta, 12);
+                Assert(true, "몬스터 사망 팝콘 픽셀 분사 성공");
+
+                mgr.SpawnSparkHit(Vector3.zero, Vector3.up, Color.yellow, 4);
+                Assert(true, "탄환 피격 네온 스파크 분사 성공");
+
+                mgr.SpawnFeverAura(Vector3.zero, true);
+                Assert(true, "피버/오버드라이브 화염 아우라 파티클 분사 성공");
+
+                UnityEngine.Object.DestroyImmediate(obj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "픽셀 파티클 시스템 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestBossTelegraph()
+        {
+            Debug.Log("--- 27. ⚠️ 보스전 사이렌 경고 & 텔레그래프 검증 ---");
+            try
+            {
+                GameObject obj = new GameObject("TestBossTelegraphManager");
+                BossTelegraphManager btm = obj.AddComponent<BossTelegraphManager>();
+                Assert(BossTelegraphManager.Instance != null, "BossTelegraphManager 인스턴스 생성 성공");
+
+                GameObject line = btm.SpawnLineTelegraph(Vector3.zero, Vector3.right * 10f, 1.8f, 0.5f);
+                Assert(line != null && line.activeSelf, "보스 돌진 궤적 텔레그래프 장판 생성 성공");
+
+                GameObject circle = btm.SpawnCircleTelegraph(Vector3.zero, 4.5f, 0.5f);
+                Assert(circle != null && circle.activeSelf, "보스 원형 충격파 텔레그래프 장판 생성 성공");
+
+                btm.ShowBossWarningBanner();
+                Assert(true, "보스 EMERGENCY WARNING 배너 및 사이렌 트리거 성공");
+
+                UnityEngine.Object.DestroyImmediate(obj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "보스 텔레그래프 시스템 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestEvolutionTreeModal()
+        {
+            Debug.Log("--- 28. 📜 실시간 무기 진화 계통도 트리 (Tab 키) 검증 ---");
+            try
+            {
+                GameObject canvasObj = new GameObject("TestCanvas");
+                Canvas canvas = canvasObj.AddComponent<Canvas>();
+                UI.EvolutionTreeModalUI modal = canvasObj.AddComponent<UI.EvolutionTreeModalUI>();
+                Assert(UI.EvolutionTreeModalUI.Instance != null, "EvolutionTreeModalUI 인스턴스 생성 성공");
+
+                modal.ToggleModal();
+                Assert(true, "진화 계통도 모달 열기(Tab 키) 시뮬레이션 성공");
+
+                modal.ToggleModal();
+                Assert(true, "진화 계통도 모달 닫기(Tab 키) 시뮬레이션 성공");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "무기 진화 계통도 모달 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestMutationRouletteAndHallOfFame()
+        {
+            Debug.Log("--- 29. 🎰 도파민 돌연변이 룰렛 & 👑 명예의 전당 TOP 10 검증 ---");
+            try
+            {
+                // 1. 돌연변이 룰렛
+                GameObject obj = new GameObject("TestMutationManager");
+                MutationRouletteManager mrm = obj.AddComponent<MutationRouletteManager>();
+                Assert(MutationRouletteManager.Instance != null, "MutationRouletteManager 인스턴스 생성 성공");
+
+                var mut = mrm.SpinRoulette();
+                Assert(mut != null && !string.IsNullOrEmpty(mut.title), $"돌연변이 룰렛 추첨 성공: [{mut.title}]");
+
+                mrm.SetMutation(MutationType.GlassCannon);
+                Assert(mrm.CurrentMutation.type == MutationType.GlassCannon && mrm.CurrentMutation.playerDamageMult > 1.2f, "유리 대포 돌연변이 설정 및 배율 검증 성공");
+
+                // 2. 명예의 전당 UI
+                GameObject panelObj = new GameObject("TestHallOfFamePanel");
+                GameObject contentObj = new GameObject("TestLeaderboardContent");
+                contentObj.transform.SetParent(panelObj.transform);
+                HallOfFameUI hof = panelObj.AddComponent<HallOfFameUI>();
+                SetField(hof, "recordListContainer", contentObj.transform);
+
+                hof.RefreshLeaderboard();
+                Assert(contentObj.transform.childCount > 0, $"명예의 전당 TOP 랭킹 카드 {contentObj.transform.childCount}개 생성 성공");
+
+                UnityEngine.Object.DestroyImmediate(panelObj);
+                UnityEngine.Object.DestroyImmediate(obj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "돌연변이 룰렛 및 명예의 전당 테스트 예외", ex.ToString());
             }
         }
 

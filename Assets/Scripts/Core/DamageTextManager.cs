@@ -37,6 +37,9 @@ namespace DopamineCleaner.Core
                 {
                     meshRenderer = gameObject.AddComponent<MeshRenderer>();
                 }
+            }
+            if (meshRenderer != null)
+            {
                 meshRenderer.sortingOrder = 50; // 최상단 노출
             }
         }

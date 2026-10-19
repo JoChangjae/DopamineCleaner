@@ -71,7 +71,9 @@ namespace DopamineCleaner.Meta
 
         public static DungeonMapDefinition Get(string id)
         {
-            return maps.TryGetValue(id, out var def) ? def : maps["map_hospital"];
+            if (!string.IsNullOrEmpty(id) && maps.TryGetValue(id, out var def))
+                return def;
+            return maps.ContainsKey("map_hospital") ? maps["map_hospital"] : null;
         }
 
         public static List<DungeonMapDefinition> GetAll()

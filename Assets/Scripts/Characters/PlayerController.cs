@@ -170,6 +170,11 @@ namespace DopamineCleaner.Characters
                     float hue = Mathf.PingPong(Time.time * 2f, 0.2f) + 0.12f; // 골드~옐로우
                     spriteRenderer.color = Color.HSVToRGB(hue, 0.8f, 1f);
                 }
+                // 네온 화염 아우라 파티클
+                if (Time.frameCount % 5 == 0)
+                {
+                    Core.PixelParticleManager.Instance?.SpawnFeverAura(transform.position, FeverManager.Instance.IsOverdrive);
+                }
             }
             else if (spriteRenderer != null && (spriteRenderer.color.a < 1f || spriteRenderer.color != Color.white))
             {
