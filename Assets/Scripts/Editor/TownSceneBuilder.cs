@@ -90,9 +90,18 @@ namespace DopamineCleaner.Editor
             Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 22, TextAnchor.MiddleRight, new Vector2(25, -18), new Vector2(400, 35));
             karmaTxt.color = new Color(0.6f, 0.85f, 1f);
 
+            // 상단 창모드 / 전체화면 토글 버튼 (헤더 중앙 우측)
+            Button winModeBtn = CreateButton("WindowModeButton", headerObj.transform, "🖥️ 화면 모드 (F11)", 16, new Color(0.24f, 0.28f, 0.38f));
+            RectTransform wRt = winModeBtn.GetComponent<RectTransform>();
+            wRt.sizeDelta = new Vector2(240, 48);
+            wRt.anchoredPosition = new Vector2(300, 0);
+            Text winModeTxt = winModeBtn.GetComponentInChildren<Text>();
+
             SetPrivateField(townMgr, "goldText", goldTxt);
             SetPrivateField(townMgr, "karmaText", karmaTxt);
             SetPrivateField(townMgr, "activeCharacterText", activeCharTxt);
+            SetPrivateField(townMgr, "windowModeBtn", winModeBtn);
+            SetPrivateField(townMgr, "windowModeBtnText", winModeTxt);
 
             // 상단 탭 네비게이션 버튼 (5개)
             GameObject tabNavObj = CreateUIObject("TabNavBar", canvasObj.transform);

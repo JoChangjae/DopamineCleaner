@@ -537,30 +537,41 @@ namespace DopamineCleaner.Editor
             // 효과음 토글 버튼
             GameObject muteBtnObj = CreateUIObject("MuteButton", pausePanelObj.transform);
             RectTransform mRt = muteBtnObj.GetComponent<RectTransform>();
-            mRt.sizeDelta = new Vector2(280, 60);
-            mRt.anchoredPosition = new Vector2(-160, -290);
+            mRt.sizeDelta = new Vector2(200, 56);
+            mRt.anchoredPosition = new Vector2(-220, -290);
             Image mImg = muteBtnObj.AddComponent<Image>();
             mImg.color = new Color(0.24f, 0.20f, 0.32f);
             Button mBtn = muteBtnObj.AddComponent<Button>();
             mBtn.onClick.AddListener(uiMgr.OnToggleMuteClicked);
-            Text mMuteTxt = CreateText("MuteBtnText", muteBtnObj.transform, "🔊 효과음: ON", 20, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(260, 50));
+            Text mMuteTxt = CreateText("MuteBtnText", muteBtnObj.transform, "🔊 효과음: ON", 19, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(190, 48));
+
+            // 창모드 / 전체화면 토글 버튼
+            GameObject winBtnObj = CreateUIObject("WindowModeButton", pausePanelObj.transform);
+            RectTransform wRt = winBtnObj.GetComponent<RectTransform>();
+            wRt.sizeDelta = new Vector2(250, 56);
+            wRt.anchoredPosition = new Vector2(20, -290);
+            Image wImg = winBtnObj.AddComponent<Image>();
+            wImg.color = new Color(0.20f, 0.26f, 0.38f);
+            Button wBtn = winBtnObj.AddComponent<Button>();
+            wBtn.onClick.AddListener(uiMgr.OnToggleWindowModeClicked);
+            Text wTxt = CreateText("WindowBtnText", winBtnObj.transform, "🖥️ 화면 모드 (F11)", 18, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(240, 48));
 
             // 계속하기 버튼
             GameObject resumeBtnObj = CreateUIObject("ResumeButton", pausePanelObj.transform);
             RectTransform resRt = resumeBtnObj.GetComponent<RectTransform>();
-            resRt.sizeDelta = new Vector2(280, 60);
-            resRt.anchoredPosition = new Vector2(160, -290);
+            resRt.sizeDelta = new Vector2(200, 56);
+            resRt.anchoredPosition = new Vector2(260, -290);
             Image resImg = resumeBtnObj.AddComponent<Image>();
             resImg.color = new Color(0.32f, 0.72f, 0.55f);
             Button resBtn = resumeBtnObj.AddComponent<Button>();
             resBtn.onClick.AddListener(uiMgr.ResumeGame);
-            CreateText("ResumeText", resumeBtnObj.transform, "▶ 계속하기 (ESC)", 22, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(260, 50));
+            CreateText("ResumeText", resumeBtnObj.transform, "▶ 계속하기", 20, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(190, 48));
 
             // 조기 철수 버튼
             GameObject retreatBtnObj = CreateUIObject("RetreatButton", pausePanelObj.transform);
             RectTransform retRt = retreatBtnObj.GetComponent<RectTransform>();
             retRt.sizeDelta = new Vector2(360, 50);
-            retRt.anchoredPosition = new Vector2(0, -370);
+            retRt.anchoredPosition = new Vector2(0, -365);
             Image retImg = retreatBtnObj.AddComponent<Image>();
             retImg.color = new Color(0.65f, 0.22f, 0.25f);
             Button retBtn = retreatBtnObj.AddComponent<Button>();
@@ -570,6 +581,8 @@ namespace DopamineCleaner.Editor
             SetPrivateField(uiMgr, "pausePanel", pausePanelObj);
             SetPrivateField(uiMgr, "pauseEquipmentText", pauseEquipTxt);
             SetPrivateField(uiMgr, "pauseMuteBtnText", mMuteTxt);
+            SetPrivateField(uiMgr, "pauseWindowModeBtn", wBtn);
+            SetPrivateField(uiMgr, "pauseWindowModeBtnText", wTxt);
 
             lvlPanel.SetActive(false);
             goPanel.SetActive(false);

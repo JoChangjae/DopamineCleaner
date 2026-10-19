@@ -98,6 +98,9 @@ namespace DopamineCleaner.Editor
             // 23. 🕹️ 본부 전체 탭 및 버튼 인터랙션 전수 검증
             TestHQButtonsAndTownUI();
 
+            // 24. 🖥️ 창모드 (Windowed Mode) & 전체화면 토글 및 F11 단축키 검증
+            TestDisplayMode();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -918,6 +921,49 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "본부 UI 및 버튼 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestDisplayMode()
+        {
+            Debug.Log("--- 24. 🖥️ 창모드 (Windowed Mode) & 전체화면 토글 및 F11 단축키 검증 ---");
+            try
+            {
+                // 1. DisplayModeManager 기본 상태 및 전환 검증
+                GameObject dmmObj = new GameObject("[TestDisplayModeManager]");
+                DisplayModeManager dmm = dmmObj.AddComponent<DisplayModeManager>();
+                SetField(typeof(DisplayModeManager), "Instance", dmm);
+
+                dmm.SetDisplayMode(true, 1600, 900);
+                Assert(dmm.IsWindowed, "창모드(1600x900) 설정 적용 확인");
+                Assert(dmm.GetDisplayModeLabel().Contains("창모드") && dmm.GetDisplayModeLabel().Contains("F11"), "창모드 라벨 및 F11 단축키 안내 텍스트 확인");
+
+                dmm.ToggleDisplayMode();
+                Assert(!dmm.IsWindowed, "창모드 -> 전체화면 즉시 토글 성공 확인");
+                Assert(dmm.GetDisplayModeLabel().Contains("전체화면"), "전체화면 라벨 표기 확인");
+
+                // 2. 도파민 본부 헤더의 창모드 버튼 검증
+                GameObject townCanvas = GameObject.Find("TownCanvas");
+                if (townCanvas != null)
+                {
+                    var winBtn = townCanvas.transform.Find("HeaderBar/WindowModeButton");
+                    Assert(winBtn != null, "본부 상단 HeaderBar [🖥️ 화면 모드 (F11)] 버튼 배치 확인");
+                }
+
+                // 3. 인게임 일시정지 창의 창모드 버튼 검증
+                DopamineSceneBuilder.BuildScene();
+                GameObject inGameCanvas = GameObject.Find("Canvas");
+                if (inGameCanvas != null)
+                {
+                    var pauseWinBtn = inGameCanvas.transform.Find("PausePanel/WindowModeButton");
+                    Assert(pauseWinBtn != null, "인게임 일시정지 [PausePanel/WindowModeButton] 배치 확인");
+                }
+
+                UnityEngine.Object.DestroyImmediate(dmmObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "창모드 및 디스플레이 테스트 예외", ex.ToString());
             }
         }
 

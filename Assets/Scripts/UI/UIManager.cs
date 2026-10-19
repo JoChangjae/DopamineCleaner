@@ -51,6 +51,8 @@ namespace DopamineCleaner.UI
         [SerializeField] private GameObject pausePanel;
         [SerializeField] private Text pauseEquipmentText;
         [SerializeField] private Text pauseMuteBtnText;
+        [SerializeField] private Button pauseWindowModeBtn;
+        [SerializeField] private Text pauseWindowModeBtnText;
 
         private void Awake()
         {
@@ -83,6 +85,10 @@ namespace DopamineCleaner.UI
             SynergyManager.OnSynergyActivated += HandleSynergyActivated;
             EnsureSynergyHudUI();
             UpdateSynergyHUD();
+
+            DisplayModeManager.OnDisplayModeChanged += HandleDisplayModeChanged;
+            EnsurePauseWindowModeButton();
+            UpdateWindowModeButtonText();
 
             if (FeverManager.Instance != null)
             {
@@ -167,6 +173,7 @@ namespace DopamineCleaner.UI
             }
             Meta.AchievementManager.OnAchievementUnlocked -= ShowAchievementToast;
             SynergyManager.OnSynergyActivated -= HandleSynergyActivated;
+            DisplayModeManager.OnDisplayModeChanged -= HandleDisplayModeChanged;
 
             if (GameManager.Instance != null)
             {
@@ -737,6 +744,7 @@ namespace DopamineCleaner.UI
             }
 
             UpdateMuteButtonText();
+            UpdateWindowModeButtonText();
         }
 
         public void ResumeGame()
@@ -759,6 +767,44 @@ namespace DopamineCleaner.UI
             if (pauseMuteBtnText != null && SoundManager.Instance != null)
             {
                 pauseMuteBtnText.text = SoundManager.Instance.IsMuted ? "🔈 효과음: OFF (음소거)" : "🔊 효과음: ON";
+            }
+        }
+
+        public void OnToggleWindowModeClicked()
+        {
+            DisplayModeManager.Instance?.ToggleDisplayMode();
+            UpdateWindowModeButtonText();
+        }
+
+        private void HandleDisplayModeChanged(bool isWindowed)
+        {
+            UpdateWindowModeButtonText();
+        }
+
+        private void UpdateWindowModeButtonText()
+        {
+            if (pauseWindowModeBtnText != null && DisplayModeManager.Instance != null)
+            {
+                pauseWindowModeBtnText.text = DisplayModeManager.Instance.GetDisplayModeLabel();
+            }
+        }
+
+        private void EnsurePauseWindowModeButton()
+        {
+            if (pauseWindowModeBtn == null && pausePanel != null)
+            {
+                var existingBtn = pausePanel.transform.Find("WindowModeButton")?.GetComponent<Button>();
+                if (existingBtn != null)
+                {
+                    pauseWindowModeBtn = existingBtn;
+                    pauseWindowModeBtnText = existingBtn.GetComponentInChildren<Text>();
+                }
+            }
+
+            if (pauseWindowModeBtn != null)
+            {
+                pauseWindowModeBtn.onClick.RemoveAllListeners();
+                pauseWindowModeBtn.onClick.AddListener(OnToggleWindowModeClicked);
             }
         }
 

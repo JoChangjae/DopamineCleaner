@@ -29,6 +29,10 @@ namespace DopamineCleaner.Town
         [SerializeField] private Button tabAchievementBtn;
         [SerializeField] private Button tabDungeonBtn;
 
+        [Header("화면 모드 버튼")]
+        [SerializeField] private Button windowModeBtn;
+        [SerializeField] private Text windowModeBtnText;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -53,6 +57,13 @@ namespace DopamineCleaner.Town
             if (tabAchievementBtn != null) tabAchievementBtn.onClick.AddListener(() => SwitchTab(4));
             tabDungeonBtn.onClick.AddListener(() => SwitchTab(5));
 
+            if (windowModeBtn != null)
+            {
+                windowModeBtn.onClick.AddListener(OnWindowModeToggleClicked);
+            }
+            Core.DisplayModeManager.OnDisplayModeChanged += HandleDisplayModeChanged;
+            UpdateWindowModeText();
+
             RefreshHeader();
             SwitchTab(0); // 기본 탭: 캐릭터 선택소
         }
@@ -62,6 +73,26 @@ namespace DopamineCleaner.Town
             if (GameDataManager.Instance != null)
             {
                 GameDataManager.Instance.OnProfileUpdated -= RefreshHeader;
+            }
+            Core.DisplayModeManager.OnDisplayModeChanged -= HandleDisplayModeChanged;
+        }
+
+        public void OnWindowModeToggleClicked()
+        {
+            Core.DisplayModeManager.Instance?.ToggleDisplayMode();
+            UpdateWindowModeText();
+        }
+
+        private void HandleDisplayModeChanged(bool isWindowed)
+        {
+            UpdateWindowModeText();
+        }
+
+        private void UpdateWindowModeText()
+        {
+            if (windowModeBtnText != null && Core.DisplayModeManager.Instance != null)
+            {
+                windowModeBtnText.text = Core.DisplayModeManager.Instance.GetDisplayModeLabel();
             }
         }
 

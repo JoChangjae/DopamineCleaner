@@ -23,6 +23,10 @@ namespace DopamineCleaner.UI
         [SerializeField] private Toggle shakeToggle;
         [SerializeField] private Toggle speedrunTimerToggle;
 
+        [Header("화면 디스플레이 옵션")]
+        [SerializeField] private Button windowModeBtn;
+        [SerializeField] private Text windowModeText;
+
         [Header("버튼")]
         [SerializeField] private Button closeButton;
 
@@ -36,11 +40,6 @@ namespace DopamineCleaner.UI
 
             if (modalPanel != null) modalPanel.SetActive(false);
             InitListeners();
-        }
-
-        private void OnDestroy()
-        {
-            if (Instance == this) Instance = null;
         }
 
         private void InitListeners()
@@ -74,11 +73,28 @@ namespace DopamineCleaner.UI
                 speedrunTimerToggle.onValueChanged.AddListener((val) => SpeedrunTimerEnabled = val);
             }
 
+            if (windowModeBtn != null)
+            {
+                windowModeBtn.onClick.AddListener(OnWindowModeClicked);
+            }
+            DisplayModeManager.OnDisplayModeChanged += HandleDisplayModeChanged;
+
             if (closeButton != null)
             {
                 closeButton.onClick.AddListener(Close);
             }
 
+            UpdateLabels();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+            DisplayModeManager.OnDisplayModeChanged -= HandleDisplayModeChanged;
+        }
+
+        private void HandleDisplayModeChanged(bool isWindowed)
+        {
             UpdateLabels();
         }
 
@@ -114,6 +130,12 @@ namespace DopamineCleaner.UI
             }
         }
 
+        private void OnWindowModeClicked()
+        {
+            DisplayModeManager.Instance?.ToggleDisplayMode();
+            UpdateLabels();
+        }
+
         private void UpdateLabels()
         {
             if (bgmValText != null && SoundManager.Instance != null)
@@ -124,6 +146,9 @@ namespace DopamineCleaner.UI
 
             if (muteText != null && SoundManager.Instance != null)
                 muteText.text = SoundManager.Instance.IsMuted ? "🔇 [전체 음소거 ON]" : "🔊 [전체 음소거 OFF]";
+
+            if (windowModeText != null && DisplayModeManager.Instance != null)
+                windowModeText.text = DisplayModeManager.Instance.GetDisplayModeLabel();
         }
     }
 }
