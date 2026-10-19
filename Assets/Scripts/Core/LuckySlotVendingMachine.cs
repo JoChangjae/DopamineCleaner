@@ -349,7 +349,7 @@ namespace DopamineCleaner.Core
                 FeverManager.Instance?.ActivateFever();
                 AchievementManager.Instance?.ReportJackpot();
                 SoundManager.Instance?.Play(SoundEffect.Fever, 0.9f);
-                PixelParticleManager.Instance?.SpawnLevelUpFlash(dropPos);
+                PixelParticleManager.Instance?.SpawnDeathPop(dropPos, new Color(1f, 0.85f, 0.2f), 18);
             }
             else if (s1 == "💎" && s2 == "💎" && s3 == "💎")
             {
@@ -364,7 +364,7 @@ namespace DopamineCleaner.Core
                 ItemManager.Instance?.SpawnGem(dropPos, GemType.Blue, 10);
                 ItemManager.Instance?.TriggerMagnet();
                 SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.8f);
-                PixelParticleManager.Instance?.SpawnLevelUpFlash(dropPos);
+                PixelParticleManager.Instance?.SpawnDeathPop(dropPos, new Color(0.3f, 0.9f, 1f), 16);
             }
             else if (s1 == "🍒" && s2 == "🍒" && s3 == "🍒")
             {
@@ -378,7 +378,7 @@ namespace DopamineCleaner.Core
                 ItemManager.Instance?.SpawnGem(dropPos, GemType.Cake, 0);
                 ItemManager.Instance?.SpawnGem(dropPos + new Vector3(0.5f, -0.2f, 0f), GemType.Blue, 10);
                 SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.8f);
-                PixelParticleManager.Instance?.SpawnLevelUpFlash(dropPos);
+                PixelParticleManager.Instance?.SpawnDeathPop(dropPos, new Color(1f, 0.3f, 0.6f), 16);
             }
             else if (s1 == "💀" && s2 == "💀" && s3 == "💀")
             {
