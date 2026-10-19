@@ -42,6 +42,12 @@ namespace DopamineCleaner.Meta
 
         // 최근 5회 작전 기록실
         public List<CombatRecord> combatRecords = new();
+
+        // 사원 승진 및 직급 이력 데이터
+        public List<CharacterCareerData> characterCareers = new();
+
+        // 활성화된 블랙기업 근로 조약 목록
+        public List<string> activePactIds = new();
     }
 
     [Serializable]
@@ -168,11 +174,17 @@ namespace DopamineCleaner.Meta
             if (Profile.combatRecords == null)
                 Profile.combatRecords = new();
 
+            if (Profile.characterCareers == null)
+                Profile.characterCareers = new();
+
+            if (Profile.activePactIds == null)
+                Profile.activePactIds = new();
+
             OnProfileUpdated?.Invoke();
         }
 
         // ==========================================
-        // 캐릭터 관리
+        // 캐릭터 관리 및 승진 (Career Advancement)
         // ==========================================
         public bool SelectCharacter(string charId)
         {
@@ -200,6 +212,134 @@ namespace DopamineCleaner.Meta
                 return true;
             }
             return false;
+        }
+
+        public CharacterCareerData GetCareerData(string charId)
+        {
+            if (Profile.characterCareers == null) Profile.characterCareers = new();
+
+            var career = Profile.characterCareers.Find(c => c.characterId == charId);
+            if (career == null)
+            {
+                career = new CharacterCareerData(charId, 0, 0);
+                Profile.characterCareers.Add(career);
+            }
+            return career;
+        }
+
+        public void RecordCharacterClear(string charId)
+        {
+            var career = GetCareerData(charId);
+            career.clearCount++;
+            SaveProfile();
+        }
+
+        public bool CanPromoteCharacter(string charId)
+        {
+            var career = GetCareerData(charId);
+            if (career.rankLevel >= 2) return false; // 최고 직급
+
+            var nextDef = CareerDatabase.GetNext((CareerRank)career.rankLevel);
+            if (nextDef == null) return false;
+
+            return career.clearCount >= nextDef.requiredClears;
+        }
+
+        public bool PromoteCharacter(string charId)
+        {
+            if (!CanPromoteCharacter(charId)) return false;
+
+            var career = GetCareerData(charId);
+            career.rankLevel++;
+            SaveProfile();
+            OnProfileUpdated?.Invoke();
+            return true;
+        }
+
+        // ==========================================
+        // 블랙기업 근로 조약 (Pacts of Overwork)
+        // ==========================================
+        public bool IsPactActive(PactType type)
+        {
+            var def = PactDatabase.Get(type);
+            return def != null && Profile.activePactIds != null && Profile.activePactIds.Contains(def.id);
+        }
+
+        public void SetPactActive(PactType type, bool active)
+        {
+            var def = PactDatabase.Get(type);
+            if (def == null) return;
+            if (Profile.activePactIds == null) Profile.activePactIds = new();
+
+            if (active && !Profile.activePactIds.Contains(def.id))
+            {
+                Profile.activePactIds.Add(def.id);
+            }
+            else if (!active && Profile.activePactIds.Contains(def.id))
+            {
+                Profile.activePactIds.Remove(def.id);
+            }
+            SaveProfile();
+            OnProfileUpdated?.Invoke();
+        }
+
+        public bool TogglePact(PactType type)
+        {
+            bool newState = !IsPactActive(type);
+            SetPactActive(type, newState);
+            return newState;
+        }
+
+        public void ClearActivePacts()
+        {
+            if (Profile.activePactIds != null)
+            {
+                Profile.activePactIds.Clear();
+                SaveProfile();
+                OnProfileUpdated?.Invoke();
+            }
+        }
+
+        public float GetActivePactGoldMultiplier()
+        {
+            float bonus = 0f;
+            foreach (PactType pt in Enum.GetValues(typeof(PactType)))
+            {
+                if (IsPactActive(pt))
+                {
+                    var def = PactDatabase.Get(pt);
+                    if (def != null) bonus += def.goldBonus;
+                }
+            }
+            return bonus;
+        }
+
+        public float GetActivePactKarmaMultiplier()
+        {
+            float bonus = 0f;
+            foreach (PactType pt in Enum.GetValues(typeof(PactType)))
+            {
+                if (IsPactActive(pt))
+                {
+                    var def = PactDatabase.Get(pt);
+                    if (def != null) bonus += def.karmaBonus;
+                }
+            }
+            return bonus;
+        }
+
+        public float GetActivePactExpMultiplier()
+        {
+            float bonus = 0f;
+            foreach (PactType pt in Enum.GetValues(typeof(PactType)))
+            {
+                if (IsPactActive(pt))
+                {
+                    var def = PactDatabase.Get(pt);
+                    if (def != null) bonus += def.expBonus;
+                }
+            }
+            return bonus;
         }
 
         public int GetResearchLevel(string researchId)

@@ -437,29 +437,51 @@ namespace DopamineCleaner.Editor
             rewardPreview.color = new Color(0.4f, 1f, 0.6f);
             rewardPreview.fontStyle = FontStyle.Bold;
 
-            // 4. 돌연변이 룰렛 영역
-            Button spinBtn = CreateButton("MutationSpinBtn", panel.transform, "🎰 돌연변이 룰렛 추첨", 20, new Color(0.48f, 0.28f, 0.65f));
+            // 4. 블랙기업 근로 조약 영역
+            GameObject pactBtnGroup = CreateUIObject("PactBtnGroup", panel.transform);
+            RectTransform pRt = pactBtnGroup.GetComponent<RectTransform>();
+            pRt.anchorMin = new Vector2(0.5f, 0.5f);
+            pRt.anchorMax = new Vector2(0.5f, 0.5f);
+            pRt.sizeDelta = new Vector2(1300, 48);
+            pRt.anchoredPosition = new Vector2(0, -170);
+
+            HorizontalLayoutGroup pHlg = pactBtnGroup.AddComponent<HorizontalLayoutGroup>();
+            pHlg.spacing = 15;
+            pHlg.childAlignment = TextAnchor.MiddleCenter;
+            pHlg.childControlWidth = true;
+            pHlg.childControlHeight = true;
+
+            Button pactOverwork = CreateButton("PactOverwork", pactBtnGroup.transform, "⏰ 주말 특근 (+25%G)", 17, new Color(0.22f, 0.20f, 0.28f));
+            Button pactAi = CreateButton("PactAI", pactBtnGroup.transform, "🤖 AI 압박 (+25%P)", 17, new Color(0.22f, 0.20f, 0.28f));
+            Button pactNotif = CreateButton("PactNotif", pactBtnGroup.transform, "📨 스팸 폭탄 (+25%Exp)", 17, new Color(0.22f, 0.20f, 0.28f));
+            Button pactBlackout = CreateButton("PactBlackout", pactBtnGroup.transform, "🔌 블랙아웃 (+35%G)", 17, new Color(0.22f, 0.20f, 0.28f));
+
+            Text pactSummary = CreateText("PactSummary", panel.transform, "📜 [근로 조약]: 미체결", 17, TextAnchor.MiddleCenter, new Vector2(0, -205), new Vector2(1300, 26));
+            pactSummary.color = new Color(0.7f, 0.75f, 0.85f);
+
+            // 5. 돌연변이 룰렛 영역
+            Button spinBtn = CreateButton("MutationSpinBtn", panel.transform, "🎰 돌연변이 룰렛 추첨", 18, new Color(0.48f, 0.28f, 0.65f));
             RectTransform spRt = spinBtn.GetComponent<RectTransform>();
             spRt.anchorMin = new Vector2(0.5f, 0.5f);
             spRt.anchorMax = new Vector2(0.5f, 0.5f);
-            spRt.sizeDelta = new Vector2(380, 50);
-            spRt.anchoredPosition = new Vector2(-280, -215);
+            spRt.sizeDelta = new Vector2(360, 44);
+            spRt.anchoredPosition = new Vector2(-280, -245);
 
-            Text mutStatus = CreateText("MutationStatus", panel.transform, "🎰 [출격 돌연변이]: 🛡️ 표준 모드 (특이 변이 없음)", 18, TextAnchor.MiddleLeft, new Vector2(210, -215), new Vector2(650, 45));
+            Text mutStatus = CreateText("MutationStatus", panel.transform, "🎰 [출격 돌연변이]: 🛡️ 표준 모드 (특이 변이 없음)", 17, TextAnchor.MiddleLeft, new Vector2(210, -245), new Vector2(650, 40));
             mutStatus.color = new Color(0.8f, 0.85f, 1f);
 
-            // 5. 대형 출동 버튼
+            // 6. 대형 출동 버튼
             GameObject startBtnObj = CreateUIObject("StartMissionButton", panel.transform);
             RectTransform sBtnRt = startBtnObj.GetComponent<RectTransform>();
             sBtnRt.anchorMin = new Vector2(0.5f, 0.5f);
             sBtnRt.anchorMax = new Vector2(0.5f, 0.5f);
-            sBtnRt.sizeDelta = new Vector2(650, 75);
-            sBtnRt.anchoredPosition = new Vector2(0, -285);
+            sBtnRt.sizeDelta = new Vector2(650, 68);
+            sBtnRt.anchoredPosition = new Vector2(0, -315);
             Image sBtnImg = startBtnObj.AddComponent<Image>();
             sBtnImg.color = new Color(0.92f, 0.32f, 0.38f);
             Button startBtn = startBtnObj.AddComponent<Button>();
 
-            Text startTxt = CreateText("StartText", startBtnObj.transform, "🚀 정화 작전 출동 (Start Cleanse)", 28, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(630, 75));
+            Text startTxt = CreateText("StartText", startBtnObj.transform, "🚀 정화 작전 출동 (Start Cleanse)", 26, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(630, 68));
             startTxt.color = Color.white;
             startTxt.fontStyle = FontStyle.Bold;
 
@@ -476,6 +498,12 @@ namespace DopamineCleaner.Editor
             SetPrivateField(ui, "mapDescText", mapDesc);
             SetPrivateField(ui, "difficultySummaryText", diffSummary);
             SetPrivateField(ui, "rewardPreviewText", rewardPreview);
+
+            SetPrivateField(ui, "pactOverworkBtn", pactOverwork);
+            SetPrivateField(ui, "pactAiPressureBtn", pactAi);
+            SetPrivateField(ui, "pactNotificationBtn", pactNotif);
+            SetPrivateField(ui, "pactBlackoutBtn", pactBlackout);
+            SetPrivateField(ui, "pactSummaryText", pactSummary);
 
             SetPrivateField(ui, "mutationSpinButton", spinBtn);
             SetPrivateField(ui, "mutationStatusText", mutStatus);
@@ -561,9 +589,14 @@ namespace DopamineCleaner.Editor
             Text passive = CreateText("Passive", card.transform, "[고유 특성]\n열정 넘치는 신입: 밸런스 균형", 17, TextAnchor.UpperCenter, new Vector2(0, -60), new Vector2(360, 130));
             passive.color = new Color(0.95f, 0.88f, 0.72f);
 
+            Button promoteBtn = CreateButton("PromoteButton", card.transform, "🌟 특진 승진", 17, new Color(0.35f, 0.32f, 0.45f));
+            RectTransform pBtnRt = promoteBtn.GetComponent<RectTransform>();
+            pBtnRt.sizeDelta = new Vector2(330, 48);
+            pBtnRt.anchoredPosition = new Vector2(0, -188);
+
             Button btn = CreateButton("ActionButton", card.transform, "요원 선택", 22, new Color(0.85f, 0.4f, 0.5f));
             RectTransform btnRt = btn.GetComponent<RectTransform>();
-            btnRt.sizeDelta = new Vector2(330, 65);
+            btnRt.sizeDelta = new Vector2(330, 58);
             btnRt.anchoredPosition = new Vector2(0, -255);
 
             string path = "Assets/Prefabs/CharacterCardPrefab.prefab";

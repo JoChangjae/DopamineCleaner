@@ -118,6 +118,18 @@ namespace DopamineCleaner.Editor
             // 29. 🎰 도파민 돌연변이 룰렛 & 👑 명예의 전당 TOP 10 랭킹 검증
             TestMutationRouletteAndHallOfFame();
 
+            // 30. 📜 블랙기업 근로 조약 (Pact of Overwork) 시스템 검증
+            TestPactOfOverwork();
+
+            // 31. 🎖️ 사원 승진 & 직급 전직 시스템 (Career Advancement) 검증
+            TestCareerAdvancement();
+
+            // 32. ☕ 비밀 탕비실 & 옥상 휴게실 딜레마 (Breakroom Dilemma) 검증
+            TestBreakroomDilemma();
+
+            // 33. 🚨 불시 사내 특별 감사 & 김감사 부장 (HR Audit Boss) 검증
+            TestHRAuditBoss();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -1216,8 +1228,239 @@ namespace DopamineCleaner.Editor
             }
         }
 
+        private static void TestPactOfOverwork()
+        {
+            Debug.Log("\n[30] 📜 블랙기업 근로 조약 (Pact of Overwork) 시스템 검증");
+            try
+            {
+                var allPacts = PactDatabase.GetAll();
+                Assert(allPacts.Count == 4, $"근로 조약 4종 등록 검증 (등록 수: {allPacts.Count})");
+
+                var gdm = GameDataManager.Instance;
+                gdm.ClearActivePacts();
+                Assert(!gdm.IsPactActive(PactType.WeekendOverwork), "조약 초기화 후 주말특근 비활성화 확인");
+
+                gdm.TogglePact(PactType.WeekendOverwork);
+                gdm.TogglePact(PactType.AIPressure);
+                Assert(gdm.IsPactActive(PactType.WeekendOverwork), "주말특근 조약 토글 활성화 확인");
+                Assert(gdm.IsPactActive(PactType.AIPressure), "AI실적압박 조약 토글 활성화 확인");
+
+                float goldMult = gdm.GetActivePactGoldMultiplier();
+                float karmaMult = gdm.GetActivePactKarmaMultiplier();
+                Assert(Mathf.Approximately(goldMult, 0.25f), $"활성 조약 골드 보너스 계산 확인 (+{goldMult * 100:F0}%)");
+                Assert(Mathf.Approximately(karmaMult, 0.25f), $"활성 조약 카르마 보너스 계산 확인 (+{karmaMult * 100:F0}%)");
+
+                // 플레이어 회복 감소 검증 (AI 실적 압박)
+                GameObject playerObj = new GameObject("TestPlayer_Pact");
+                playerObj.AddComponent<Rigidbody2D>();
+                playerObj.AddComponent<CircleCollider2D>();
+                var pc = playerObj.AddComponent<PlayerController>();
+                SetField(typeof(PlayerController), "Instance", pc);
+                SetField(pc, "maxHP", 100f);
+                SetField(pc, "currentHP", 50f);
+                pc.Heal(20f); // AIPressure 시 50% 삭감 -> 10f 회복
+                Assert(Mathf.Approximately(pc.CurrentHP, 60f), $"AI 실적 압박 조약 회복량 50% 삭감 확인 (현재HP: {pc.CurrentHP})");
+
+                // 적 몬스터 초기화 검증 (주말 특근)
+                GameObject enemyObj = new GameObject("TestEnemy_Pact");
+                enemyObj.AddComponent<CircleCollider2D>();
+                var enemy = enemyObj.AddComponent<Enemy>();
+                enemy.Initialize(EnemyType.MindDust, 1, 0f);
+                Assert(enemy.IsAlive, "주말 특근 계약 하에 몬스터 정상 초기화 확인");
+
+                // 조약 초기화
+                gdm.ClearActivePacts();
+                Assert(gdm.GetActivePactGoldMultiplier() == 0f, "조약 전체 해제 확인");
+
+                UnityEngine.Object.DestroyImmediate(playerObj);
+                UnityEngine.Object.DestroyImmediate(enemyObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "블랙기업 근로 조약 검증 예외", ex.ToString());
+            }
+        }
+
+        private static void TestCareerAdvancement()
+        {
+            Debug.Log("\n[31] 🎖️ 사원 승진 & 직급 전직 시스템 (Career Advancement) 검증");
+            try
+            {
+                var internDef = CareerDatabase.Get(CareerRank.Intern);
+                var asstDef = CareerDatabase.Get(CareerRank.AssistantManager);
+                var mgrDef = CareerDatabase.Get(CareerRank.Manager);
+
+                Assert(internDef != null && internDef.rankTitle == "수습 사원", "수습 사원 직급 데이터 정의 검증");
+                Assert(asstDef != null && asstDef.requiredClears == 2, "선임 대리 2회 클리어 조건 정의 검증");
+                Assert(mgrDef != null && mgrDef.requiredClears == 5, "총괄 팀장 5회 클리어 조건 정의 검증");
+
+                var gdm = GameDataManager.Instance;
+                string testCharId = "test_char_agent";
+                var career = gdm.GetCareerData(testCharId);
+                career.clearCount = 0;
+                career.rankLevel = 0;
+
+                Assert(!gdm.CanPromoteCharacter(testCharId), "0회 클리어 시 승진 불가 확인");
+
+                // 2회 클리어 기록
+                gdm.RecordCharacterClear(testCharId);
+                gdm.RecordCharacterClear(testCharId);
+                Assert(career.clearCount == 2, $"클리어 횟수 2회 누적 확인 (현재: {career.clearCount})");
+                Assert(gdm.CanPromoteCharacter(testCharId), "2회 클리어 달성 후 선임 대리 승진 자격 확인");
+
+                bool promoted = gdm.PromoteCharacter(testCharId);
+                Assert(promoted && career.rankLevel == 1, "선임 대리(Rank 1) 특진 승진 성공 확인");
+
+                // 플레이어 스탯 보너스 반영 검증
+                GameObject pObj = new GameObject("TestPlayer_Career");
+                pObj.AddComponent<Rigidbody2D>();
+                pObj.AddComponent<CircleCollider2D>();
+                var pc = pObj.AddComponent<PlayerController>();
+
+                gdm.Profile.selectedCharacterId = testCharId;
+                SetField(pc, "characterId", testCharId);
+                pObj.SendMessage("InitCharacterStats", UnityEngine.SendMessageOptions.DontRequireReceiver);
+
+                Assert(pc.CurrentCareerRank == CareerRank.AssistantManager, $"플레이어 컨트롤러 선임 대리 직급 반영 확인 ({pc.CareerRankTitle})");
+
+                // 5회까지 클리어 추가 후 총괄 팀장 승진 검증
+                gdm.RecordCharacterClear(testCharId);
+                gdm.RecordCharacterClear(testCharId);
+                gdm.RecordCharacterClear(testCharId);
+                Assert(career.clearCount == 5, $"클리어 횟수 5회 누적 확인 ({career.clearCount})");
+                Assert(gdm.CanPromoteCharacter(testCharId), "5회 클리어 달성 후 총괄 팀장 승진 자격 확인");
+
+                promoted = gdm.PromoteCharacter(testCharId);
+                Assert(promoted && career.rankLevel == 2, "총괄 팀장(Rank 2) 특진 승진 성공 확인");
+                Assert(!gdm.CanPromoteCharacter(testCharId), "최고 직급(팀장) 도달 후 추가 승진 불가 확인");
+
+                gdm.Profile.selectedCharacterId = "char_intern"; // 복구
+                UnityEngine.Object.DestroyImmediate(pObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "사원 승진 & 직급 전직 검증 예외", ex.ToString());
+            }
+        }
+
+        private static void TestBreakroomDilemma()
+        {
+            Debug.Log("\n[32] ☕ 비밀 탕비실 & 옥상 휴게실 딜레마 (Breakroom Dilemma) 검증");
+            try
+            {
+                var dilemmas = BreakroomDilemmaDatabase.GetRandomDilemmas(3);
+                Assert(dilemmas.Count == 3, $"랜덤 딜레마 3종 추출 성공 (추출 수: {dilemmas.Count})");
+
+                GameObject canvasObj = new GameObject("TestBreakroomCanvas");
+                canvasObj.AddComponent<Canvas>();
+                var modal = canvasObj.AddComponent<BreakroomDilemmaModalUI>();
+                Assert(modal != null, "BreakroomDilemmaModalUI 인스턴스 생성 검증");
+
+                modal.OpenDilemmaModal();
+                Assert(modal.IsOpen, "비밀 탕비실 딜레마 모달 열림 상태 검증");
+
+                // 법인카드 긁기 딜레마 효과 실행 검증 (+350 Gold)
+                GameObject pObj = new GameObject("TestPlayer_Breakroom");
+                pObj.AddComponent<Rigidbody2D>();
+                pObj.AddComponent<CircleCollider2D>();
+                var pc = pObj.AddComponent<PlayerController>();
+                SetField(typeof(PlayerController), "Instance", pc);
+
+                GameObject gmObj = new GameObject("TestGM_Breakroom");
+                var gm = gmObj.AddComponent<GameManager>();
+                SetField(typeof(GameManager), "Instance", gm);
+
+                int prevGold = gm.BonusGold;
+                var cardOpt = new BreakroomDilemmaOption(
+                    BreakroomOptionType.CorporateCardSwipe, "법카", "💳", "골드+350", "체력감소", "선택");
+
+                modal.ApplyDilemmaChoice(cardOpt);
+                Assert(gm.BonusGold >= prevGold + 350, $"비품실 법인카드 딜레마 실행 후 +350G 지급 확인 (보너스골드: {gm.BonusGold})");
+
+                modal.CloseModal();
+                Assert(!modal.IsOpen, "모달 닫기 및 시간 스케일 복구 검증");
+
+                // BreakroomManager 필드 스폰 검증
+                GameObject bmObj = new GameObject("TestBreakroomManager");
+                var bm = bmObj.AddComponent<BreakroomManager>();
+                bm.SpawnBreakroomStand();
+                Assert(bm.HasSpawned, "비밀 탕비실 필드 스탠드 오브젝트 스폰 검증");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+                UnityEngine.Object.DestroyImmediate(pObj);
+                UnityEngine.Object.DestroyImmediate(gmObj);
+                UnityEngine.Object.DestroyImmediate(bmObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "비밀 탕비실 딜레마 검증 예외", ex.ToString());
+            }
+        }
+
+        private static void TestHRAuditBoss()
+        {
+            Debug.Log("\n[33] 🚨 불시 사내 특별 감사 & 김감사 부장 (HR Audit Boss) 검증");
+            try
+            {
+                GameObject canvasObj = new GameObject("TestAuditCanvas");
+                canvasObj.AddComponent<Canvas>();
+
+                GameObject gmObj = new GameObject("TestGM_Audit");
+                var gm = gmObj.AddComponent<GameManager>();
+                SetField(typeof(GameManager), "Instance", gm);
+
+                GameObject pObj = new GameObject("TestPlayer_Audit");
+                pObj.tag = "Player";
+                pObj.AddComponent<Rigidbody2D>();
+                pObj.AddComponent<CircleCollider2D>();
+                var pc = pObj.AddComponent<PlayerController>();
+                SetField(typeof(PlayerController), "Instance", pc);
+
+                GameObject auditMgrObj = new GameObject("TestHRAuditManager");
+                var auditMgr = auditMgrObj.AddComponent<HRAuditManager>();
+
+                // 특별 감사 트리거
+                auditMgr.TriggerAuditBoss();
+                Assert(auditMgr.HasTriggered, "불시 특별 감사 이벤트 트리거 검증");
+
+                // 김감사 부장 인스턴스 검증
+                var auditor = auditMgr.ActiveAuditor;
+                Assert(auditor != null, "김감사 부장 보스 몬스터 스폰 검증");
+                Assert(auditor.Type == EnemyType.AuditorKim, $"보스 타입 AuditorKim 확인 ({auditor.Type})");
+                Assert(auditor.MaxHP >= 500f, $"김감사 부장 대형 체력 검증 ({auditor.MaxHP:F0} HP)");
+
+                // 황금 퇴직금 상자 인터랙션 검증
+                GameObject boxObj = new GameObject("TestSeveranceBox");
+                var trigger = boxObj.AddComponent<SeveranceBoxTrigger>();
+                var col = boxObj.AddComponent<CircleCollider2D>();
+                col.isTrigger = true;
+
+                float prevDmgMult = pc.TotalDamageMultiplier;
+                trigger.Collect();
+
+                Assert(pc.TotalDamageMultiplier > prevDmgMult, $"감사 통과 확인서 (+30% 대미지 버프) 획득 확인 (배율: {pc.TotalDamageMultiplier:F2})");
+                Assert(gm.BonusGold >= 500, $"황금 퇴직금 상자 (+500 Gold 성과급) 획득 확인 ({gm.BonusGold}G)");
+
+                auditMgr.OnAuditorDefeated();
+                Assert(auditMgr.IsAuditorDefeated, "김감사 부장 격파 및 특별 감사 성공 종료 검증");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+                UnityEngine.Object.DestroyImmediate(gmObj);
+                UnityEngine.Object.DestroyImmediate(pObj);
+                UnityEngine.Object.DestroyImmediate(auditMgrObj);
+                if (auditor != null) UnityEngine.Object.DestroyImmediate(auditor.gameObject);
+                if (boxObj != null) UnityEngine.Object.DestroyImmediate(boxObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "불시 사내 특별 감사 검증 예외", ex.ToString());
+            }
+        }
+
         private static void SetField(object target, string fieldName, object value)
         {
+            if (target == null) return;
+
             if (target is Type type)
             {
                 var prop = type.GetProperty(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
@@ -1231,6 +1474,12 @@ namespace DopamineCleaner.Editor
             }
             else
             {
+                var prop = target.GetType().GetProperty(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (prop != null)
+                {
+                    prop.GetSetMethod(true)?.Invoke(target, new object[] { value });
+                    return;
+                }
                 var field = target.GetType().GetField(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 field?.SetValue(target, value);
             }

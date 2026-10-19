@@ -104,6 +104,8 @@ namespace DopamineCleaner.UI
             if (feverBanner != null) feverBanner.SetActive(false);
             if (pausePanel != null) pausePanel.SetActive(false);
 
+            EnsureServerBlackoutVignette();
+
             // HUD 텍스트 시인성 극대화 (골드/민트 색상 + 블랙 아웃라인)
             if (timerText != null)
             {
@@ -877,6 +879,48 @@ namespace DopamineCleaner.UI
             SoundManager.Instance?.Play(SoundEffect.Dash, 0.5f);
             if (pausePanel != null) pausePanel.SetActive(false);
             GameManager.Instance?.TriggerGameOver(false);
+        }
+
+        private GameObject serverBlackoutVignetteObj;
+
+        public void EnsureServerBlackoutVignette()
+        {
+            if (Meta.GameDataManager.Instance == null || !Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.ServerBlackout))
+            {
+                if (serverBlackoutVignetteObj != null) serverBlackoutVignetteObj.SetActive(false);
+                return;
+            }
+
+            if (serverBlackoutVignetteObj == null)
+            {
+                serverBlackoutVignetteObj = new GameObject("ServerBlackoutVignette");
+                serverBlackoutVignetteObj.transform.SetParent(transform, false);
+                serverBlackoutVignetteObj.transform.SetAsFirstSibling();
+
+                RectTransform rt = serverBlackoutVignetteObj.AddComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.sizeDelta = Vector2.zero;
+
+                Image img = serverBlackoutVignetteObj.AddComponent<Image>();
+                img.raycastTarget = false;
+                img.color = new Color(0.02f, 0.02f, 0.06f, 0.58f); // 딥 다크 블랙아웃 틴트
+
+                GameObject tObj = new GameObject("BlackoutLabel");
+                tObj.transform.SetParent(serverBlackoutVignetteObj.transform, false);
+                RectTransform trt = tObj.AddComponent<RectTransform>();
+                trt.anchorMin = new Vector2(0.5f, 1f);
+                trt.anchorMax = new Vector2(0.5f, 1f);
+                trt.sizeDelta = new Vector2(400, 30);
+                trt.anchoredPosition = new Vector2(0, -65);
+                Text txt = tObj.AddComponent<Text>();
+                txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                txt.fontSize = 15;
+                txt.alignment = TextAnchor.MiddleCenter;
+                txt.color = new Color(1f, 0.4f, 0.4f, 0.85f);
+                txt.text = "🔌 [전산망 블랙아웃 조약 발효 중]";
+            }
+            serverBlackoutVignetteObj.SetActive(true);
         }
     }
 }

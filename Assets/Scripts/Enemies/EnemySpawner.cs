@@ -70,6 +70,10 @@ namespace DopamineCleaner.Enemies
             // 1. 일반 스폰 주기
             spawnTimer += Time.deltaTime;
             float interval = Mathf.Max(0.28f, baseSpawnInterval - survivalSec * 0.002f);
+            if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.WeekendOverwork))
+            {
+                interval *= 0.8f; // 주말 특근 조약: 스폰 간격 20% 단축
+            }
 
             if (spawnTimer >= interval)
             {

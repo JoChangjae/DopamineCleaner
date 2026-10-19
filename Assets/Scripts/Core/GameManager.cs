@@ -54,6 +54,14 @@ namespace DopamineCleaner.Core
             }
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
         private void Start()
         {
             StartNewGame();
@@ -246,6 +254,12 @@ namespace DopamineCleaner.Core
                     goldMult *= 2.0f;
                     karmaMult *= 2.0f;
                 }
+
+                // 블랙기업 근로 조약 추가 성과급 배율 적용
+                float pactGoldBonus = Meta.GameDataManager.Instance.GetActivePactGoldMultiplier();
+                float pactKarmaBonus = Meta.GameDataManager.Instance.GetActivePactKarmaMultiplier();
+                goldMult *= (1f + pactGoldBonus);
+                karmaMult *= (1f + pactKarmaBonus);
             }
 
             int killBonusGold = totalKills * 3;
@@ -263,6 +277,10 @@ namespace DopamineCleaner.Core
             {
                 EarnedGold = Mathf.RoundToInt((baseGold + killBonusGold + survivalBonusGold) * goldMult) + BonusGold + overtimeGold;
                 EarnedKarma = Mathf.Max(1, Mathf.RoundToInt(baseKarma * karmaMult));
+
+                // 사원 승진을 위한 던전 정화 성공 기록 누적
+                string charId = Meta.GameDataManager.Instance?.Profile?.selectedCharacterId ?? "char_intern";
+                Meta.GameDataManager.Instance?.RecordCharacterClear(charId);
             }
             else
             {

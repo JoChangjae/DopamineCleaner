@@ -16,7 +16,9 @@ namespace DopamineCleaner.Core
         Whirlwind,
         Mist,
         Slash,
-        ButtonClick
+        ButtonClick,
+        Warning,
+        Laser
     }
 
     public class SoundManager : MonoBehaviour
@@ -76,6 +78,8 @@ namespace DopamineCleaner.Core
             clipCache[SoundEffect.Mist] = GenerateTone(0.18f, 900f, 400f, WaveType.Noise);
             clipCache[SoundEffect.Slash] = GenerateTone(0.14f, 850f, 150f, WaveType.Sine);
             clipCache[SoundEffect.ButtonClick] = GenerateTone(0.04f, 900f, 1300f, WaveType.Sine);
+            clipCache[SoundEffect.Warning] = GenerateTone(0.35f, 440f, 880f, WaveType.Square);
+            clipCache[SoundEffect.Laser] = GenerateTone(0.25f, 1200f, 300f, WaveType.Sine);
         }
 
         private void GenerateProceduralBGM()

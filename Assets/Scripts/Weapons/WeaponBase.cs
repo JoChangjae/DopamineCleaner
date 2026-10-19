@@ -62,6 +62,11 @@ namespace DopamineCleaner.Weapons
                 rate *= 1.8f;
             }
 
+            if (PlayerController.Instance != null && PlayerController.Instance.CooldownRateMultiplier > 0f)
+            {
+                rate *= PlayerController.Instance.CooldownRateMultiplier;
+            }
+
             return Mathf.Max(0.08f, baseCooldown / rate);
         }
 
@@ -69,19 +74,25 @@ namespace DopamineCleaner.Weapons
         {
             float dmg = rawDamage;
 
-            // 1. 패시브 공격력 증가
+            // 1. 플레이어 직급 및 특화 공격력 배율 (Career / Audit Buff)
+            if (PlayerController.Instance != null && PlayerController.Instance.TotalDamageMultiplier > 0f)
+            {
+                dmg *= PlayerController.Instance.TotalDamageMultiplier;
+            }
+
+            // 2. 패시브 공격력 증가
             if (WeaponManager.Instance != null)
             {
                 dmg *= (1f + WeaponManager.Instance.DamageBoostLevel * 0.12f);
             }
 
-            // 2. 본부 영구 연구소 공격력 보너스
+            // 3. 본부 영구 연구소 공격력 보너스
             if (Meta.GameDataManager.Instance != null)
             {
                 dmg *= (1f + Meta.GameDataManager.Instance.Profile.researchAtkLevel * 0.08f);
             }
 
-            // 3. 디톡스 피버 모드 데미지 증폭 (+40%)
+            // 4. 디톡스 피버 모드 데미지 증폭 (+40%)
             if (Core.FeverManager.Instance != null && Core.FeverManager.Instance.IsFever)
             {
                 dmg *= 1.4f;

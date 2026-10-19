@@ -125,6 +125,14 @@ namespace DopamineCleaner.Core
             }
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
         private DamageText CreateNewInstance()
         {
             GameObject obj = new GameObject("DamageText");
