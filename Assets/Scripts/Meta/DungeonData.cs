@@ -49,17 +49,17 @@ namespace DopamineCleaner.Meta
         static DungeonDatabase()
         {
             Register(new DungeonMapDefinition(
-                "map_hospital", "버려진 성모 유령병원", "의료사고 영혼 수습 현장", "🏥",
+                "map_hospital", "도파민 격리 병동", "중독 환자 집중 정화 구역", "🏥",
                 new Color(0.85f, 0.94f, 0.92f), 300f, 600, 1,
                 "좁고 음침한 병동 복도. 힐링 아이템 드랍 확률이 소폭 높습니다. (목표: 5분 생존)"));
 
             Register(new DungeonMapDefinition(
-                "map_office", "블랙기업 지하 오피스", "과로사 직장인 원혼 대폭주", "🏢",
+                "map_office", "번아웃 오피스 미궁", "야근 직장인 잡생각 대폭주", "🏢",
                 new Color(0.92f, 0.88f, 0.95f), 420f, 1000, 2,
                 "야근과 커피로 찌든 서류더미 미궁. 골드 드랍량이 매우 많습니다. (목표: 7분 생존)"));
 
             Register(new DungeonMapDefinition(
-                "map_highway", "심야 도파민 고속도로", "무한 질주 폭주 영혼의 도로", "🛣️",
+                "map_highway", "심야 숏폼 고속도로", "무한 스크롤 도파민 폭주 도로", "🛣️",
                 new Color(0.95f, 0.85f, 0.85f), 600f, 1800, 4,
                 "끝없이 맹렬히 돌진하는 최고 난이도의 고속도로. (목표: 10분 생존)"));
         }

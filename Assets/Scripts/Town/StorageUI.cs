@@ -22,10 +22,10 @@ namespace DopamineCleaner.Town
             var profile = GameDataManager.Instance.Profile;
 
             if (inventoryCapacityText != null)
-                inventoryCapacityText.text = $"🎒 출격 가방 ({profile.inventory.Count} / 6)";
+                inventoryCapacityText.text = $"🎒 출동 가방 ({profile.inventory.Count} / 6)";
 
             if (stashCapacityText != null)
-                stashCapacityText.text = $"🗄️ 개인 사물함 ({profile.stashStorage.Count} / 24)";
+                stashCapacityText.text = $"🗄️ 본부 창고 ({profile.stashStorage.Count} / 24)";
 
             // 1. 가방 아이템 목록 생성
             if (inventoryContainer != null && storageItemPrefab != null)

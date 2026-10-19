@@ -142,7 +142,7 @@ namespace DopamineCleaner.Editor
             TownSceneBuilder.BuildTownScene();
             BuildScene();
             EditorSceneManager.OpenScene("Assets/Scenes/TownScene.unity");
-            EditorUtility.DisplayDialog("윤회 보험사 R.I.P", "🎉 마을 본사(TownScene)와 액션 던전(MainGame) 원클릭 구축이 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 마을에서 사원을 고르고 상점/창고 이용 후 던전으로 출동할 수 있습니다!", "확인");
+            EditorUtility.DisplayDialog("도파민 클리너 (Dopamine Cleaner)", "🎉 도파민 본부(TownScene)와 액션 던전(MainGame) 원클릭 구축이 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 본부에서 요원을 고르고 보급소/창고 이용 후 정화 작전으로 출동할 수 있습니다!", "확인");
         }
 
         private static void LoadKoreanFont()

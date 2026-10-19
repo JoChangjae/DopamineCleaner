@@ -12,7 +12,7 @@ namespace DopamineCleaner.Editor
     {
         private static Font koreanFont;
 
-        [MenuItem("Dopamine Cleaner/🏢 Build R.I.P Town Scene")]
+        [MenuItem("Dopamine Cleaner/🧠 Build Dopamine HQ Scene")]
         public static void BuildTownScene()
         {
             LoadKoreanFont();
@@ -67,7 +67,7 @@ namespace DopamineCleaner.Editor
             Image bgImg = bgObj.AddComponent<Image>();
             bgImg.color = new Color(0.12f, 0.10f, 0.16f);
 
-            // 상단 헤더 (회사명 및 재화/사원증)
+            // 상단 헤더 (본부명 및 재화/요원증)
             GameObject headerObj = CreateUIObject("HeaderBar", canvasObj.transform);
             RectTransform hRt = headerObj.GetComponent<RectTransform>();
             hRt.anchorMin = new Vector2(0f, 1f);
@@ -79,14 +79,14 @@ namespace DopamineCleaner.Editor
             Image hBg = headerObj.AddComponent<Image>();
             hBg.color = new Color(0.18f, 0.15f, 0.24f);
 
-            CreateText("CorpTitle", headerObj.transform, "🏢 윤회 보험사 R.I.P (본사)", 30, TextAnchor.MiddleLeft, new Vector2(-25, 18), new Vector2(500, 40));
-            Text activeCharTxt = CreateText("ActiveCharText", headerObj.transform, "사원증: 🧑‍💼 김인턴 (신입 수습사원)", 20, TextAnchor.MiddleLeft, new Vector2(-25, -18), new Vector2(550, 35));
+            CreateText("CorpTitle", headerObj.transform, "🧠 도파민 클리너 본부 (HQ)", 30, TextAnchor.MiddleLeft, new Vector2(-25, 18), new Vector2(500, 40));
+            Text activeCharTxt = CreateText("ActiveCharText", headerObj.transform, "요원증: 🧑‍💼 김인턴 (수습 클리너)", 20, TextAnchor.MiddleLeft, new Vector2(-25, -18), new Vector2(550, 35));
             activeCharTxt.color = new Color(0.85f, 0.8f, 0.95f);
 
             Text goldTxt = CreateText("GoldText", headerObj.transform, "💰 보유 골드: 600 G", 22, TextAnchor.MiddleRight, new Vector2(25, 18), new Vector2(400, 40));
             goldTxt.color = new Color(1f, 0.85f, 0.3f);
 
-            Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 윤회 포인트: 1 P", 22, TextAnchor.MiddleRight, new Vector2(25, -18), new Vector2(400, 35));
+            Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 22, TextAnchor.MiddleRight, new Vector2(25, -18), new Vector2(400, 35));
             karmaTxt.color = new Color(0.6f, 0.85f, 1f);
 
             SetPrivateField(townMgr, "goldText", goldTxt);
@@ -108,10 +108,10 @@ namespace DopamineCleaner.Editor
             tabHlg.childControlWidth = true;
             tabHlg.childControlHeight = true;
 
-            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 사원 선택소", 20, new Color(0.28f, 0.24f, 0.38f));
-            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 사내 매점", 20, new Color(0.28f, 0.24f, 0.38f));
-            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 개인 사물함", 20, new Color(0.28f, 0.24f, 0.38f));
-            Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 현장 출장 접수처", 20, new Color(0.85f, 0.35f, 0.38f));
+            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 클리너 요원실", 20, new Color(0.28f, 0.24f, 0.38f));
+            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 디톡스 보급소", 20, new Color(0.28f, 0.24f, 0.38f));
+            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 본부 창고", 20, new Color(0.28f, 0.24f, 0.38f));
+            Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 정화 작전 출동처", 20, new Color(0.85f, 0.35f, 0.38f));
 
             SetPrivateField(townMgr, "tabCharBtn", tabChar);
             SetPrivateField(townMgr, "tabShopBtn", tabShop);
@@ -140,7 +140,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(townMgr, "storagePanel", storagePanel);
             storagePanel.SetActive(false);
 
-            // 4. 던전 출장 접수처 패널
+            // 4. 정화 구역 출동처 패널
             GameObject dungeonPanel = CreateDungeonSelectPanel(contentArea.transform);
             SetPrivateField(townMgr, "dungeonPanel", dungeonPanel);
             dungeonPanel.SetActive(false);
@@ -161,7 +161,7 @@ namespace DopamineCleaner.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            EditorUtility.DisplayDialog("윤회 보험사 R.I.P", "🏢 'TownScene.unity'(마을 본사 씬) 구축이 성공적으로 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 사원 선택/상점/창고/출장 시스템을 즐기실 수 있습니다.", "확인");
+            EditorUtility.DisplayDialog("도파민 클리너 (Dopamine Cleaner)", "🧠 'TownScene.unity'(도파민 본부 씬) 구축이 성공적으로 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 요원 선택/보급소/창고/출동 시스템을 이용할 수 있습니다.", "확인");
         }
 
         private static GameObject CreateCharacterSelectPanel(Transform parent, GameObject cardPrefab)
@@ -205,7 +205,7 @@ namespace DopamineCleaner.Editor
             ShopUI ui = panel.AddComponent<ShopUI>();
 
             // 상품 목록 (구매 가능 품목)
-            CreateText("ShopTitle", panel.transform, "🛒 사내 보급 매점 (구매 가능 품목)", 26, TextAnchor.MiddleLeft, new Vector2(0, 375), new Vector2(1650, 35));
+            CreateText("ShopTitle", panel.transform, "🛒 디톡스 보급소 (구매 가능 품목)", 26, TextAnchor.MiddleLeft, new Vector2(0, 375), new Vector2(1650, 35));
 
             GameObject shopCont = CreateUIObject("ShopItemContainer", panel.transform);
             RectTransform sRt = shopCont.GetComponent<RectTransform>();
@@ -253,8 +253,8 @@ namespace DopamineCleaner.Editor
 
             StorageUI ui = panel.AddComponent<StorageUI>();
 
-            // 좌측: 출격 가방 (최대 6칸)
-            Text invCap = CreateText("InvCap", panel.transform, "🎒 출격 가방 (0 / 6)", 26, TextAnchor.MiddleCenter, new Vector2(-510, 375), new Vector2(580, 40));
+            // 좌측: 출동 가방 (최대 6칸)
+            Text invCap = CreateText("InvCap", panel.transform, "🎒 출동 가방 (0 / 6)", 26, TextAnchor.MiddleCenter, new Vector2(-510, 375), new Vector2(580, 40));
             GameObject invCont = CreateUIObject("InvContainer", panel.transform);
             RectTransform iRt = invCont.GetComponent<RectTransform>();
             iRt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -268,11 +268,11 @@ namespace DopamineCleaner.Editor
             iGlg.childAlignment = TextAnchor.UpperCenter;
 
             // 중앙: 이동 안내
-            Text midHint = CreateText("MidHint", panel.transform, "⇄\n아이템 클릭 시\n가방 ↔ 사물함\n즉시 이동", 20, TextAnchor.MiddleCenter, new Vector2(0, -20), new Vector2(180, 160));
+            Text midHint = CreateText("MidHint", panel.transform, "⇄\n아이템 클릭 시\n가방 ↔ 창고\n즉시 이동", 20, TextAnchor.MiddleCenter, new Vector2(0, -20), new Vector2(180, 160));
             midHint.color = new Color(0.75f, 0.70f, 0.90f);
 
-            // 우측: 개인 사물함 (최대 24칸)
-            Text stashCap = CreateText("StashCap", panel.transform, "🗄️ 개인 사물함 (0 / 24)", 26, TextAnchor.MiddleCenter, new Vector2(450, 375), new Vector2(750, 40));
+            // 우측: 본부 창고 (최대 24칸)
+            Text stashCap = CreateText("StashCap", panel.transform, "🗄️ 본부 창고 (0 / 24)", 26, TextAnchor.MiddleCenter, new Vector2(450, 375), new Vector2(750, 40));
             GameObject stashCont = CreateUIObject("StashContainer", panel.transform);
             RectTransform sRt = stashCont.GetComponent<RectTransform>();
             sRt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -305,7 +305,7 @@ namespace DopamineCleaner.Editor
             DungeonSelectUI ui = panel.AddComponent<DungeonSelectUI>();
 
             // 1. 맵 선택 헤더 & 버튼들
-            CreateText("MapHeader", panel.transform, "📍 출장 사고 현장 선택", 28, TextAnchor.MiddleCenter, new Vector2(0, 340), new Vector2(900, 40));
+            CreateText("MapHeader", panel.transform, "📍 정화 작전 구역 선택", 28, TextAnchor.MiddleCenter, new Vector2(0, 340), new Vector2(900, 40));
 
             GameObject mapBtnGroup = CreateUIObject("MapBtnGroup", panel.transform);
             RectTransform mRt = mapBtnGroup.GetComponent<RectTransform>();
@@ -320,12 +320,12 @@ namespace DopamineCleaner.Editor
             mHlg.childControlWidth = true;
             mHlg.childControlHeight = true;
 
-            Button mapHosp = CreateButton("BtnHosp", mapBtnGroup.transform, "🏥 유령 병원\n(5분 생존)", 22, new Color(0.24f, 0.32f, 0.38f));
-            Button mapOff = CreateButton("BtnOff", mapBtnGroup.transform, "🏢 지하 오피스\n(7분 생존)", 22, new Color(0.32f, 0.25f, 0.4f));
-            Button mapHigh = CreateButton("BtnHigh", mapBtnGroup.transform, "🛣️ 도파민 고속도로\n(10분 생존)", 22, new Color(0.42f, 0.22f, 0.25f));
+            Button mapHosp = CreateButton("BtnHosp", mapBtnGroup.transform, "🏥 격리 병동\n(5분 생존)", 22, new Color(0.24f, 0.32f, 0.38f));
+            Button mapOff = CreateButton("BtnOff", mapBtnGroup.transform, "🏢 번아웃 오피스\n(7분 생존)", 22, new Color(0.32f, 0.25f, 0.4f));
+            Button mapHigh = CreateButton("BtnHigh", mapBtnGroup.transform, "🛣️ 숏폼 고속도로\n(10분 생존)", 22, new Color(0.42f, 0.22f, 0.25f));
 
             // 2. 난이도 선택 헤더 & 버튼들
-            CreateText("DiffHeader", panel.transform, "⚡ 출장 위험 등급 (난이도 설정)", 26, TextAnchor.MiddleCenter, new Vector2(0, 155), new Vector2(900, 35));
+            CreateText("DiffHeader", panel.transform, "⚡ 도파민 오염 등급 (난이도 설정)", 26, TextAnchor.MiddleCenter, new Vector2(0, 155), new Vector2(900, 35));
 
             GameObject diffBtnGroup = CreateUIObject("DiffBtnGroup", panel.transform);
             RectTransform dRt = diffBtnGroup.GetComponent<RectTransform>();
@@ -355,11 +355,11 @@ namespace DopamineCleaner.Editor
             Image bImg = briefingObj.AddComponent<Image>();
             bImg.color = new Color(0.20f, 0.17f, 0.27f);
 
-            Text mapTitle = CreateText("MapTitle", briefingObj.transform, "🏥 버려진 성모 유령병원", 26, TextAnchor.MiddleLeft, new Vector2(0, 60), new Vector2(1220, 35));
+            Text mapTitle = CreateText("MapTitle", briefingObj.transform, "🏥 도파민 격리 병동", 26, TextAnchor.MiddleLeft, new Vector2(0, 60), new Vector2(1220, 35));
             mapTitle.color = new Color(1f, 0.9f, 0.5f);
             mapTitle.fontStyle = FontStyle.Bold;
 
-            Text mapDesc = CreateText("MapDesc", briefingObj.transform, "사고 현장 설명", 20, TextAnchor.UpperLeft, new Vector2(0, 15), new Vector2(1220, 45));
+            Text mapDesc = CreateText("MapDesc", briefingObj.transform, "정화 작전 구역 설명", 20, TextAnchor.UpperLeft, new Vector2(0, 15), new Vector2(1220, 45));
             mapDesc.color = new Color(0.85f, 0.82f, 0.9f);
 
             Text diffSummary = CreateText("DiffSummary", briefingObj.transform, "난이도 계수 정보", 18, TextAnchor.MiddleLeft, new Vector2(0, -30), new Vector2(1220, 35));
@@ -380,7 +380,7 @@ namespace DopamineCleaner.Editor
             sBtnImg.color = new Color(0.92f, 0.32f, 0.38f);
             Button startBtn = startBtnObj.AddComponent<Button>();
 
-            Text startTxt = CreateText("StartText", startBtnObj.transform, "🚀 현장 출동 시작 (Start Mission)", 28, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(630, 75));
+            Text startTxt = CreateText("StartText", startBtnObj.transform, "🚀 정화 작전 출동 (Start Cleanse)", 28, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(630, 75));
             startTxt.color = Color.white;
             startTxt.fontStyle = FontStyle.Bold;
 
@@ -419,16 +419,16 @@ namespace DopamineCleaner.Editor
             Text name = CreateText("Name", card.transform, "김인턴", 28, TextAnchor.MiddleCenter, new Vector2(0, 160), new Vector2(360, 42));
             name.fontStyle = FontStyle.Bold;
 
-            Text title = CreateText("Title", card.transform, "신입 수습사원", 20, TextAnchor.MiddleCenter, new Vector2(0, 120), new Vector2(360, 32));
+            Text title = CreateText("Title", card.transform, "수습 클리너", 20, TextAnchor.MiddleCenter, new Vector2(0, 120), new Vector2(360, 32));
             title.color = new Color(0.75f, 0.70f, 0.90f);
 
             Text stats = CreateText("Stats", card.transform, "체력: 100 | 이속: 5.0 | 공격력: x1.0", 17, TextAnchor.MiddleCenter, new Vector2(0, 55), new Vector2(380, 50));
             stats.color = new Color(0.6f, 0.9f, 1f);
 
-            Text passive = CreateText("Passive", card.transform, "[특약 패시브]\n열정 넘치는 신입: 밸런스 균형", 17, TextAnchor.UpperCenter, new Vector2(0, -60), new Vector2(360, 130));
+            Text passive = CreateText("Passive", card.transform, "[고유 특성]\n열정 넘치는 신입: 밸런스 균형", 17, TextAnchor.UpperCenter, new Vector2(0, -60), new Vector2(360, 130));
             passive.color = new Color(0.95f, 0.88f, 0.72f);
 
-            Button btn = CreateButton("ActionButton", card.transform, "사원 선택", 22, new Color(0.85f, 0.4f, 0.5f));
+            Button btn = CreateButton("ActionButton", card.transform, "요원 선택", 22, new Color(0.85f, 0.4f, 0.5f));
             RectTransform btnRt = btn.GetComponent<RectTransform>();
             btnRt.sizeDelta = new Vector2(330, 65);
             btnRt.anchoredPosition = new Vector2(0, -255);

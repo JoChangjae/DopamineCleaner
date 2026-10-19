@@ -1392,7 +1392,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\U0001F9D1\u200D\U0001F4BC \uC0AC\uC6D0 \uC120\uD0DD\uC18C"
+  m_Text: "\U0001F9D1\u200D\U0001F4BC \uD074\uB9AC\uB108 \uC694\uC6D0\uC2E4"
 --- !u!222 &645727056
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1654,7 +1654,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uC0AC\uC6D0\uC99D: \U0001F9D1\u200D\U0001F4BC \uAE40\uC778\uD134 (\uC2E0\uC785 \uC218\uC2B5\uC0AC\uC6D0)"
+  m_Text: "\uC694\uC6D0\uC99D: \U0001F9D1\u200D\U0001F4BC \uAE40\uC778\uD134 (\uC218\uC2B5 \uD074\uB9AC\uB108)"
 --- !u!222 &760559973
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2206,7 +2206,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u2728 \uC724\uD68C \uD3EC\uC778\uD2B8: 1 P"
+  m_Text: "\u2728 \uB514\uD1A1\uC2A4 \uD3EC\uC778\uD2B8: 1 P"
 --- !u!1 &1032600314
 GameObject:
   m_ObjectHideFlags: 0
@@ -2882,7 +2882,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\U0001F3E2 \uC724\uD68C \uBCF4\uD5D8\uC0AC R.I.P (\uBCF8\uC0AC)"
+  m_Text: "\U0001F9E0 \uB3C4\uD30C\uBBFC \uD074\uB9AC\uB108 \uBCF8\uBD80 (HQ)"
 --- !u!222 &1313544162
 CanvasRenderer:
   m_ObjectHideFlags: 0

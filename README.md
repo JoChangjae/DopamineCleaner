@@ -42,17 +42,17 @@
 
 ---
 
-## 🏢 윤회 보험사 R.I.P 시스템 (Town & Dungeon Meta Loop)
+## 🧠 도파민 클리너 본부 시스템 (HQ & Detox Meta Loop)
 
-1. **본사 마을 시스템 (TownScene)**
-   * **🧑‍💼 사원 선택소**: 김인턴, 박사정, 강반장, 윤이사 4종의 고유 특약 패시브 사원 해금 및 선택.
-   * **🛒 사내 보급 매점**: 응급 구급약, 부활 보험 증권, 스피드 부스터 등 실전 아이템 구매 및 가방 아이템 매각.
-   * **🗄️ 개인 사물함**: 출격 가방 (6칸) ⇄ 개인 사물함 (24칸) 아이템 보관 및 자유로운 세팅.
-   * **🚀 출장 접수처**: 유령 병원, 지하 오피스, 도파민 고속도로 맵과 4단계 위험 난이도(Easy, Normal, Hard, Nightmare) 설정 후 현장 출동.
-2. **현장 액션 던전 & 귀환 (MainGame)**
-   * 실시간 구급약 사용 (`1`번 키) 및 부활 보험 증권 자동 발동.
-   * 만렙 도달 후 무한 성과급/체력/폭탄 한계 돌파 시스템.
-   * 목표 생존 시간 달성 시 승리 정산 후 마을로 귀환하여 골드 및 윤회 포인트 획득.
+1. **도파민 본부 시스템 (TownScene)**
+   * **🧑‍💼 클리너 요원실**: 김인턴, 박사정, 강반장, 윤이사 4종의 고유 특성 패시브 요원 해금 및 선택.
+   * **🛒 디톡스 보급소**: 응급 구급약, 비상 소생 키트, 스피드 부스터 등 실전 아이템 구매 및 인벤토리 아이템 매각.
+   * **🗄️ 본부 창고**: 출동 가방 (6칸) ⇄ 본부 창고 (24칸) 아이템 보관 및 자유로운 세팅.
+   * **🚀 정화 작전 출동처**: 도파민 격리 병동, 번아웃 오피스 미궁, 심야 숏폼 고속도로 맵과 4단계 오염 난이도(Easy, Normal, Hard, Nightmare) 설정 후 작전 출동.
+2. **정화 액션 구역 & 귀환 (MainGame)**
+   * 실시간 구급약 사용 (`1`번 키) 및 비상 소생 키트 자동 발동.
+   * 만렙 도달 후 무한 디톡스 보너스/체력/폭탄 한계 돌파 시스템.
+   * 목표 생존 시간 달성 시 승리 정산 후 본부로 귀환하여 골드 및 디톡스 포인트 획득.
 
 ---
 
@@ -61,20 +61,20 @@
 ```
 Assets/Scripts/
 ├── Core/
-│   ├── GameManager.cs       # 게임 상태, 스테이지, 킬 카운트, 던전 정산금 계산
+│   ├── GameManager.cs       # 게임 상태, 스테이지, 킬 카운트, 정산금 계산
 │   └── CameraFollow.cs      # 2D 부드러운 플레이어 추적 카메라
 ├── Meta/
 │   ├── GameEnums.cs         # 난이도, 아이템 타입/희귀도 정의
-│   ├── CharacterData.cs     # 사원 스탯, 패시브, 해금 비용 데이터베이스
+│   ├── CharacterData.cs     # 요원 스탯, 고유 특성, 해금 비용 데이터베이스
 │   ├── ItemData.cs          # 소모품, 장비, 유물 데이터베이스
-│   ├── DungeonData.cs       # 던전 맵, 난이도별 배율 데이터베이스
+│   ├── DungeonData.cs       # 정화 구역 맵, 난이도별 배율 데이터베이스
 │   └── GameDataManager.cs  # 싱글톤 프로필 세이브/로드, 인벤토리/창고, 재화 관리
 ├── Town/
-│   ├── TownManager.cs       # 마을 UI 탭 네비게이션 및 경제 현황 표시
-│   ├── CharacterSelectUI.cs # 사원 고용 및 출장 선택 UI
-│   ├── ShopUI.cs            # 사내 매점 구매 및 매각 UI
-│   ├── StorageUI.cs         # 가방 ⇄ 사물함 보관함 UI
-│   └── DungeonSelectUI.cs   # 현장 맵 및 난이도 선택, 브리핑 UI
+│   ├── TownManager.cs       # 본부 UI 탭 네비게이션 및 경제 현황 표시
+│   ├── CharacterSelectUI.cs # 클리너 요원 영입 및 출동 선택 UI
+│   ├── ShopUI.cs            # 디톡스 보급소 구매 및 매각 UI
+│   ├── StorageUI.cs         # 가방 ⇄ 본부 창고 UI
+│   └── DungeonSelectUI.cs   # 정화 구역 맵 및 난이도 선택, 작전 브리핑 UI
 ├── Characters/
 │   └── PlayerController.cs  # 2D 물리 이동, 대시, 체력, 무적, 경험치 & 레벨업, 구급약 사용
 ├── Enemies/
@@ -94,6 +94,6 @@ Assets/Scripts/
 │   ├── UIManager.cs         # 인게임 HUD, 레벨업 팝업, 게임오버/승리 정산 모달
 │   └── UpgradeCardUI.cs     # 레벨업 카드 UI
 └── Editor/
-    ├── TownSceneBuilder.cs  # 본사 마을 씬(TownScene) 자동 생성 빌더
-    └── DopamineSceneBuilder.cs # 액션 던전 씬(MainGame) 및 원클릭 빌드 도구
+    ├── TownSceneBuilder.cs  # 도파민 본부 씬(TownScene) 자동 생성 빌더
+    └── DopamineSceneBuilder.cs # 액션 구역 씬(MainGame) 및 원클릭 빌드 도구
 ```

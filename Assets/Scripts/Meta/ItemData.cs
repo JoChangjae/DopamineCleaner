@@ -41,8 +41,8 @@ namespace DopamineCleaner.Meta
                 150, 75, "🩹", "현장에서 즉시 체력 40을 회복합니다.", 40f));
 
             Register(new ItemDefinition(
-                "item_revive_policy", "사후 부활 증서", ItemType.Consumable, ItemRarity.Legendary,
-                650, 300, "📜", "사망 시 보험 혜택이 적용되어 체력 50%로 1회 부활합니다.", 0.5f));
+                "item_revive_policy", "비상 소생 키트", ItemType.Consumable, ItemRarity.Legendary,
+                650, 300, "💉", "사망 시 긴급 리셋 프로토콜이 발동되어 체력 50%로 1회 부활합니다.", 0.5f));
 
             Register(new ItemDefinition(
                 "item_speed_booster", "고카페인 각성제", ItemType.Consumable, ItemRarity.Rare,
@@ -50,10 +50,10 @@ namespace DopamineCleaner.Meta
 
             Register(new ItemDefinition(
                 "artifact_golden_calc", "황금 계산기", ItemType.Artifact, ItemRarity.Epic,
-                500, 250, "🧮", "출장 현장에서 획득하는 골드가 25% 증가합니다.", 1.25f));
+                500, 250, "🧮", "정화 구역에서 획득하는 골드가 25% 증가합니다.", 1.25f));
 
             Register(new ItemDefinition(
-                "artifact_magnet_badge", "영혼 견인 배지", ItemType.Artifact, ItemRarity.Rare,
+                "artifact_magnet_badge", "도파민 견인 배지", ItemType.Artifact, ItemRarity.Rare,
                 350, 160, "🧲", "바닥의 모든 보석 흡수 반경이 35% 넓어집니다.", 1.35f));
 
             Register(new ItemDefinition(

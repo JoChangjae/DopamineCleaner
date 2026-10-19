@@ -65,7 +65,7 @@ namespace DopamineCleaner.Weapons
             // 기본 무기 1레벨 시작
             cleanBulletWeapon?.Upgrade();
 
-            // 윤이사 사원 특권: 시작부터 가디언 위성 1기 장착 출동
+            // 윤이사(도파민 총괄) 요원 특권: 시작부터 가디언 위성 1기 장착 출동
             if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.Profile.selectedCharacterId == "char_director")
             {
                 orbitWeapon?.Upgrade();
@@ -181,7 +181,7 @@ namespace DopamineCleaner.Weapons
                 candidates.Add(new UpgradeCardInfo
                 {
                     type = UpgradeType.BonusGold,
-                    title = "💰 도파민 성과급 (+100G)",
+                    title = "💰 디톡스 정화 보너스 (+100G)",
                     description = "모든 능력을 마스터했습니다! 즉시 추가 골드 100G를 정산금에 적립합니다.",
                     iconText = "💰",
                     isEvolution = false

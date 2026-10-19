@@ -319,18 +319,18 @@ namespace DopamineCleaner.UI
             Text titleText = gameOverPanel.transform.Find("GoTitle")?.GetComponent<Text>();
             if (titleText != null)
             {
-                titleText.text = isVictory ? "🏆 출장 임무 완료 (생존)" : "💀 현장 순직 (사후 보험금 정산)";
+                titleText.text = isVictory ? "🏆 디톡스 임무 완료 (생존)" : "💀 도파민 과부하 (정화 실패)";
                 titleText.color = isVictory ? new Color(1f, 0.85f, 0.25f) : new Color(1f, 0.4f, 0.45f);
             }
 
             if (gameOverStatsText != null)
             {
                 gameOverStatsText.text =
-                    $"출장 현장: {Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance?.SelectedMapId ?? "map_hospital").name}\n" +
+                    $"정화 구역: {Meta.DungeonDatabase.Get(Meta.GameDataManager.Instance?.SelectedMapId ?? "map_hospital").name}\n" +
                     $"생존 시간: {sec / 60:D2}:{sec % 60:D2}  |  처치: {GameManager.Instance.TotalKills}마리\n\n" +
                     $"[정산 회수 내역]\n" +
-                    $"💰 수령 보험금: +{gold:N0} G\n" +
-                    $"✨ 윤회 포인트: +{karma} P";
+                    $"💰 정화 지원금: +{gold:N0} G\n" +
+                    $"✨ 디톡스 포인트: +{karma} P";
             }
         }
 

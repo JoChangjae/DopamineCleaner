@@ -200,7 +200,7 @@ namespace DopamineCleaner.Core
             }
             else
             {
-                // 순직(사망) 시 기본 보험금 지급 (50%)
+                // 정화 실패(사망) 시 기본 지원금 지급 (40%)
                 EarnedGold = Mathf.RoundToInt((baseGold * 0.4f + killBonusGold + survivalBonusGold) * goldMult) + BonusGold;
                 EarnedKarma = survivalTime >= (targetSec * 0.6f) ? 1 : 0;
             }

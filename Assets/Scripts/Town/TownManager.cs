@@ -70,10 +70,10 @@ namespace DopamineCleaner.Town
                 goldText.text = $"💰 보유 골드: {profile.gold:N0} G";
 
             if (karmaText != null)
-                karmaText.text = $"✨ 윤회 포인트: {profile.karmaPoints} P";
+                karmaText.text = $"✨ 디톡스 포인트: {profile.karmaPoints} P";
 
             if (activeCharacterText != null)
-                activeCharacterText.text = $"사원증: {curChar.iconEmoji} {curChar.name} ({curChar.jobTitle})";
+                activeCharacterText.text = $"요원증: {curChar.iconEmoji} {curChar.name} ({curChar.jobTitle})";
         }
 
         public void SwitchTab(int tabIndex)

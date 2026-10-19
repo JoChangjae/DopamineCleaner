@@ -52,7 +52,7 @@ namespace DopamineCleaner.Town
 
             if (passiveText != null)
             {
-                passiveText.text = $"[특약 패시브]\n{def.passiveDesc}";
+                passiveText.text = $"[고유 특성]\n{def.passiveDesc}";
             }
 
             bool isUnlocked = profile.unlockedCharacterIds.Contains(def.id);
@@ -64,12 +64,12 @@ namespace DopamineCleaner.Town
 
                 if (isCurrent)
                 {
-                    btnText.text = "✅ 현장 출동 사원";
+                    btnText.text = "✅ 출동 중인 요원";
                     actionBtn.interactable = false;
                 }
                 else if (isUnlocked)
                 {
-                    btnText.text = "사원 선택";
+                    btnText.text = "요원 선택";
                     actionBtn.interactable = true;
                     actionBtn.onClick.AddListener(() =>
                     {
@@ -81,7 +81,7 @@ namespace DopamineCleaner.Town
                 {
                     string costStr = $"{def.unlockGoldCost}G";
                     if (def.unlockKarmaCost > 0) costStr += $" + {def.unlockKarmaCost}P";
-                    btnText.text = $"🔓 채용 ({costStr})";
+                    btnText.text = $"🔓 영입 ({costStr})";
 
                     bool canAfford = profile.gold >= def.unlockGoldCost && profile.karmaPoints >= def.unlockKarmaCost;
                     actionBtn.interactable = canAfford;
