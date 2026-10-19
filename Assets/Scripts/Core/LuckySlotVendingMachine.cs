@@ -14,9 +14,10 @@ namespace DopamineCleaner.Core
         public static LuckySlotVendingMachine Instance { get; private set; }
 
         [Header("자판기 상태")]
-        [SerializeField] private float interactionRadius = 2.2f;
+        [SerializeField] private float interactionRadius = 3.2f;
         [SerializeField] private int spinCost = 50;
         private bool isPlayerNearby = false;
+        public bool IsModalOpen { get; private set; } = false;
 
         [Header("UI 연결")]
         [SerializeField] private GameObject promptUI;
@@ -34,6 +35,7 @@ namespace DopamineCleaner.Core
         [SerializeField] private Text contract1Txt;
         [SerializeField] private Text contract2Txt;
 
+        private TextMesh worldLabelText;
         private bool isSpinning = false;
         private readonly string[] symbols = { "7️⃣", "💎", "🍒", "⭐", "💀" };
 
@@ -45,26 +47,127 @@ namespace DopamineCleaner.Core
             SetupVisualSprite();
         }
 
+        private void Start()
+        {
+            EnsureUIReferencesAndListeners();
+        }
+
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
         }
 
-        private void SetupVisualSprite()
+        public void SetupVisualSprite()
         {
             var sr = GetComponent<SpriteRenderer>();
             if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
             sr.sprite = CreateVendingSprite();
+            sr.sortingOrder = 5;
             transform.localScale = Vector3.one * 1.35f;
 
             var col = GetComponent<CircleCollider2D>();
             if (col == null) col = gameObject.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
-            col.radius = 1.0f;
+            col.radius = 1.2f;
+
+            // 이미 라벨이 있다면 참조만 갱신
+            Transform existingLabel = transform.Find("VendingWorldLabel");
+            if (existingLabel != null)
+            {
+                worldLabelText = existingLabel.GetComponent<TextMesh>();
+                return;
+            }
+
+            // 자판기 머리 위 월드 텍스트 라벨 (위치 인지 및 E키 안내)
+            GameObject labelObj = new GameObject("VendingWorldLabel");
+            labelObj.transform.SetParent(transform, false);
+            labelObj.transform.localPosition = new Vector3(0, 1.4f, 0);
+
+            worldLabelText = labelObj.AddComponent<TextMesh>();
+            worldLabelText.text = "🎰 럭키 자판기\n[E] 상호작용";
+            worldLabelText.fontSize = 28;
+            worldLabelText.characterSize = 0.08f;
+            worldLabelText.alignment = TextAlignment.Center;
+            worldLabelText.anchor = TextAnchor.LowerCenter;
+            worldLabelText.color = new Color(1f, 0.9f, 0.3f);
+        }
+
+        /// <summary>
+        /// 씬 직렬화가 누락되었거나 런타임 진입 시 버튼 리스너 및 UI 참조를 안전하게 자동 바인딩합니다.
+        /// </summary>
+        public void EnsureUIReferencesAndListeners()
+        {
+            SetupVisualSprite();
+
+            if (promptUI == null)
+            {
+                var p = GameObject.Find("SlotPrompt");
+                if (p != null) promptUI = p;
+            }
+
+            if (slotModalUI == null)
+            {
+                var m = GameObject.Find("SlotModalPanel");
+                if (m != null)
+                {
+                    slotModalUI = m;
+
+                    if (reel1Text == null) reel1Text = m.transform.Find("ReelsGroup/Reel1")?.GetComponent<Text>();
+                    if (reel2Text == null) reel2Text = m.transform.Find("ReelsGroup/Reel2")?.GetComponent<Text>();
+                    if (reel3Text == null) reel3Text = m.transform.Find("ReelsGroup/Reel3")?.GetComponent<Text>();
+                    if (resultMessageText == null) resultMessageText = m.transform.Find("ResText")?.GetComponent<Text>();
+
+                    if (spinButton == null) spinButton = m.transform.Find("SpinBtn")?.GetComponent<Button>();
+                    if (closeButton == null) closeButton = m.transform.Find("CloseBtn")?.GetComponent<Button>();
+
+                    if (contract1Btn == null) contract1Btn = m.transform.Find("Contract1Btn")?.GetComponent<Button>();
+                    if (contract2Btn == null) contract2Btn = m.transform.Find("Contract2Btn")?.GetComponent<Button>();
+                    if (contract1Txt == null) contract1Txt = m.transform.Find("Contract1Btn/C1Txt")?.GetComponent<Text>();
+                    if (contract2Txt == null) contract2Txt = m.transform.Find("Contract2Btn/C2Txt")?.GetComponent<Text>();
+                }
+            }
+
+            // 버튼 클릭 이벤트 확실하게 등록
+            if (spinButton != null)
+            {
+                spinButton.onClick.RemoveAllListeners();
+                spinButton.onClick.AddListener(OnSpinClicked);
+            }
+
+            if (closeButton != null)
+            {
+                closeButton.onClick.RemoveAllListeners();
+                closeButton.onClick.AddListener(CloseSlotModal);
+            }
+
+            if (contract1Btn != null)
+            {
+                contract1Btn.onClick.RemoveAllListeners();
+                contract1Btn.onClick.AddListener(() => ApplyContract(1));
+            }
+
+            if (contract2Btn != null)
+            {
+                contract2Btn.onClick.RemoveAllListeners();
+                contract2Btn.onClick.AddListener(() => ApplyContract(2));
+            }
+
+            if (promptUI != null && !IsModalOpen) promptUI.SetActive(false);
+            if (slotModalUI != null && !IsModalOpen) slotModalUI.SetActive(false);
         }
 
         private void Update()
         {
+            // 모달이 열려 있을 때: E키 또는 ESC키로 닫기 지원
+            if (IsModalOpen)
+            {
+                if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Escape))
+                {
+                    CloseSlotModal();
+                }
+                return;
+            }
+
             if (PlayerController.Instance == null) return;
 
             float dist = Vector2.Distance(transform.position, PlayerController.Instance.transform.position);
@@ -73,9 +176,18 @@ namespace DopamineCleaner.Core
             if (nearby != isPlayerNearby)
             {
                 isPlayerNearby = nearby;
-                if (promptUI != null) promptUI.SetActive(isPlayerNearby && (slotModalUI == null || !slotModalUI.activeSelf));
+                if (promptUI != null)
+                {
+                    promptUI.SetActive(isPlayerNearby && !IsModalOpen);
+                }
+
+                if (worldLabelText != null)
+                {
+                    worldLabelText.color = isPlayerNearby ? new Color(1f, 0.35f, 0.75f) : new Color(1f, 0.9f, 0.3f);
+                }
             }
 
+            // 자판기 근처에서 E키 입력 시 모달 열기
             if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
             {
                 OpenSlotModal();
@@ -98,19 +210,16 @@ namespace DopamineCleaner.Core
             contract1Txt = c1Txt;
             contract2Txt = c2Txt;
 
-            if (spinButton != null) spinButton.onClick.AddListener(OnSpinClicked);
-            if (closeButton != null) closeButton.onClick.AddListener(CloseSlotModal);
-
-            if (contract1Btn != null) contract1Btn.onClick.AddListener(() => ApplyContract(1));
-            if (contract2Btn != null) contract2Btn.onClick.AddListener(() => ApplyContract(2));
-
-            if (promptUI != null) promptUI.SetActive(false);
-            if (slotModalUI != null) slotModalUI.SetActive(false);
+            EnsureUIReferencesAndListeners();
         }
 
         public void OpenSlotModal()
         {
+            EnsureUIReferencesAndListeners();
+
             if (slotModalUI == null) return;
+
+            IsModalOpen = true;
             slotModalUI.SetActive(true);
             if (promptUI != null) promptUI.SetActive(false);
 
@@ -119,12 +228,26 @@ namespace DopamineCleaner.Core
 
             RefreshContracts();
             SoundManager.Instance?.Play(SoundEffect.GemCollect, 0.6f);
+
+            // 슬롯 이용 중 몬스터 공격 방지 및 안전한 플레이를 위해 일시정지
+            Time.timeScale = 0f;
         }
 
         public void CloseSlotModal()
         {
+            if (isSpinning) return; // 릴 회전 중에는 닫기 방지
+
+            IsModalOpen = false;
             if (slotModalUI != null) slotModalUI.SetActive(false);
             if (promptUI != null && isPlayerNearby) promptUI.SetActive(true);
+
+            // 게임 플레이 상태인 경우 시간 정상 재개
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Playing)
+            {
+                Time.timeScale = 1f;
+            }
+
+            SoundManager.Instance?.Play(SoundEffect.Dash, 0.5f);
         }
 
         private void OnSpinClicked()
@@ -135,7 +258,11 @@ namespace DopamineCleaner.Core
             if (currentGold < spinCost)
             {
                 if (resultMessageText != null)
+                {
                     resultMessageText.text = "⚠️ 골드가 부족합니다! (필요: 50G)";
+                    resultMessageText.color = new Color(1f, 0.3f, 0.3f);
+                }
+                SoundManager.Instance?.Play(SoundEffect.Hit, 0.6f);
                 return;
             }
 
@@ -156,15 +283,16 @@ namespace DopamineCleaner.Core
             float spinDuration = 1.3f;
             float elapsed = 0f;
 
+            // Time.timeScale = 0 상태이므로 WaitForSecondsRealtime 및 unscaledDeltaTime 사용
             while (elapsed < spinDuration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 if (reel1Text != null) reel1Text.text = symbols[Random.Range(0, symbols.Length)];
                 if (reel2Text != null) reel2Text.text = symbols[Random.Range(0, symbols.Length)];
                 if (reel3Text != null) reel3Text.text = symbols[Random.Range(0, symbols.Length)];
 
                 SoundManager.Instance?.Play(SoundEffect.Shoot, 0.25f);
-                yield return new WaitForSeconds(0.08f);
+                yield return new WaitForSecondsRealtime(0.08f);
             }
 
             // 결과 추첨

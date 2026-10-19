@@ -570,6 +570,29 @@ namespace DopamineCleaner.Editor
                 evalMethod?.Invoke(slot, new object[] { "💎", "💎", "💎" });
                 Assert(true, "다이아 3개 결과 판정 예외 없이 처리 완료");
 
+                // 모달 열기 및 일시정지(Time.timeScale = 0), 닫기 테스트
+                GameObject dummyPrompt = new GameObject("DummyPrompt");
+                GameObject dummyModal = new GameObject("DummyModal");
+                slot.BindUI(dummyPrompt, dummyModal, null, null, null, null, null, null);
+
+                Assert(!slot.IsModalOpen, "자판기 초기 상태는 모달이 닫혀 있음");
+                slot.OpenSlotModal();
+                Assert(slot.IsModalOpen, "OpenSlotModal() 호출 후 IsModalOpen true 확인");
+                Assert(dummyModal.activeSelf, "OpenSlotModal() 호출 시 모달 활성화 확인");
+                Assert(Mathf.Approximately(Time.timeScale, 0f), "OpenSlotModal() 호출 시 슬롯 몰입을 위해 Time.timeScale=0 확인");
+
+                slot.CloseSlotModal();
+                Assert(!slot.IsModalOpen, "CloseSlotModal() 호출 후 IsModalOpen false 확인");
+                Assert(!dummyModal.activeSelf, "CloseSlotModal() 호출 시 모달 비활성화 확인");
+
+                // 월드 라벨 자식 오브젝트 확인
+                Transform labelTr = slotObj.transform.Find("VendingWorldLabel");
+                Assert(labelTr != null, "자판기 머리 위 월드 텍스트 라벨(VendingWorldLabel) 정상 생성 확인");
+
+                Time.timeScale = 1f; // 테스트 후 정상 복구
+
+                UnityEngine.Object.DestroyImmediate(dummyPrompt);
+                UnityEngine.Object.DestroyImmediate(dummyModal);
                 UnityEngine.Object.DestroyImmediate(slotObj);
                 UnityEngine.Object.DestroyImmediate(root);
             }

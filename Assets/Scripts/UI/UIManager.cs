@@ -186,6 +186,13 @@ namespace DopamineCleaner.UI
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                if (DopamineCleaner.Core.LuckySlotVendingMachine.Instance != null &&
+                    DopamineCleaner.Core.LuckySlotVendingMachine.Instance.IsModalOpen)
+                {
+                    DopamineCleaner.Core.LuckySlotVendingMachine.Instance.CloseSlotModal();
+                    return;
+                }
+
                 TogglePauseMenu();
             }
 

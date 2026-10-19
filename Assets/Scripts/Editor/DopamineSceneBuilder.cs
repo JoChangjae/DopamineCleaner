@@ -119,6 +119,7 @@ namespace DopamineCleaner.Editor
             GameObject slotMachineObj = new GameObject("LuckySlotMachine");
             slotMachineObj.transform.position = new Vector3(5.5f, 4.0f, 0f);
             LuckySlotVendingMachine slotMachine = slotMachineObj.AddComponent<LuckySlotVendingMachine>();
+            slotMachine.SetupVisualSprite();
 
             EnemySpawner spawner = sysObj.AddComponent<EnemySpawner>();
             SetPrivateField(spawner, "enemyPrefab", enemyPrefab);
