@@ -10,12 +10,18 @@ namespace DopamineCleaner.Weapons
     {
         CleanBullet,
         OrbitBarrier,
+        LaserBeam,
+        FirewallMine,
+        ShockAura,
         MoveSpeed,
         MaxHP,
         Magnet,
         AttackSpeed,
         EvoGigaGatling,
         EvoGalacticCleanse,
+        EvoPrismCannon,
+        EvoSecurityMatrix,
+        EvoTeslaDischarge,
         BonusGold,
         BonusHeal,
         BonusBomb
@@ -38,6 +44,9 @@ namespace DopamineCleaner.Weapons
         [Header("무기 컴포넌트")]
         [SerializeField] private CleanBulletWeapon cleanBulletWeapon;
         [SerializeField] private OrbitWeapon orbitWeapon;
+        [SerializeField] private LaserBeamWeapon laserBeamWeapon;
+        [SerializeField] private FirewallMineWeapon mineWeapon;
+        [SerializeField] private ShockAuraWeapon shockWeapon;
 
         [Header("패시브 레벨")]
         [SerializeField] private int moveSpeedLevel = 0;
@@ -47,6 +56,9 @@ namespace DopamineCleaner.Weapons
 
         public CleanBulletWeapon BulletWeapon => cleanBulletWeapon;
         public OrbitWeapon OrbitWeapon => orbitWeapon;
+        public LaserBeamWeapon LaserWeapon => laserBeamWeapon;
+        public FirewallMineWeapon MineWeapon => mineWeapon;
+        public ShockAuraWeapon ShockWeapon => shockWeapon;
         public int AttackSpeedLevel => attackSpeedLevel;
 
         private void Awake()
@@ -58,6 +70,14 @@ namespace DopamineCleaner.Weapons
 
             if (cleanBulletWeapon == null) cleanBulletWeapon = GetComponentInChildren<CleanBulletWeapon>();
             if (orbitWeapon == null) orbitWeapon = GetComponentInChildren<OrbitWeapon>();
+            if (laserBeamWeapon == null) laserBeamWeapon = GetComponentInChildren<LaserBeamWeapon>();
+            if (mineWeapon == null) mineWeapon = GetComponentInChildren<FirewallMineWeapon>();
+            if (shockWeapon == null) shockWeapon = GetComponentInChildren<ShockAuraWeapon>();
+
+            // 없으면 동적 추가
+            if (laserBeamWeapon == null) laserBeamWeapon = gameObject.AddComponent<LaserBeamWeapon>();
+            if (mineWeapon == null) mineWeapon = gameObject.AddComponent<FirewallMineWeapon>();
+            if (shockWeapon == null) shockWeapon = gameObject.AddComponent<ShockAuraWeapon>();
         }
 
         private void Start()
@@ -101,6 +121,42 @@ namespace DopamineCleaner.Weapons
                 });
             }
 
+            if (laserBeamWeapon != null && laserBeamWeapon.Level >= 5 && !laserBeamWeapon.IsEvolved && magnetLevel >= 1)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.EvoPrismCannon,
+                    title = "✨ 프리즘 정화포",
+                    description = "십자 4방향으로 거대 관통 프리즘 레이저를 일제 사격합니다!",
+                    iconText = "🌈",
+                    isEvolution = true
+                });
+            }
+
+            if (mineWeapon != null && mineWeapon.Level >= 5 && !mineWeapon.IsEvolved && moveSpeedLevel >= 1)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.EvoSecurityMatrix,
+                    title = "✨ 절대 보안 결계",
+                    description = "발밑에 초대형 폭발 지뢰를 맹렬히 투하합니다!",
+                    iconText = "💥",
+                    isEvolution = true
+                });
+            }
+
+            if (shockWeapon != null && shockWeapon.Level >= 5 && !shockWeapon.IsEvolved && attackSpeedLevel >= 1)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.EvoTeslaDischarge,
+                    title = "✨ 테슬라 뇌파 방전",
+                    description = "화면 내 다수의 적들에게 강력한 연쇄 벼락 폭풍을 내리꽂습니다!",
+                    iconText = "⚡",
+                    isEvolution = true
+                });
+            }
+
             // 2. 일반 무기 후보
             if (cleanBulletWeapon != null && cleanBulletWeapon.Level < 5 && !cleanBulletWeapon.IsEvolved)
             {
@@ -122,6 +178,42 @@ namespace DopamineCleaner.Weapons
                     title = orbitWeapon.Level == 0 ? "가디언 위성 (신규)" : $"가디언 위성 Lv.{orbitWeapon.Level + 1}",
                     description = "주변을 회전하며 접근하는 적을 밀어내고 피해를 줍니다.",
                     iconText = "🛡️",
+                    isEvolution = false
+                });
+            }
+
+            if (laserBeamWeapon != null && laserBeamWeapon.Level < 5 && !laserBeamWeapon.IsEvolved)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.LaserBeam,
+                    title = laserBeamWeapon.Level == 0 ? "디톡스 레이저 (신규)" : $"디톡스 레이저 Lv.{laserBeamWeapon.Level + 1}",
+                    description = "가장 가까운 적을 관통하는 고출력 정화 레이저를 쏩니다.",
+                    iconText = "🔦",
+                    isEvolution = false
+                });
+            }
+
+            if (mineWeapon != null && mineWeapon.Level < 5 && !mineWeapon.IsEvolved)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.FirewallMine,
+                    title = mineWeapon.Level == 0 ? "방화벽 지뢰 (신규)" : $"방화벽 지뢰 Lv.{mineWeapon.Level + 1}",
+                    description = "이동 경로에 지뢰를 설치하여 밟은 적을 폭파시킵니다.",
+                    iconText = "💣",
+                    isEvolution = false
+                });
+            }
+
+            if (shockWeapon != null && shockWeapon.Level < 5 && !shockWeapon.IsEvolved)
+            {
+                candidates.Add(new UpgradeCardInfo
+                {
+                    type = UpgradeType.ShockAura,
+                    title = shockWeapon.Level == 0 ? "쇼크 펄스 (신규)" : $"쇼크 펄스 Lv.{shockWeapon.Level + 1}",
+                    description = "주변의 여러 적에게 연쇄 번개 전류를 방전합니다.",
+                    iconText = "⚡",
                     isEvolution = false
                 });
             }
@@ -227,11 +319,29 @@ namespace DopamineCleaner.Weapons
                 case UpgradeType.OrbitBarrier:
                     orbitWeapon?.Upgrade();
                     break;
+                case UpgradeType.LaserBeam:
+                    laserBeamWeapon?.Upgrade();
+                    break;
+                case UpgradeType.FirewallMine:
+                    mineWeapon?.Upgrade();
+                    break;
+                case UpgradeType.ShockAura:
+                    shockWeapon?.Upgrade();
+                    break;
                 case UpgradeType.EvoGigaGatling:
                     cleanBulletWeapon?.Evolve();
                     break;
                 case UpgradeType.EvoGalacticCleanse:
                     orbitWeapon?.Evolve();
+                    break;
+                case UpgradeType.EvoPrismCannon:
+                    laserBeamWeapon?.Evolve();
+                    break;
+                case UpgradeType.EvoSecurityMatrix:
+                    mineWeapon?.Evolve();
+                    break;
+                case UpgradeType.EvoTeslaDischarge:
+                    shockWeapon?.Evolve();
                     break;
                 case UpgradeType.MoveSpeed:
                     moveSpeedLevel++;

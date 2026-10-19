@@ -90,9 +90,12 @@ namespace DopamineCleaner.Editor
             SetPrivateField(weaponMgr, "cleanBulletWeapon", bulletWeapon);
             SetPrivateField(weaponMgr, "orbitWeapon", orbitWeapon);
 
-            // 6. 게임 매니저 & 스포너 & 아이템 매니저
+            // 6. 게임 매니저 & 스포너 & 아이템 매니저 & 피버 매니저 & 데미지 텍스트 & 사운드 매니저
             GameObject sysObj = new GameObject("[Systems]");
             GameManager gameMgr = sysObj.AddComponent<GameManager>();
+            FeverManager feverMgr = sysObj.AddComponent<FeverManager>();
+            DamageTextManager dmgTextMgr = sysObj.AddComponent<DamageTextManager>();
+            SoundManager soundMgr = sysObj.AddComponent<SoundManager>();
 
             EnemySpawner spawner = sysObj.AddComponent<EnemySpawner>();
             SetPrivateField(spawner, "enemyPrefab", enemyPrefab);
@@ -162,22 +165,26 @@ namespace DopamineCleaner.Editor
             topRt.anchorMin = new Vector2(0.5f, 1f);
             topRt.anchorMax = new Vector2(0.5f, 1f);
             topRt.pivot = new Vector2(0.5f, 1f);
-            topRt.sizeDelta = new Vector2(920, 150);
+            topRt.sizeDelta = new Vector2(920, 210);
             topRt.anchoredPosition = new Vector2(0, -15);
 
             Image topBg = topHud.AddComponent<Image>();
             topBg.color = new Color(0.12f, 0.09f, 0.18f, 0.88f);
 
             // 경험치 바 (최상단)
-            Slider expSlider = CreateSimpleSlider("ExpBar", topHud.transform, new Color(1f, 0.46f, 0.56f), new Vector2(0, 45));
+            Slider expSlider = CreateSimpleSlider("ExpBar", topHud.transform, new Color(1f, 0.46f, 0.56f), new Vector2(0, 75));
             SetPrivateField(uiMgr, "expSlider", expSlider);
 
             // 체력 바
-            Slider hpSlider = CreateSimpleSlider("HpBar", topHud.transform, new Color(0.32f, 0.72f, 0.53f), new Vector2(0, 5));
+            Slider hpSlider = CreateSimpleSlider("HpBar", topHud.transform, new Color(0.32f, 0.72f, 0.53f), new Vector2(0, 38));
             SetPrivateField(uiMgr, "hpSlider", hpSlider);
 
+            // 피버 게이지 바
+            Slider feverSlider = CreateSimpleSlider("FeverBar", topHud.transform, new Color(0.25f, 0.75f, 1f), new Vector2(0, 2));
+            SetPrivateField(uiMgr, "feverSlider", feverSlider);
+
             // 레벨 텍스트
-            Text lvlText = CreateText("LevelText", topHud.transform, "Lv.1", 24, TextAnchor.MiddleLeft, new Vector2(-380, 45));
+            Text lvlText = CreateText("LevelText", topHud.transform, "Lv.1", 24, TextAnchor.MiddleLeft, new Vector2(-380, 75));
             lvlText.color = new Color(1f, 0.78f, 0.35f);
             lvlText.fontStyle = FontStyle.Bold;
             Outline lvlOut = lvlText.gameObject.AddComponent<Outline>();
@@ -185,8 +192,27 @@ namespace DopamineCleaner.Editor
             lvlOut.effectDistance = new Vector2(1.5f, -1.5f);
             SetPrivateField(uiMgr, "levelText", lvlText);
 
+            // 피버 게이지 텍스트
+            Text feverTxt = CreateText("FeverText", topHud.transform, "⚡ 디톡스 피버 게이지: 0%", 18, TextAnchor.MiddleLeft, new Vector2(-380, 2));
+            feverTxt.color = new Color(0.35f, 0.85f, 1f);
+            feverTxt.fontStyle = FontStyle.Bold;
+            Outline feverOut = feverTxt.gameObject.AddComponent<Outline>();
+            feverOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            feverOut.effectDistance = new Vector2(1.2f, -1.2f);
+            SetPrivateField(uiMgr, "feverText", feverTxt);
+
+            // 콤보 텍스트
+            Text comboTxt = CreateText("ComboText", topHud.transform, "⚡ 10 COMBO!", 20, TextAnchor.MiddleRight, new Vector2(380, 2));
+            comboTxt.color = new Color(1f, 0.85f, 0.2f);
+            comboTxt.fontStyle = FontStyle.Bold;
+            Outline comboOut = comboTxt.gameObject.AddComponent<Outline>();
+            comboOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            comboOut.effectDistance = new Vector2(1.5f, -1.5f);
+            comboTxt.gameObject.SetActive(false);
+            SetPrivateField(uiMgr, "comboText", comboTxt);
+
             // 타이머 텍스트 (화사한 골드 옐로우 + 또렷한 블랙 아웃라인)
-            Text timerText = CreateText("TimerText", topHud.transform, "00:00", 36, TextAnchor.MiddleCenter, new Vector2(0, -32));
+            Text timerText = CreateText("TimerText", topHud.transform, "00:00", 34, TextAnchor.MiddleCenter, new Vector2(0, -42));
             timerText.color = new Color(1f, 0.88f, 0.32f);
             timerText.fontStyle = FontStyle.Bold;
             Outline timerOut = timerText.gameObject.AddComponent<Outline>();
@@ -195,13 +221,27 @@ namespace DopamineCleaner.Editor
             SetPrivateField(uiMgr, "timerText", timerText);
 
             // 킬/스테이지 텍스트 (산뜻한 네온 민트 그린 + 블랙 아웃라인)
-            Text killsText = CreateText("KillsText", topHud.transform, "STAGE 1 [0/35]  👾 0", 22, TextAnchor.MiddleCenter, new Vector2(0, -65));
+            Text killsText = CreateText("KillsText", topHud.transform, "STAGE 1 [0/35]  👾 0", 22, TextAnchor.MiddleCenter, new Vector2(0, -78));
             killsText.color = new Color(0.40f, 0.95f, 0.75f);
             killsText.fontStyle = FontStyle.Bold;
             Outline killsOut = killsText.gameObject.AddComponent<Outline>();
             killsOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
             killsOut.effectDistance = new Vector2(1.5f, -1.5f);
             SetPrivateField(uiMgr, "stageKillsText", killsText);
+
+            // 피버 배너 (화면 중앙 상단에 깜빡이는 배너)
+            GameObject feverBannerObj = CreateUIObject("FeverBanner", canvasObj.transform);
+            RectTransform fbRt = feverBannerObj.GetComponent<RectTransform>();
+            fbRt.anchorMin = new Vector2(0.5f, 0.75f);
+            fbRt.anchorMax = new Vector2(0.5f, 0.75f);
+            fbRt.sizeDelta = new Vector2(700, 70);
+            Image fbImg = feverBannerObj.AddComponent<Image>();
+            fbImg.color = new Color(1f, 0.3f, 0.1f, 0.85f);
+            Text fbTxt = CreateText("FbText", feverBannerObj.transform, "🔥 DETOX FEVER TIME! (연사속도 2배) 🔥", 26, TextAnchor.MiddleCenter, Vector2.zero);
+            fbTxt.color = Color.white;
+            fbTxt.fontStyle = FontStyle.Bold;
+            feverBannerObj.SetActive(false);
+            SetPrivateField(uiMgr, "feverBanner", feverBannerObj);
 
             // 하단 대시 / 구급약 텍스트
             GameObject bottomHud = CreateUIObject("BottomHUD", canvasObj.transform);

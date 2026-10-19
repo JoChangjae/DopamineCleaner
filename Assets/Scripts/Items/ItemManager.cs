@@ -105,6 +105,7 @@ namespace DopamineCleaner.Items
 
         public void TriggerScreenBomb()
         {
+            Core.CameraFollow.Instance?.Shake(0.5f, 0.55f);
             Enemy[] allEnemies = FindObjectsByType<Enemy>();
             for (int i = 0; i < allEnemies.Length; i++)
             {

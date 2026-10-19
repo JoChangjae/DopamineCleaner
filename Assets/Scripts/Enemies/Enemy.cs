@@ -11,6 +11,8 @@ namespace DopamineCleaner.Enemies
         MindDust,          // 잡생각 먼지 (약하지만 떼지어 몰려옴)
         HeavySloth,        // 쏟아지는 졸음 (탱커형)
         NotificationGhost, // 알림 유령 (스마트폰 알림, 고속 이동)
+        ShortsRunner,      // 숏폼 알고리즘 (초고속 지그재그 돌진)
+        SpamShooter,       // 스팸/악플러 (원거리 투사체 사격)
         DopamineBoss       // 도파민 거대 보스
     }
 
@@ -29,6 +31,7 @@ namespace DopamineCleaner.Enemies
         private SpriteRenderer spriteRenderer;
         private Color originalColor;
         private Coroutine flashCoroutine;
+        private float specialActionTimer = 0f;
 
         public EnemyType Type => enemyType;
         public float HP => currentHP;
@@ -46,6 +49,7 @@ namespace DopamineCleaner.Enemies
         public void Initialize(EnemyType type, int stage, float survivalSec)
         {
             enemyType = type;
+            specialActionTimer = Random.Range(1.0f, 2.5f);
             float stageMult = 1.0f + (stage - 1) * 0.32f;
 
             switch (type)
@@ -77,6 +81,24 @@ namespace DopamineCleaner.Enemies
                     transform.localScale = Vector3.one * 1.1f;
                     break;
 
+                case EnemyType.ShortsRunner:
+                    maxHP = (35f + survivalSec * 0.30f) * stageMult;
+                    moveSpeed = Random.Range(4.5f, 5.5f);
+                    damage = 12f + (stage - 1) * 3f;
+                    baseExp = 6;
+                    SetVisualColor(new Color(1.0f, 0.45f, 0.2f)); // 번갯빛 주황
+                    transform.localScale = Vector3.one * 0.85f;
+                    break;
+
+                case EnemyType.SpamShooter:
+                    maxHP = (30f + survivalSec * 0.25f) * stageMult;
+                    moveSpeed = 2.0f;
+                    damage = 10f + (stage - 1) * 3f;
+                    baseExp = 7;
+                    SetVisualColor(new Color(0.95f, 0.25f, 0.35f)); // 핏빛 빨강
+                    transform.localScale = Vector3.one * 1.0f;
+                    break;
+
                 case EnemyType.DopamineBoss:
                     maxHP = (380f + (stage - 1) * 260f) * stageMult;
                     moveSpeed = 1.8f + Mathf.Min(0.6f, (stage - 1) * 0.12f);
@@ -106,15 +128,80 @@ namespace DopamineCleaner.Enemies
 
             if (PlayerController.Instance == null || !IsAlive) return;
 
-            // 플레이어 추적 이동
             Vector3 playerPos = PlayerController.Instance.transform.position;
             Vector3 dir = (playerPos - transform.position).normalized;
-            transform.position += dir * (moveSpeed * Time.deltaTime);
+            float distToPlayer = Vector2.Distance(transform.position, playerPos);
+
+            // 특수 몬스터 행동 분기
+            if (enemyType == EnemyType.ShortsRunner)
+            {
+                // 지그재그 전광석화 돌진
+                Vector3 perp = new Vector3(-dir.y, dir.x, 0f) * Mathf.Sin(Time.time * 9f) * 1.2f;
+                transform.position += (dir + perp).normalized * (moveSpeed * Time.deltaTime);
+            }
+            else if (enemyType == EnemyType.SpamShooter)
+            {
+                // 원거리 유지 및 투사체 발사
+                if (distToPlayer > 5.5f)
+                {
+                    transform.position += dir * (moveSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    // 5.5m 이내에선 사격
+                    specialActionTimer -= Time.deltaTime;
+                    if (specialActionTimer <= 0f)
+                    {
+                        specialActionTimer = 2.6f;
+                        ShootProjectile(dir);
+                    }
+                }
+            }
+            else if (enemyType == EnemyType.DopamineBoss)
+            {
+                // 보스: 추적 이동 + 주기적 8방향 탄막 폭풍
+                transform.position += dir * (moveSpeed * Time.deltaTime);
+
+                specialActionTimer -= Time.deltaTime;
+                if (specialActionTimer <= 0f)
+                {
+                    specialActionTimer = 3.8f;
+                    FireBossRadialBurst();
+                }
+            }
+            else
+            {
+                // 기본 추적 이동
+                transform.position += dir * (moveSpeed * Time.deltaTime);
+            }
 
             // 스프라이트 반전
             if (spriteRenderer != null && dir.x != 0)
             {
                 spriteRenderer.flipX = dir.x < 0;
+            }
+        }
+
+        private void ShootProjectile(Vector2 dir)
+        {
+            GameObject projObj = new GameObject("SpamBullet");
+            projObj.transform.position = transform.position;
+            EnemyProjectile ep = projObj.AddComponent<EnemyProjectile>();
+            ep.Initialize(dir, 4.5f, damage);
+        }
+
+        private void FireBossRadialBurst()
+        {
+            int bulletCount = 8;
+            for (int i = 0; i < bulletCount; i++)
+            {
+                float angle = i * (360f / bulletCount) * Mathf.Deg2Rad;
+                Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+
+                GameObject projObj = new GameObject("BossBullet");
+                projObj.transform.position = transform.position;
+                EnemyProjectile ep = projObj.AddComponent<EnemyProjectile>();
+                ep.Initialize(dir, 5.0f, damage * 0.8f);
             }
         }
 
@@ -137,6 +224,10 @@ namespace DopamineCleaner.Enemies
             {
                 transform.position += (Vector3)(knockbackDir.normalized * knockbackForce);
             }
+
+            // 데미지 텍스트 팝업 및 피격음
+            Core.DamageTextManager.Instance?.SpawnDamageText(amount, transform.position, amount >= 35f);
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Hit, 0.4f);
 
             // 피격 플래시
             if (flashCoroutine != null) StopCoroutine(flashCoroutine);

@@ -125,7 +125,7 @@ namespace DopamineCleaner.Characters
                 dashTimer -= Time.deltaTime;
             }
 
-            // 3. 무적 타이머 처리
+            // 3. 무적 타이머 및 피버 시각 효과 처리
             if (invincibleTimer > 0f)
             {
                 invincibleTimer -= Time.deltaTime;
@@ -138,11 +138,18 @@ namespace DopamineCleaner.Characters
                     spriteRenderer.color = c;
                 }
             }
-            else if (spriteRenderer != null && spriteRenderer.color.a < 1f)
+            else if (FeverManager.Instance != null && FeverManager.Instance.IsFever)
             {
-                Color c = spriteRenderer.color;
-                c.a = 1f;
-                spriteRenderer.color = c;
+                // 피버 중 황금/민트 네온 펄스 효과
+                if (spriteRenderer != null)
+                {
+                    float hue = Mathf.PingPong(Time.time * 2f, 0.2f) + 0.12f; // 골드~옐로우
+                    spriteRenderer.color = Color.HSVToRGB(hue, 0.8f, 1f);
+                }
+            }
+            else if (spriteRenderer != null && (spriteRenderer.color.a < 1f || spriteRenderer.color != Color.white))
+            {
+                spriteRenderer.color = Color.white;
             }
 
             // 4. 단축키 1: 응급 구급약 사용
@@ -165,6 +172,10 @@ namespace DopamineCleaner.Characters
             {
                 speed *= dashSpeedMultiplier;
             }
+            if (FeverManager.Instance != null && FeverManager.Instance.IsFever)
+            {
+                speed *= 1.3f;
+            }
 
             rb.linearVelocity = movementInput * speed;
         }
@@ -175,6 +186,7 @@ namespace DopamineCleaner.Characters
             {
                 dashTimer = dashDuration;
                 dashCooldownTimer = dashCooldown;
+                SoundManager.Instance?.Play(SoundEffect.Dash, 0.4f);
                 OnDashCooldownChanged?.Invoke(dashCooldownTimer, dashCooldown);
             }
         }
@@ -182,6 +194,12 @@ namespace DopamineCleaner.Characters
         public void TakeDamage(float amount)
         {
             if (IsInvincible || currentHP <= 0f) return;
+
+            // 피버 모드 시 피격 피해 60% 경감
+            if (FeverManager.Instance != null && FeverManager.Instance.IsFever)
+            {
+                amount *= 0.4f;
+            }
 
             currentHP -= amount;
             invincibleTimer = invincibilityDuration;
@@ -245,6 +263,7 @@ namespace DopamineCleaner.Characters
                 currentExp -= nextLevelExp;
                 currentLevel++;
                 nextLevelExp = Mathf.Round(nextLevelExp * 1.35f + 5f);
+                SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.55f);
                 OnLevelUp?.Invoke(currentLevel);
                 GameManager.Instance?.SetState(GameState.LevelUp);
             }
@@ -276,9 +295,10 @@ namespace DopamineCleaner.Characters
                 var profile = Meta.GameDataManager.Instance.Profile;
                 var def = Meta.CharacterDatabase.Get(profile.selectedCharacterId);
 
-                maxHP = def.baseMaxHP + profile.contractHPLevel * 15f;
-                moveSpeed = def.baseMoveSpeed + profile.contractSpeedLevel * 0.3f;
-                magnetRadius = def.baseMagnetRadius;
+                maxHP = def.baseMaxHP + profile.contractHPLevel * 15f + profile.researchHpLevel * 25f;
+                moveSpeed = (def.baseMoveSpeed + profile.contractSpeedLevel * 0.3f) * (1f + profile.researchSpdLevel * 0.06f);
+                magnetRadius = def.baseMagnetRadius * (1f + profile.researchMagLevel * 0.18f);
+                if (profile.researchRevLevel > 0) hasRevive = true;
 
                 // 인벤토리 장비 & 유물 패시브 효과 적용
                 foreach (string itemId in profile.inventory)

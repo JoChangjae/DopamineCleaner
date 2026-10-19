@@ -46,6 +46,8 @@ namespace DopamineCleaner.Weapons
 
         protected override void Attack()
         {
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Shoot, 0.25f);
+
             Enemy target = FindClosestEnemy();
             Vector2 targetDir = Vector2.right;
 

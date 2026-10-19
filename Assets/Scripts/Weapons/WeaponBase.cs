@@ -49,7 +49,13 @@ namespace DopamineCleaner.Weapons
             {
                 rate += 0.15f;
             }
-            return Mathf.Max(0.1f, baseCooldown / rate);
+
+            if (Core.FeverManager.Instance != null && Core.FeverManager.Instance.IsFever)
+            {
+                rate *= 1.8f;
+            }
+
+            return Mathf.Max(0.08f, baseCooldown / rate);
         }
     }
 }

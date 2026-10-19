@@ -125,6 +125,8 @@ namespace DopamineCleaner.Items
 
         private void Collect()
         {
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.GemCollect, 0.35f);
+
             switch (gemType)
             {
                 case GemType.Cake:

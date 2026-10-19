@@ -114,6 +114,7 @@ namespace DopamineCleaner.Core
         public void RegisterKill(bool isBoss)
         {
             totalKills++;
+            FeverManager.Instance?.AddKill(isBoss);
 
             if (isBoss)
             {

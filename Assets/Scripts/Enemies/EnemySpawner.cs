@@ -95,12 +95,20 @@ namespace DopamineCleaner.Enemies
         private EnemyType DetermineEnemyType(float survivalSec)
         {
             if (survivalSec < 20f) return EnemyType.MindDust;
-            if (survivalSec < 50f) return Random.value < 0.65f ? EnemyType.MindDust : EnemyType.HeavySloth;
+            if (survivalSec < 45f)
+            {
+                float r = Random.value;
+                if (r < 0.6f) return EnemyType.MindDust;
+                if (r < 0.85f) return EnemyType.HeavySloth;
+                return EnemyType.ShortsRunner;
+            }
 
             float roll = Random.value;
-            if (roll < 0.45f) return EnemyType.MindDust;
-            if (roll < 0.75f) return EnemyType.HeavySloth;
-            return EnemyType.NotificationGhost;
+            if (roll < 0.30f) return EnemyType.MindDust;
+            if (roll < 0.55f) return EnemyType.HeavySloth;
+            if (roll < 0.75f) return EnemyType.NotificationGhost;
+            if (roll < 0.90f) return EnemyType.ShortsRunner;
+            return EnemyType.SpamShooter;
         }
 
         private void TriggerWaveRush(int sec, int stage, float survivalSec)

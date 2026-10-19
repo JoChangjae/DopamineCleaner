@@ -24,6 +24,13 @@ namespace DopamineCleaner.Meta
         public int contractSpeedLevel = 0;
         public int contractDamageLevel = 0;
         public int contractGoldLevel = 0;
+
+        // 본부 연구소 영구 강화 레벨
+        public int researchAtkLevel = 0;
+        public int researchHpLevel = 0;
+        public int researchSpdLevel = 0;
+        public int researchMagLevel = 0;
+        public int researchRevLevel = 0;
     }
 
     public class GameDataManager : MonoBehaviour
@@ -137,6 +144,50 @@ namespace DopamineCleaner.Meta
                 return true;
             }
             return false;
+        }
+
+        public int GetResearchLevel(string researchId)
+        {
+            return researchId switch
+            {
+                "atk" => Profile.researchAtkLevel,
+                "hp" => Profile.researchHpLevel,
+                "spd" => Profile.researchSpdLevel,
+                "mag" => Profile.researchMagLevel,
+                "rev" => Profile.researchRevLevel,
+                _ => 0
+            };
+        }
+
+        public bool UpgradeResearch(string researchId)
+        {
+            var def = ResearchDatabase.Get(researchId);
+            if (def == null) return false;
+
+            int curLevel = GetResearchLevel(researchId);
+            if (curLevel >= def.maxLevel) return false;
+
+            int goldCost = def.GetGoldCost(curLevel);
+            int karmaCost = def.GetKarmaCost(curLevel);
+
+            if (Profile.gold < goldCost || Profile.karmaPoints < karmaCost)
+                return false;
+
+            Profile.gold -= goldCost;
+            Profile.karmaPoints -= karmaCost;
+
+            switch (researchId)
+            {
+                case "atk": Profile.researchAtkLevel++; break;
+                case "hp": Profile.researchHpLevel++; break;
+                case "spd": Profile.researchSpdLevel++; break;
+                case "mag": Profile.researchMagLevel++; break;
+                case "rev": Profile.researchRevLevel++; break;
+            }
+
+            SaveProfile();
+            OnProfileUpdated?.Invoke();
+            return true;
         }
 
         // ==========================================

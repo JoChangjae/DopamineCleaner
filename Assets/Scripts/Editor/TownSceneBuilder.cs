@@ -22,6 +22,7 @@ namespace DopamineCleaner.Editor
             GameObject shopItemPrefab = CreateOrUpdateShopItemPrefab();
             GameObject sellItemPrefab = CreateOrUpdateSellItemPrefab();
             GameObject storageItemPrefab = CreateOrUpdateStorageItemPrefab();
+            GameObject researchCardPrefab = CreateOrUpdateResearchCardPrefab();
 
             // 2. 새 씬 생성
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -93,13 +94,13 @@ namespace DopamineCleaner.Editor
             SetPrivateField(townMgr, "karmaText", karmaTxt);
             SetPrivateField(townMgr, "activeCharacterText", activeCharTxt);
 
-            // 상단 탭 네비게이션 버튼 (4개)
+            // 상단 탭 네비게이션 버튼 (5개)
             GameObject tabNavObj = CreateUIObject("TabNavBar", canvasObj.transform);
             RectTransform tabRt = tabNavObj.GetComponent<RectTransform>();
             tabRt.anchorMin = new Vector2(0.5f, 1f);
             tabRt.anchorMax = new Vector2(0.5f, 1f);
             tabRt.pivot = new Vector2(0.5f, 1f);
-            tabRt.sizeDelta = new Vector2(1400, 52);
+            tabRt.sizeDelta = new Vector2(1500, 52);
             tabRt.anchoredPosition = new Vector2(0, -115);
 
             HorizontalLayoutGroup tabHlg = tabNavObj.AddComponent<HorizontalLayoutGroup>();
@@ -108,14 +109,16 @@ namespace DopamineCleaner.Editor
             tabHlg.childControlWidth = true;
             tabHlg.childControlHeight = true;
 
-            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 클리너 요원실", 20, new Color(0.28f, 0.24f, 0.38f));
-            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 디톡스 보급소", 20, new Color(0.28f, 0.24f, 0.38f));
-            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 본부 창고", 20, new Color(0.28f, 0.24f, 0.38f));
-            Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 정화 작전 출동처", 20, new Color(0.85f, 0.35f, 0.38f));
+            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 클리너 요원실", 18, new Color(0.28f, 0.24f, 0.38f));
+            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 디톡스 보급소", 18, new Color(0.28f, 0.24f, 0.38f));
+            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 본부 창고", 18, new Color(0.28f, 0.24f, 0.38f));
+            Button tabResearch = CreateButton("TabResearch", tabNavObj.transform, "🔬 본부 연구소", 18, new Color(0.28f, 0.24f, 0.38f));
+            Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 정화 작전 출동처", 18, new Color(0.85f, 0.35f, 0.38f));
 
             SetPrivateField(townMgr, "tabCharBtn", tabChar);
             SetPrivateField(townMgr, "tabShopBtn", tabShop);
             SetPrivateField(townMgr, "tabStorageBtn", tabStorage);
+            SetPrivateField(townMgr, "tabResearchBtn", tabResearch);
             SetPrivateField(townMgr, "tabDungeonBtn", tabDungeon);
 
             // 메인 콘텐츠 영역 (중앙)
@@ -140,7 +143,12 @@ namespace DopamineCleaner.Editor
             SetPrivateField(townMgr, "storagePanel", storagePanel);
             storagePanel.SetActive(false);
 
-            // 4. 정화 구역 출동처 패널
+            // 4. 연구소 패널
+            GameObject resPanel = CreateResearchPanel(contentArea.transform, researchCardPrefab);
+            SetPrivateField(townMgr, "researchPanel", resPanel);
+            resPanel.SetActive(false);
+
+            // 5. 정화 구역 출동처 패널
             GameObject dungeonPanel = CreateDungeonSelectPanel(contentArea.transform);
             SetPrivateField(townMgr, "dungeonPanel", dungeonPanel);
             dungeonPanel.SetActive(false);
@@ -290,6 +298,36 @@ namespace DopamineCleaner.Editor
             SetPrivateField(ui, "storageItemPrefab", itemPrefab);
             SetPrivateField(ui, "stashCapacityText", stashCap);
             SetPrivateField(ui, "stashContainer", stashCont.transform);
+
+            return panel;
+        }
+
+        private static GameObject CreateResearchPanel(Transform parent, GameObject itemPrefab)
+        {
+            GameObject panel = CreateUIObject("ResearchPanel", parent);
+            RectTransform rt = panel.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+
+            ResearchUI ui = panel.AddComponent<ResearchUI>();
+
+            CreateText("ResTitle", panel.transform, "🔬 본부 연구소 (영구 능력치 강화)", 26, TextAnchor.MiddleLeft, new Vector2(0, 375), new Vector2(1650, 35));
+
+            GameObject cont = CreateUIObject("ResearchContainer", panel.transform);
+            RectTransform cRt = cont.GetComponent<RectTransform>();
+            cRt.anchorMin = new Vector2(0.5f, 0.5f);
+            cRt.anchorMax = new Vector2(0.5f, 0.5f);
+            cRt.sizeDelta = new Vector2(1650, 680);
+            cRt.anchoredPosition = new Vector2(0, -10);
+
+            GridLayoutGroup glg = cont.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(380, 260);
+            glg.spacing = new Vector2(35, 30);
+            glg.childAlignment = TextAnchor.UpperCenter;
+
+            SetPrivateField(ui, "researchContainer", cont.transform);
+            SetPrivateField(ui, "researchCardPrefab", itemPrefab);
 
             return panel;
         }
@@ -516,6 +554,36 @@ namespace DopamineCleaner.Editor
             string path = "Assets/Prefabs/StorageItemPrefab.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(row, path);
             Object.DestroyImmediate(row);
+            return prefab;
+        }
+
+        private static GameObject CreateOrUpdateResearchCardPrefab()
+        {
+            GameObject card = CreateUIObject("ResearchCard", null);
+            RectTransform rt = card.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(380, 260);
+
+            Image bg = card.AddComponent<Image>();
+            bg.color = new Color(0.20f, 0.17f, 0.28f);
+
+            Text icon = CreateText("Icon", card.transform, "💥", 48, TextAnchor.MiddleCenter, new Vector2(-125, 65), new Vector2(70, 70));
+            Text title = CreateText("Title", card.transform, "뇌파 집중 (공격력)", 20, TextAnchor.MiddleLeft, new Vector2(35, 80), new Vector2(230, 35));
+            title.fontStyle = FontStyle.Bold;
+
+            Text lvlText = CreateText("LevelText", card.transform, "Lv.0 / 5", 18, TextAnchor.MiddleLeft, new Vector2(35, 45), new Vector2(230, 25));
+            lvlText.color = new Color(0.6f, 0.9f, 1f);
+
+            Text desc = CreateText("Desc", card.transform, "모든 무기의 기본 공격력이 상승합니다. (레벨당 +10%)", 15, TextAnchor.UpperLeft, new Vector2(0, -10), new Vector2(330, 70));
+            desc.color = new Color(0.85f, 0.82f, 0.9f);
+
+            Button btn = CreateButton("UpgradeButton", card.transform, "연구 강화 (250G + 1P)", 18, new Color(0.85f, 0.45f, 0.25f));
+            RectTransform btnRt = btn.GetComponent<RectTransform>();
+            btnRt.sizeDelta = new Vector2(330, 50);
+            btnRt.anchoredPosition = new Vector2(0, -85);
+
+            string path = "Assets/Prefabs/ResearchCardPrefab.prefab";
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(card, path);
+            Object.DestroyImmediate(card);
             return prefab;
         }
 

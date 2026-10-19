@@ -19,6 +19,12 @@ namespace DopamineCleaner.UI
         [SerializeField] private Text stageKillsText;
         [SerializeField] private Text dashCooldownText;
 
+        [Header("피버 & 콤보 HUD")]
+        [SerializeField] private Slider feverSlider;
+        [SerializeField] private Text feverText;
+        [SerializeField] private Text comboText;
+        [SerializeField] private GameObject feverBanner;
+
         [Header("레벨업 모달")]
         [SerializeField] private GameObject levelUpPanel;
         [SerializeField] private Text levelUpTitleText;
@@ -56,8 +62,18 @@ namespace DopamineCleaner.UI
                 GameManager.Instance.OnStateChanged += HandleStateChanged;
             }
 
+            if (FeverManager.Instance != null)
+            {
+                FeverManager.Instance.OnFeverGaugeChanged += UpdateFeverHUD;
+                FeverManager.Instance.OnFeverStateChanged += HandleFeverStateChanged;
+                FeverManager.Instance.OnComboChanged += UpdateComboHUD;
+                UpdateFeverHUD(FeverManager.Instance.CurrentFever, FeverManager.Instance.MaxFever);
+                UpdateComboHUD(FeverManager.Instance.ComboCount);
+            }
+
             if (levelUpPanel != null) levelUpPanel.SetActive(false);
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
+            if (feverBanner != null) feverBanner.SetActive(false);
 
             // HUD 텍스트 시인성 극대화 (골드/민트 색상 + 블랙 아웃라인)
             if (timerText != null)
@@ -130,6 +146,59 @@ namespace DopamineCleaner.UI
                 if (timerText != null)
                 {
                     timerText.text = $"{totalSec / 60:D2}:{totalSec % 60:D2}";
+                }
+        private void UpdateFeverHUD(float current, float max)
+        {
+            if (feverSlider != null)
+            {
+                feverSlider.maxValue = max;
+                feverSlider.value = current;
+            }
+
+            if (feverText != null)
+            {
+                if (FeverManager.Instance != null && FeverManager.Instance.IsFever)
+                {
+                    feverText.text = "🔥 FEVER TIME! (연사속도 2배!) 🔥";
+                    feverText.color = new Color(1f, 0.45f, 0.2f);
+                }
+                else
+                {
+                    int pct = Mathf.RoundToInt((current / Mathf.Max(1f, max)) * 100f);
+                    feverText.text = $"⚡ 디톡스 피버 게이지: {pct}%";
+                    feverText.color = new Color(0.35f, 0.85f, 1f);
+                }
+            }
+        }
+
+        private void HandleFeverStateChanged(bool isFever)
+        {
+            if (feverBanner != null)
+            {
+                feverBanner.SetActive(isFever);
+            }
+            if (feverSlider != null)
+            {
+                var fill = feverSlider.fillRect?.GetComponent<Image>();
+                if (fill != null)
+                {
+                    fill.color = isFever ? new Color(1f, 0.45f, 0.2f) : new Color(0.35f, 0.85f, 1f);
+                }
+            }
+        }
+
+        private void UpdateComboHUD(int combo)
+        {
+            if (comboText != null)
+            {
+                if (combo > 1)
+                {
+                    comboText.gameObject.SetActive(true);
+                    comboText.text = $"⚡ {combo} COMBO!";
+                }
+                else
+                {
+                    comboText.gameObject.SetActive(false);
                 }
             }
         }
