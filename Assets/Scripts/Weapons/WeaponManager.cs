@@ -267,35 +267,42 @@ namespace DopamineCleaner.Weapons
                 });
             }
 
-            // 4. 모든 스킬 만렙 시 제공되는 '한계 돌파 / 만렙 보너스'
-            if (candidates.Count == 0)
+            // 4. 업그레이드 후보가 부족하거나 만렙일 때 제공되는 '한계 돌파 / 보너스 카드' 보충
+            if (candidates.Count < count)
             {
-                candidates.Add(new UpgradeCardInfo
+                var bonusCards = new List<UpgradeCardInfo>
                 {
-                    type = UpgradeType.BonusGold,
-                    title = "💰 디톡스 정화 보너스 (+100G)",
-                    description = "모든 능력을 마스터했습니다! 즉시 추가 골드 100G를 정산금에 적립합니다.",
-                    iconText = "💰",
-                    isEvolution = false
-                });
+                    new UpgradeCardInfo
+                    {
+                        type = UpgradeType.BonusGold,
+                        title = "💰 디톡스 정화 보너스 (+100G)",
+                        description = "정산금에 즉시 추가 골드 100G를 적립합니다.",
+                        iconText = "💰",
+                        isEvolution = false
+                    },
+                    new UpgradeCardInfo
+                    {
+                        type = UpgradeType.BonusHeal,
+                        title = "💖 긴급 영양 보충 (+40 HP)",
+                        description = "도파민 피로를 씻어내고 체력을 40 즉시 회복합니다.",
+                        iconText = "💖",
+                        isEvolution = false
+                    },
+                    new UpgradeCardInfo
+                    {
+                        type = UpgradeType.BonusBomb,
+                        title = "💣 전면 방역 살포 (화면 폭탄)",
+                        description = "화면 내의 모든 일반 몬스터를 일망타진 소독합니다.",
+                        iconText = "💣",
+                        isEvolution = false
+                    }
+                };
 
-                candidates.Add(new UpgradeCardInfo
+                // 부족한 수만큼 보너스 카드 추가
+                for (int b = 0; b < bonusCards.Count && candidates.Count < count; b++)
                 {
-                    type = UpgradeType.BonusHeal,
-                    title = "💖 긴급 영양 보충 (+40 HP)",
-                    description = "도파민 피로를 씻어내고 체력을 40 즉시 회복합니다.",
-                    iconText = "💖",
-                    isEvolution = false
-                });
-
-                candidates.Add(new UpgradeCardInfo
-                {
-                    type = UpgradeType.BonusBomb,
-                    title = "💣 전면 방역 살포 (화면 폭탄)",
-                    description = "화면 내의 모든 일반 몬스터를 일망타진 소독합니다.",
-                    iconText = "💣",
-                    isEvolution = false
-                });
+                    candidates.Add(bonusCards[b]);
+                }
             }
 
             // 셔플 및 count개 추출
@@ -368,8 +375,6 @@ namespace DopamineCleaner.Weapons
                     Items.ItemManager.Instance?.TriggerScreenBomb();
                     break;
             }
-
-            GameManager.Instance?.SetState(GameState.Playing);
         }
 
         public void OpenTreasureChestJackpot()

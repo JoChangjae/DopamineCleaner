@@ -134,6 +134,11 @@ namespace DopamineCleaner.Items
             }
         }
 
+        public void TriggerMagnet()
+        {
+            AttractAllGems();
+        }
+
         public void OpenTreasureChest()
         {
             WeaponManager.Instance?.OpenTreasureChestJackpot();

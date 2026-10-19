@@ -258,14 +258,20 @@ namespace DopamineCleaner.Characters
         {
             currentExp += exp;
 
+            bool leveledUp = false;
             while (currentExp >= nextLevelExp)
             {
                 currentExp -= nextLevelExp;
                 currentLevel++;
                 nextLevelExp = Mathf.Round(nextLevelExp * 1.35f + 5f);
-                SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.55f);
+                leveledUp = true;
                 OnLevelUp?.Invoke(currentLevel);
                 GameManager.Instance?.SetState(GameState.LevelUp);
+            }
+
+            if (leveledUp)
+            {
+                SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.55f);
             }
 
             OnExpChanged?.Invoke(currentExp, nextLevelExp, currentLevel);

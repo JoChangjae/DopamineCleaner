@@ -147,6 +147,9 @@ namespace DopamineCleaner.UI
                 {
                     timerText.text = $"{totalSec / 60:D2}:{totalSec % 60:D2}";
                 }
+            }
+        }
+
         private void UpdateFeverHUD(float current, float max)
         {
             if (feverSlider != null)
@@ -320,7 +323,10 @@ namespace DopamineCleaner.UI
                 }
 
                 // 3개 옵션 생성 (보물상자면 진화 무기 우선 배치)
-                List<UpgradeCardInfo> options = WeaponManager.Instance.GetRandomUpgradeOptions(3);
+                List<UpgradeCardInfo> options = WeaponManager.Instance != null
+                    ? WeaponManager.Instance.GetRandomUpgradeOptions(3)
+                    : new List<UpgradeCardInfo>();
+
                 if (options == null || options.Count == 0)
                 {
                     // 후보가 전혀 없을 때 게임 정지 먹통 방지 (즉시 플레이 재개)
@@ -337,15 +343,28 @@ namespace DopamineCleaner.UI
                     if (levelUpSubText != null) levelUpSubText.text = "모든 능력을 마스터했습니다! 원하는 성과급을 선택하세요.";
                 }
 
+                int spawnedCount = 0;
                 for (int i = 0; i < options.Count; i++)
                 {
                     UpgradeCardInfo opt = options[i];
+                    GameObject cardObj = null;
+
                     if (cardPrefab != null)
                     {
-                        GameObject cardObj = Instantiate(cardPrefab, cardContainer);
+                        cardObj = Instantiate(cardPrefab, cardContainer);
+                    }
+                    else
+                    {
+                        // 프리팹 누락 시 동적 폴백 카드 생성
+                        cardObj = CreateFallbackCard(cardContainer, opt);
+                    }
+
+                    if (cardObj != null)
+                    {
                         UpgradeCardUI cardUI = cardObj.GetComponent<UpgradeCardUI>();
                         if (cardUI != null)
                         {
+                            spawnedCount++;
                             cardUI.Setup(opt, () =>
                             {
                                 WeaponManager.Instance?.ApplyUpgrade(opt.type);
@@ -364,7 +383,78 @@ namespace DopamineCleaner.UI
                         }
                     }
                 }
+
+                // 만약 생성된 카드가 0개라면 절대 멈추지 않고 즉시 닫고 플레이 재개
+                if (spawnedCount == 0)
+                {
+                    pendingLevelUps = 0;
+                    levelUpPanel.SetActive(false);
+                    GameManager.Instance?.SetState(GameState.Playing);
+                }
             }
+            else
+            {
+                // cardContainer가 없더라도 먹통 방지
+                pendingLevelUps = 0;
+                levelUpPanel.SetActive(false);
+                GameManager.Instance?.SetState(GameState.Playing);
+            }
+        }
+
+        public void OnSkipLevelUpClicked()
+        {
+            pendingLevelUps = 0;
+            if (levelUpPanel != null) levelUpPanel.SetActive(false);
+            GameManager.Instance?.SetState(GameState.Playing);
+        }
+
+        private GameObject CreateFallbackCard(Transform parent, UpgradeCardInfo info)
+        {
+            GameObject cardObj = new GameObject("FallbackCard");
+            cardObj.transform.SetParent(parent, false);
+            RectTransform rt = cardObj.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(280, 420);
+
+            Image img = cardObj.AddComponent<Image>();
+            img.color = new Color(0.96f, 0.94f, 0.98f);
+
+            Button btn = cardObj.AddComponent<Button>();
+            UpgradeCardUI cardUI = cardObj.AddComponent<UpgradeCardUI>();
+
+            Text icon = CreateFallbackText("Icon", cardObj.transform, info.iconText, 48, new Vector2(0, 90), new Vector2(100, 80));
+            Text title = CreateFallbackText("Title", cardObj.transform, info.title, 20, new Vector2(0, 20), new Vector2(260, 40));
+            title.color = new Color(0.15f, 0.12f, 0.22f);
+            title.fontStyle = FontStyle.Bold;
+
+            Text desc = CreateFallbackText("Desc", cardObj.transform, info.description, 15, new Vector2(0, -80), new Vector2(240, 120));
+            desc.color = new Color(0.35f, 0.3f, 0.4f);
+
+            var fIcon = typeof(UpgradeCardUI).GetField("iconText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            fIcon?.SetValue(cardUI, icon);
+            var fTitle = typeof(UpgradeCardUI).GetField("titleText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            fTitle?.SetValue(cardUI, title);
+            var fDesc = typeof(UpgradeCardUI).GetField("descriptionText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            fDesc?.SetValue(cardUI, desc);
+            var fBtn = typeof(UpgradeCardUI).GetField("selectButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            fBtn?.SetValue(cardUI, btn);
+
+            return cardObj;
+        }
+
+        private Text CreateFallbackText(string name, Transform parent, string content, int fontSize, Vector2 pos, Vector2 size)
+        {
+            GameObject obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            RectTransform rt = obj.AddComponent<RectTransform>();
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+
+            Text txt = obj.AddComponent<Text>();
+            txt.text = content;
+            txt.fontSize = fontSize;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.font = Font.CreateDynamicFontFromOSFont(new string[] { "Malgun Gothic", "맑은 고딕", "Arial" }, fontSize);
+            return txt;
         }
 
         private void HandleStateChanged(GameState state)

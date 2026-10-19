@@ -86,9 +86,16 @@ namespace DopamineCleaner.Editor
             OrbitWeapon orbitWeapon = weaponsObj.AddComponent<OrbitWeapon>();
             SetPrivateField(orbitWeapon, "satellitePrefab", satellitePrefab);
 
+            LaserBeamWeapon laserWeapon = weaponsObj.AddComponent<LaserBeamWeapon>();
+            FirewallMineWeapon mineWeapon = weaponsObj.AddComponent<FirewallMineWeapon>();
+            ShockAuraWeapon shockWeapon = weaponsObj.AddComponent<ShockAuraWeapon>();
+
             WeaponManager weaponMgr = weaponsObj.AddComponent<WeaponManager>();
             SetPrivateField(weaponMgr, "cleanBulletWeapon", bulletWeapon);
             SetPrivateField(weaponMgr, "orbitWeapon", orbitWeapon);
+            SetPrivateField(weaponMgr, "laserBeamWeapon", laserWeapon);
+            SetPrivateField(weaponMgr, "mineWeapon", mineWeapon);
+            SetPrivateField(weaponMgr, "shockWeapon", shockWeapon);
 
             // 6. 게임 매니저 & 스포너 & 아이템 매니저 & 피버 매니저 & 데미지 텍스트 & 사운드 매니저
             GameObject sysObj = new GameObject("[Systems]");
@@ -294,6 +301,19 @@ namespace DopamineCleaner.Editor
             SetPrivateField(uiMgr, "levelUpSubText", lvlSub);
             SetPrivateField(uiMgr, "cardContainer", cardsContainer.transform);
             SetPrivateField(uiMgr, "cardPrefab", cardPrefab);
+
+            // 비상 건너뛰기 버튼 (혹시 모를 UI 정지 방지용)
+            GameObject skipBtnObj = CreateUIObject("SkipButton", lvlPanel.transform);
+            RectTransform skipRt = skipBtnObj.GetComponent<RectTransform>();
+            skipRt.anchorMin = new Vector2(0.5f, 0.5f);
+            skipRt.anchorMax = new Vector2(0.5f, 0.5f);
+            skipRt.sizeDelta = new Vector2(220, 50);
+            skipRt.anchoredPosition = new Vector2(0, -310);
+            Image skipImg = skipBtnObj.AddComponent<Image>();
+            skipImg.color = new Color(0.25f, 0.22f, 0.32f, 0.85f);
+            Button skipBtn = skipBtnObj.AddComponent<Button>();
+            skipBtn.onClick.AddListener(uiMgr.OnSkipLevelUpClicked);
+            CreateText("SkipText", skipBtnObj.transform, "⏩ 작전 계속하기", 18, TextAnchor.MiddleCenter, Vector2.zero);
 
             // 게임 오버 패널
             GameObject goPanel = CreateUIObject("GameOverPanel", canvasObj.transform);

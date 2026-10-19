@@ -213,6 +213,11 @@ namespace DopamineCleaner.Enemies
             }
         }
 
+        public void TakeDamage(float amount)
+        {
+            TakeDamage(amount, Vector2.zero, 0f);
+        }
+
         public void TakeDamage(float amount, Vector2 knockbackDir, float knockbackForce = 0f)
         {
             if (!IsAlive) return;
