@@ -235,8 +235,11 @@ namespace DopamineCleaner.Enemies
             Core.SoundManager.Instance?.Play(Core.SoundEffect.Hit, 0.4f);
 
             // 피격 플래시
-            if (flashCoroutine != null) StopCoroutine(flashCoroutine);
-            flashCoroutine = StartCoroutine(FlashRoutine());
+            if (Application.isPlaying && gameObject.activeInHierarchy)
+            {
+                if (flashCoroutine != null) StopCoroutine(flashCoroutine);
+                flashCoroutine = StartCoroutine(FlashRoutine());
+            }
 
             if (currentHP <= 0f)
             {

@@ -159,7 +159,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "[\uD2B9\uC57D \uD328\uC2DC\uBE0C]\n\uC5F4\uC815 \uB118\uCE58\uB294 \uC2E0\uC785: \uBC38\uB7F0\uC2A4 \uADE0\uD615"
+  m_Text: "[\uACE0\uC720 \uD2B9\uC131]\n\uC5F4\uC815 \uB118\uCE58\uB294 \uC2E0\uC785: \uBC38\uB7F0\uC2A4 \uADE0\uD615"
 --- !u!1 &2226681930095947584
 GameObject:
   m_ObjectHideFlags: 0

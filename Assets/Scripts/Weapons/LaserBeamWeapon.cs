@@ -138,7 +138,7 @@ namespace DopamineCleaner.Weapons
 
         private Enemy FindClosestEnemy()
         {
-            Enemy[] allEnemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+            Enemy[] allEnemies = FindObjectsByType<Enemy>();
             Enemy closest = null;
             float minDist = beamRange;
 

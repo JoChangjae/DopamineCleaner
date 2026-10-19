@@ -157,7 +157,14 @@ namespace DopamineCleaner.Core
                 currentProgress++;
             }
 
-            UpdateUI();
+            if (currentProgress >= targetProgress)
+            {
+                CompleteQuest(true);
+            }
+            else
+            {
+                UpdateUI();
+            }
         }
 
         private void OnKillReported(int stageKills, int totalKills)
