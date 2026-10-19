@@ -115,6 +115,7 @@ namespace DopamineCleaner.Core
         {
             totalKills++;
             FeverManager.Instance?.AddKill(isBoss);
+            Meta.AchievementManager.Instance?.ReportKill(totalKills, isBoss);
 
             if (isBoss)
             {
@@ -150,11 +151,16 @@ namespace DopamineCleaner.Core
         public int EarnedGold { get; private set; } = 0;
         public int EarnedKarma { get; private set; } = 0;
         public int BonusGold { get; private set; } = 0;
+        public int CurrentGold => Meta.GameDataManager.Instance != null ? Meta.GameDataManager.Instance.Profile.gold : BonusGold;
 
         public void AddBonusGold(int amount)
         {
             BonusGold += amount;
             EarnedGold += amount;
+            if (Meta.GameDataManager.Instance != null)
+            {
+                Meta.GameDataManager.Instance.Profile.gold += amount;
+            }
         }
 
         public void TriggerGameOver(bool victory = false)

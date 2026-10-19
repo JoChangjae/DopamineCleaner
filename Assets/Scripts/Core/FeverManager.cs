@@ -119,6 +119,8 @@ namespace DopamineCleaner.Core
             // 카메라 쉐이크 & 피버 사운드
             CameraFollow.Instance?.Shake(0.35f, 0.35f);
             SoundManager.Instance?.Play(SoundEffect.Fever, 0.6f);
+            SoundManager.Instance?.SetFeverPitch(true);
+            Meta.AchievementManager.Instance?.ReportFever();
 
             // 1. 플레이어 강화 (자석 대폭 흡수)
             if (PlayerController.Instance != null)
@@ -138,6 +140,7 @@ namespace DopamineCleaner.Core
             currentFever = 0f;
             feverTimer = 0f;
 
+            SoundManager.Instance?.SetFeverPitch(false);
             OnFeverStateChanged?.Invoke(false);
             OnFeverGaugeChanged?.Invoke(currentFever, maxFever);
 

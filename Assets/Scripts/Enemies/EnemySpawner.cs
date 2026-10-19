@@ -141,6 +141,17 @@ namespace DopamineCleaner.Enemies
             }
         }
 
+        public void SpawnSpecialWave(int count)
+        {
+            if (GameManager.Instance == null) return;
+            int stage = GameManager.Instance.CurrentStage;
+            float time = GameManager.Instance.SurvivalTime;
+            for (int i = 0; i < count; i++)
+            {
+                SpawnSingleEnemy(EnemyType.SpamShooter, stage, time);
+            }
+        }
+
         private void SpawnBoss()
         {
             if (GameManager.Instance == null) return;

@@ -109,16 +109,18 @@ namespace DopamineCleaner.Editor
             tabHlg.childControlWidth = true;
             tabHlg.childControlHeight = true;
 
-            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 클리너 요원실", 18, new Color(0.28f, 0.24f, 0.38f));
-            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 디톡스 보급소", 18, new Color(0.28f, 0.24f, 0.38f));
-            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 본부 창고", 18, new Color(0.28f, 0.24f, 0.38f));
-            Button tabResearch = CreateButton("TabResearch", tabNavObj.transform, "🔬 본부 연구소", 18, new Color(0.28f, 0.24f, 0.38f));
+            Button tabChar = CreateButton("TabChar", tabNavObj.transform, "🧑‍💼 클리너 요원실", 18, new Color(0.24f, 0.28f, 0.42f));
+            Button tabShop = CreateButton("TabShop", tabNavObj.transform, "🛒 디톡스 보급소", 18, new Color(0.24f, 0.28f, 0.42f));
+            Button tabStorage = CreateButton("TabStorage", tabNavObj.transform, "🗄️ 본부 창고", 18, new Color(0.24f, 0.28f, 0.42f));
+            Button tabResearch = CreateButton("TabResearch", tabNavObj.transform, "🔬 본부 연구소", 18, new Color(0.24f, 0.28f, 0.42f));
+            Button tabAchieve = CreateButton("TabAchieve", tabNavObj.transform, "🏆 디톡스 실적/도감", 18, new Color(0.24f, 0.28f, 0.42f));
             Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 정화 작전 출동처", 18, new Color(0.85f, 0.35f, 0.38f));
 
             SetPrivateField(townMgr, "tabCharBtn", tabChar);
             SetPrivateField(townMgr, "tabShopBtn", tabShop);
             SetPrivateField(townMgr, "tabStorageBtn", tabStorage);
             SetPrivateField(townMgr, "tabResearchBtn", tabResearch);
+            SetPrivateField(townMgr, "tabAchievementBtn", tabAchieve);
             SetPrivateField(townMgr, "tabDungeonBtn", tabDungeon);
 
             // 메인 콘텐츠 영역 (중앙)
@@ -148,7 +150,12 @@ namespace DopamineCleaner.Editor
             SetPrivateField(townMgr, "researchPanel", resPanel);
             resPanel.SetActive(false);
 
-            // 5. 정화 구역 출동처 패널
+            // 5. 업적/도감 패널
+            GameObject achievePanel = CreateAchievementPanel(contentArea.transform);
+            SetPrivateField(townMgr, "achievementPanel", achievePanel);
+            achievePanel.SetActive(false);
+
+            // 6. 정화 구역 출동처 패널
             GameObject dungeonPanel = CreateDungeonSelectPanel(contentArea.transform);
             SetPrivateField(townMgr, "dungeonPanel", dungeonPanel);
             dungeonPanel.SetActive(false);
@@ -585,6 +592,39 @@ namespace DopamineCleaner.Editor
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(card, path);
             Object.DestroyImmediate(card);
             return prefab;
+        }
+
+        private static GameObject CreateAchievementPanel(Transform parent)
+        {
+            GameObject panel = CreateUIObject("AchievementPanel", parent);
+            RectTransform rt = panel.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+
+            AchievementUI ui = panel.AddComponent<AchievementUI>();
+
+            // 상단 진행도 요약 헤더
+            Text progressTxt = CreateText("ProgressSummaryText", panel.transform, "🏆 디톡스 실적 달성 현황: 0 / 12 (0%)", 22, TextAnchor.MiddleCenter, new Vector2(0, 310), new Vector2(900, 40));
+            progressTxt.color = new Color(1f, 0.88f, 0.35f);
+            SetPrivateField(ui, "progressSummaryText", progressTxt);
+
+            // 카드 스크롤 컨테이너
+            GameObject scrollObj = CreateUIObject("ScrollArea", panel.transform);
+            RectTransform sRt = scrollObj.GetComponent<RectTransform>();
+            sRt.anchorMin = new Vector2(0.5f, 0.5f);
+            sRt.anchorMax = new Vector2(0.5f, 0.5f);
+            sRt.sizeDelta = new Vector2(1400, 580);
+            sRt.anchoredPosition = new Vector2(0, -25);
+
+            VerticalLayoutGroup vlg = scrollObj.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 10;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+
+            SetPrivateField(ui, "cardContainer", scrollObj.transform);
+
+            return panel;
         }
 
         // ==========================================

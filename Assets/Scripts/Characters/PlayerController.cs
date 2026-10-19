@@ -31,6 +31,18 @@ namespace DopamineCleaner.Characters
         private float dashTimer = 0f;
         private float dashCooldownTimer = 0f;
 
+        [Header("궁극기(Ultimate Q) 시스템")]
+        [SerializeField] private float ultimateCooldown = 18f;
+        private float ultimateCooldownTimer = 0f;
+        private string characterId = "char_intern";
+
+        public event Action<float, float> OnUltimateCooldownChanged; // currentTimer, maxCooldown
+        public string UltimateSkillName { get; private set; } = "전면 대청소";
+        public string UltimateSkillIcon { get; private set; } = "🧹";
+        public float UltimateCooldownRatio => ultimateCooldown > 0f ? Mathf.Clamp01(1f - (ultimateCooldownTimer / ultimateCooldown)) : 1f;
+        public bool IsUltimateReady => ultimateCooldownTimer <= 0f;
+        public float UltimateRemainingTime => Mathf.Max(0f, ultimateCooldownTimer);
+
         [Header("무적(Invincibility)")]
         [SerializeField] private float invincibilityDuration = 0.45f;
         private float invincibleTimer = 0f;
@@ -123,6 +135,18 @@ namespace DopamineCleaner.Characters
             if (dashTimer > 0f)
             {
                 dashTimer -= Time.deltaTime;
+            }
+
+            // 3. 궁극기(Q) 쿨타임 및 입력
+            if (ultimateCooldownTimer > 0f)
+            {
+                ultimateCooldownTimer -= Time.deltaTime;
+                OnUltimateCooldownChanged?.Invoke(Mathf.Max(0f, ultimateCooldownTimer), ultimateCooldown);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                PerformUltimateSkill();
             }
 
             // 3. 무적 타이머 및 피버 시각 효과 처리
@@ -305,17 +329,153 @@ namespace DopamineCleaner.Characters
             magnetRadius += radiusIncrease;
         }
 
+        public void PerformUltimateSkill()
+        {
+            if (ultimateCooldownTimer > 0f) return;
+
+            ultimateCooldownTimer = ultimateCooldown;
+            OnUltimateCooldownChanged?.Invoke(ultimateCooldownTimer, ultimateCooldown);
+
+            SoundManager.Instance?.Play(SoundEffect.Fever, 0.85f);
+            CameraFollow.Instance?.Shake(0.35f, 0.4f);
+            Meta.AchievementManager.Instance?.ReportUltimateUsed();
+
+            switch (characterId)
+            {
+                case "char_intern":
+                    ExecuteInternBroomSweep();
+                    break;
+                case "char_auditor":
+                    ExecuteAuditorImmunity();
+                    break;
+                case "char_manager":
+                    ExecuteManagerLockdown();
+                    break;
+                case "char_director":
+                    ExecuteDirectorGoldenRain();
+                    break;
+                default:
+                    ExecuteInternBroomSweep();
+                    break;
+            }
+        }
+
+        private void ExecuteInternBroomSweep()
+        {
+            // 김인턴: 전방 대청소 빗자루 넉백 및 투사체 정화
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 4.5f);
+            foreach (var hit in hits)
+            {
+                if (hit != null && hit.CompareTag("Enemy") && hit.TryGetComponent<Enemies.Enemy>(out var enemy))
+                {
+                    Vector2 kb = ((Vector2)enemy.transform.position - (Vector2)transform.position).normalized;
+                    enemy.TakeDamage(80f, kb, 3.2f);
+                }
+            }
+
+            // 적 투사체 소멸
+            var projs = FindObjectsByType<Enemies.EnemyProjectile>();
+            foreach (var p in projs)
+            {
+                if (p != null) Destroy(p.gameObject);
+            }
+
+            DamageTextManager.Instance?.SpawnDamageText(80f, transform.position + Vector3.up * 0.8f, true);
+        }
+
+        private void ExecuteAuditorImmunity()
+        {
+            // 박사정: 4초간 완전 무적 및 주변 3.5m 감전 파동
+            invincibleTimer = 4.0f;
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 3.8f);
+            foreach (var hit in hits)
+            {
+                if (hit != null && hit.CompareTag("Enemy") && hit.TryGetComponent<Enemies.Enemy>(out var enemy))
+                {
+                    Vector2 kb = ((Vector2)enemy.transform.position - (Vector2)transform.position).normalized;
+                    enemy.TakeDamage(95f, kb, 1.8f);
+                }
+            }
+            DamageTextManager.Instance?.SpawnDamageText(95f, transform.position + Vector3.up * 0.8f, true);
+        }
+
+        private void ExecuteManagerLockdown()
+        {
+            // 강반장: 화면 전체 적 4.5초간 80% 이동속도 감속 & 45 데미지
+            var enemies = FindObjectsByType<Enemies.Enemy>();
+            foreach (var e in enemies)
+            {
+                if (e != null && e.gameObject.activeInHierarchy)
+                {
+                    e.TakeDamage(45f);
+                    // 감속 밀쳐내기
+                    Vector2 away = ((Vector2)e.transform.position - (Vector2)transform.position).normalized;
+                    e.transform.position += (Vector3)(away * 0.8f);
+                }
+            }
+            SoundManager.Instance?.Play(SoundEffect.Explosion, 0.7f);
+        }
+
+        private void ExecuteDirectorGoldenRain()
+        {
+            // 윤이사: 화면 전체 황금 코인비 폭발 + 즉시 50 Gold 적립 + 자석
+            var enemies = FindObjectsByType<Enemies.Enemy>();
+            foreach (var e in enemies)
+            {
+                if (e != null && e.gameObject.activeInHierarchy)
+                {
+                    e.TakeDamage(150f);
+                }
+            }
+
+            GameManager.Instance?.AddBonusGold(50);
+            Items.ItemManager.Instance?.TriggerMagnet();
+            SoundManager.Instance?.Play(SoundEffect.GemCollect, 0.8f);
+            DamageTextManager.Instance?.SpawnDamageText(150f, transform.position + Vector3.up * 0.8f, true);
+        }
+
         private void InitCharacterStats()
         {
             if (Meta.GameDataManager.Instance != null)
             {
                 var profile = Meta.GameDataManager.Instance.Profile;
+                characterId = profile.selectedCharacterId;
                 var def = Meta.CharacterDatabase.Get(profile.selectedCharacterId);
 
                 maxHP = def.baseMaxHP + profile.contractHPLevel * 15f + profile.researchHpLevel * 25f;
                 moveSpeed = (def.baseMoveSpeed + profile.contractSpeedLevel * 0.3f) * (1f + profile.researchSpdLevel * 0.06f);
                 magnetRadius = def.baseMagnetRadius * (1f + profile.researchMagLevel * 0.18f);
                 if (profile.researchRevLevel > 0) hasRevive = true;
+
+                // 궁극기 세팅
+                switch (characterId)
+                {
+                    case "char_intern":
+                        UltimateSkillName = "전면 대청소";
+                        UltimateSkillIcon = "🧹";
+                        ultimateCooldown = 16f;
+                        break;
+                    case "char_auditor":
+                        UltimateSkillName = "법적 면책 특권";
+                        UltimateSkillIcon = "🛡️";
+                        ultimateCooldown = 20f;
+                        break;
+                    case "char_manager":
+                        UltimateSkillName = "긴급 현장 통제";
+                        UltimateSkillIcon = "🚨";
+                        ultimateCooldown = 18f;
+                        break;
+                    case "char_director":
+                        UltimateSkillName = "자본의 힘";
+                        UltimateSkillIcon = "💼";
+                        ultimateCooldown = 22f;
+                        break;
+                    default:
+                        UltimateSkillName = "전면 대청소";
+                        UltimateSkillIcon = "🧹";
+                        ultimateCooldown = 18f;
+                        break;
+                }
 
                 // 인벤토리 장비 & 유물 패시브 효과 적용
                 foreach (string itemId in profile.inventory)
@@ -331,6 +491,10 @@ namespace DopamineCleaner.Characters
                 maxHP = 100f;
                 moveSpeed = 5.5f;
                 magnetRadius = 3.0f;
+                characterId = "char_intern";
+                UltimateSkillName = "전면 대청소";
+                UltimateSkillIcon = "🧹";
+                ultimateCooldown = 16f;
             }
 
             currentHP = maxHP;

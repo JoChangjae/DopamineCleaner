@@ -538,30 +538,39 @@ namespace DopamineCleaner.Weapons
 
                 case UpgradeType.EvoGigaGatling:
                     cleanBulletWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoGalacticCleanse:
                     orbitWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoPrismCannon:
                     laserBeamWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoSecurityMatrix:
                     mineWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoTeslaDischarge:
                     shockWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoAegisBarrage:
                     missileWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoDetoxTyphoon:
                     vortexWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoPlasmaCloud:
                     mistWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
                 case UpgradeType.EvoShutdownBlade:
                     scytheWeapon?.Evolve();
+                    CheckEvolutionAchievements();
                     break;
 
                 case UpgradeType.MoveSpeed:
@@ -596,6 +605,17 @@ namespace DopamineCleaner.Weapons
                     Items.ItemManager.Instance?.TriggerScreenBomb();
                     break;
             }
+        }
+
+        private void CheckEvolutionAchievements()
+        {
+            WeaponBase[] weapons = { cleanBulletWeapon, orbitWeapon, laserBeamWeapon, mineWeapon, shockWeapon, missileWeapon, vortexWeapon, mistWeapon, scytheWeapon };
+            int evolvedCount = 0;
+            foreach (var w in weapons)
+            {
+                if (w != null && w.IsEvolved) evolvedCount++;
+            }
+            Meta.AchievementManager.Instance?.ReportEvolution(evolvedCount);
         }
 
         public void OpenTreasureChestJackpot()

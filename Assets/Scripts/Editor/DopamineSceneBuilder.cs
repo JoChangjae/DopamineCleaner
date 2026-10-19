@@ -105,7 +105,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(weaponMgr, "mistWeapon", mistWeapon);
             SetPrivateField(weaponMgr, "scytheWeapon", scytheWeapon);
 
-            // 6. 게임 매니저 & 스포너 & 아이템 매니저 & 피버 매니저 & 데미지 텍스트 & 사운드 매니저 & 돌발 퀘스트
+            // 6. 게임 매니저 & 스포너 & 아이템 매니저 & 피버 매니저 & 데미지 텍스트 & 사운드 매니저 & 돌발 퀘스트 & 업적 매니저
             GameObject sysObj = new GameObject("[Systems]");
             GameManager gameMgr = sysObj.AddComponent<GameManager>();
             FeverManager feverMgr = sysObj.AddComponent<FeverManager>();
@@ -113,6 +113,12 @@ namespace DopamineCleaner.Editor
             SoundManager soundMgr = sysObj.AddComponent<SoundManager>();
             EmergencyQuestManager questMgr = sysObj.AddComponent<EmergencyQuestManager>();
             MentalSanctuaryManager sanctuaryMgr = sysObj.AddComponent<MentalSanctuaryManager>();
+            Meta.AchievementManager achieveMgr = sysObj.AddComponent<Meta.AchievementManager>();
+
+            // 7. 필드 럭키 슬롯 자판기
+            GameObject slotMachineObj = new GameObject("LuckySlotMachine");
+            slotMachineObj.transform.position = new Vector3(5.5f, 4.0f, 0f);
+            LuckySlotVendingMachine slotMachine = slotMachineObj.AddComponent<LuckySlotVendingMachine>();
 
             EnemySpawner spawner = sysObj.AddComponent<EnemySpawner>();
             SetPrivateField(spawner, "enemyPrefab", enemyPrefab);
@@ -120,7 +126,7 @@ namespace DopamineCleaner.Editor
             ItemManager itemMgr = sysObj.AddComponent<ItemManager>();
             SetPrivateField(itemMgr, "gemPrefab", gemPrefab);
 
-            // 7. UI 캔버스 및 HUD 생성 (한글 100% 완벽 출력 표준 uGUI Text)
+            // 8. UI 캔버스 및 HUD 생성 (한글 100% 완벽 출력 표준 uGUI Text)
             GameObject canvasObj = new GameObject("Canvas");
             Canvas canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -138,7 +144,7 @@ namespace DopamineCleaner.Editor
 
             // UI Manager
             UIManager uiMgr = canvasObj.AddComponent<UIManager>();
-            BuildCanvasUI(canvasObj, uiMgr, cardPrefab, questMgr, sanctuaryMgr);
+            BuildCanvasUI(canvasObj, uiMgr, cardPrefab, questMgr, sanctuaryMgr, slotMachine);
 
             // 8. 씬 저장
             Directory.CreateDirectory("Assets/Scenes");
@@ -174,7 +180,7 @@ namespace DopamineCleaner.Editor
             }
         }
 
-        private static void BuildCanvasUI(GameObject canvasObj, UIManager uiMgr, GameObject cardPrefab, EmergencyQuestManager questMgr = null, MentalSanctuaryManager sanctuaryMgr = null)
+        private static void BuildCanvasUI(GameObject canvasObj, UIManager uiMgr, GameObject cardPrefab, EmergencyQuestManager questMgr = null, MentalSanctuaryManager sanctuaryMgr = null, LuckySlotVendingMachine slotMachine = null)
         {
             // 화면 전체 도파민 과부하 비네트 (최하단 레이어)
             GameObject vignetteObj = CreateUIObject("OverloadVignette", canvasObj.transform);
@@ -186,6 +192,26 @@ namespace DopamineCleaner.Editor
             vImg.color = new Color(0.95f, 0.2f, 0.45f, 0f);
             vImg.raycastTarget = false;
             sanctuaryMgr?.BindVignette(vImg);
+
+            // 업적 달성 토스트 배너 (상단 중앙 팝업)
+            GameObject toastObj = CreateUIObject("AchievementToast", canvasObj.transform);
+            RectTransform tRt = toastObj.GetComponent<RectTransform>();
+            tRt.anchorMin = new Vector2(0.5f, 0.94f);
+            tRt.anchorMax = new Vector2(0.5f, 0.94f);
+            tRt.sizeDelta = new Vector2(620, 75);
+            Image tBg = toastObj.AddComponent<Image>();
+            tBg.color = new Color(0.12f, 0.22f, 0.18f, 0.96f);
+            Outline tOut = toastObj.AddComponent<Outline>();
+            tOut.effectColor = new Color(0.3f, 1f, 0.6f);
+            tOut.effectDistance = new Vector2(2f, -2f);
+
+            Text toastTxt = CreateText("ToastText", toastObj.transform, "🏆 [업적 달성!] 첫 소독의 첫걸음\n보상: +150 Gold", 17, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(600, 65));
+            toastTxt.color = new Color(1f, 0.95f, 0.5f);
+            toastTxt.fontStyle = FontStyle.Bold;
+            toastObj.SetActive(false);
+
+            SetPrivateField(uiMgr, "achievementToastPanel", toastObj);
+            SetPrivateField(uiMgr, "achievementToastText", toastTxt);
 
             // 상단 레이아웃 (어두운 반투명 HUD 글래스 패널)
             GameObject topHud = CreateUIObject("TopHUD", canvasObj.transform);
@@ -290,25 +316,134 @@ namespace DopamineCleaner.Editor
 
             questMgr?.BindUI(questBannerObj, qbTxt);
 
-            // 하단 대시 / 구급약 텍스트
+            // 하단 대시 / 구급약 / 궁극기 텍스트
             GameObject bottomHud = CreateUIObject("BottomHUD", canvasObj.transform);
             RectTransform botRt = bottomHud.GetComponent<RectTransform>();
             botRt.anchorMin = new Vector2(0.5f, 0f);
             botRt.anchorMax = new Vector2(0.5f, 0f);
             botRt.pivot = new Vector2(0.5f, 0f);
-            botRt.sizeDelta = new Vector2(700, 60);
+            botRt.sizeDelta = new Vector2(960, 65);
             botRt.anchoredPosition = new Vector2(0, 15);
 
             Image botBg = bottomHud.AddComponent<Image>();
-            botBg.color = new Color(0.12f, 0.09f, 0.18f, 0.85f);
+            botBg.color = new Color(0.12f, 0.09f, 0.18f, 0.90f);
+            Outline botOut = bottomHud.AddComponent<Outline>();
+            botOut.effectColor = new Color(0.2f, 0.85f, 1f, 0.5f);
+            botOut.effectDistance = new Vector2(1.5f, -1.5f);
 
-            Text dashText = CreateText("DashText", bottomHud.transform, "💨 대시 준비완료 (Space / Shift)", 22, TextAnchor.MiddleCenter, Vector2.zero);
+            Text dashText = CreateText("DashText", bottomHud.transform, "💨 대시 준비완료 (Space / Shift)", 20, TextAnchor.MiddleCenter, new Vector2(-220, 0), new Vector2(460, 50));
             dashText.color = new Color(0.70f, 0.90f, 1f);
             dashText.fontStyle = FontStyle.Bold;
-            Outline dashOut = dashText.gameObject.AddComponent<Outline>();
-            dashOut.effectColor = new Color(0f, 0f, 0f, 0.95f);
-            dashOut.effectDistance = new Vector2(1.5f, -1.5f);
             SetPrivateField(uiMgr, "dashCooldownText", dashText);
+
+            Text ultimateText = CreateText("UltimateText", bottomHud.transform, "⚡ [Q] 궁극기 [READY!]", 20, TextAnchor.MiddleCenter, new Vector2(230, 0), new Vector2(440, 50));
+            ultimateText.color = new Color(1f, 0.9f, 0.25f);
+            ultimateText.fontStyle = FontStyle.Bold;
+            SetPrivateField(uiMgr, "ultimateCooldownText", ultimateText);
+
+            // 우측 상단 미니맵 레이더 & 나침반
+            GameObject radarObj = CreateUIObject("RadarPanel", canvasObj.transform);
+            RectTransform rRt = radarObj.GetComponent<RectTransform>();
+            rRt.anchorMin = new Vector2(1f, 1f);
+            rRt.anchorMax = new Vector2(1f, 1f);
+            rRt.pivot = new Vector2(1f, 1f);
+            rRt.sizeDelta = new Vector2(160, 160);
+            rRt.anchoredPosition = new Vector2(-25, -25);
+            Image rBg = radarObj.AddComponent<Image>();
+            rBg.color = new Color(0.08f, 0.10f, 0.16f, 0.90f);
+            Outline rOut = radarObj.AddComponent<Outline>();
+            rOut.effectColor = new Color(0.2f, 0.85f, 1f, 0.8f);
+            rOut.effectDistance = new Vector2(1.5f, -1.5f);
+
+            CreateText("RadarTitle", radarObj.transform, "📡 RADAR", 14, TextAnchor.UpperCenter, new Vector2(0, -6), new Vector2(140, 20));
+
+            GameObject ptrContainer = CreateUIObject("PointerContainer", canvasObj.transform);
+            RectTransform ptrRt = ptrContainer.GetComponent<RectTransform>();
+            ptrRt.anchorMin = Vector2.zero;
+            ptrRt.anchorMax = Vector2.one;
+            ptrRt.sizeDelta = Vector2.zero;
+
+            MinimapRadar mm = radarObj.AddComponent<MinimapRadar>();
+            SetPrivateField(mm, "radarRect", rRt);
+            SetPrivateField(mm, "pointerContainer", ptrRt);
+
+            // 럭키 슬롯 자판기 상호작용 프롬프트 & 모달
+            GameObject slotPromptObj = CreateUIObject("SlotPrompt", canvasObj.transform);
+            RectTransform spRt = slotPromptObj.GetComponent<RectTransform>();
+            spRt.anchorMin = new Vector2(0.5f, 0.22f);
+            spRt.anchorMax = new Vector2(0.5f, 0.22f);
+            spRt.sizeDelta = new Vector2(480, 50);
+            Image spBg = slotPromptObj.AddComponent<Image>();
+            spBg.color = new Color(0.1f, 0.12f, 0.2f, 0.92f);
+            Outline spOut = slotPromptObj.AddComponent<Outline>();
+            spOut.effectColor = new Color(1f, 0.85f, 0.2f);
+            Text spTxt = CreateText("SpText", slotPromptObj.transform, "🎰 [E] 도파민 럭키 자판기 이용 (50G)", 20, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(460, 45));
+            slotPromptObj.SetActive(false);
+
+            GameObject slotModalObj = CreateUIObject("SlotModalPanel", canvasObj.transform);
+            RectTransform smRt = slotModalObj.GetComponent<RectTransform>();
+            smRt.anchorMin = new Vector2(0.5f, 0.5f);
+            smRt.anchorMax = new Vector2(0.5f, 0.5f);
+            smRt.sizeDelta = new Vector2(650, 520);
+            Image smBg = slotModalObj.AddComponent<Image>();
+            smBg.color = new Color(0.12f, 0.10f, 0.18f, 0.98f);
+            Outline smOut = slotModalObj.AddComponent<Outline>();
+            smOut.effectColor = new Color(1f, 0.3f, 0.8f);
+            smOut.effectDistance = new Vector2(2f, -2f);
+
+            CreateText("SmTitle", slotModalObj.transform, "🎰 도파민 럭키 슬롯 & 암거래", 30, TextAnchor.MiddleCenter, new Vector2(0, 220), new Vector2(580, 45));
+
+            GameObject reelsObj = CreateUIObject("ReelsGroup", slotModalObj.transform);
+            RectTransform rgRt = reelsObj.GetComponent<RectTransform>();
+            rgRt.sizeDelta = new Vector2(460, 110);
+            rgRt.anchoredPosition = new Vector2(0, 120);
+            Image rgBg = reelsObj.AddComponent<Image>();
+            rgBg.color = new Color(0.06f, 0.05f, 0.10f, 0.95f);
+
+            Text r1 = CreateText("Reel1", reelsObj.transform, "7️⃣", 52, TextAnchor.MiddleCenter, new Vector2(-140, 0), new Vector2(100, 100));
+            Text r2 = CreateText("Reel2", reelsObj.transform, "💎", 52, TextAnchor.MiddleCenter, new Vector2(0, 0), new Vector2(100, 100));
+            Text r3 = CreateText("Reel3", reelsObj.transform, "🍒", 52, TextAnchor.MiddleCenter, new Vector2(140, 0), new Vector2(100, 100));
+
+            Text resTxt = CreateText("ResText", slotModalObj.transform, "💰 50 골드로 레버를 당기세요!", 18, TextAnchor.MiddleCenter, new Vector2(0, 45), new Vector2(580, 35));
+
+            GameObject spinBtnObj = CreateUIObject("SpinBtn", slotModalObj.transform);
+            RectTransform sbRt = spinBtnObj.GetComponent<RectTransform>();
+            sbRt.sizeDelta = new Vector2(240, 55);
+            sbRt.anchoredPosition = new Vector2(0, -15);
+            Image sbImg = spinBtnObj.AddComponent<Image>();
+            sbImg.color = new Color(0.9f, 0.3f, 0.45f);
+            Button spinBtn = spinBtnObj.AddComponent<Button>();
+            CreateText("SbTxt", spinBtnObj.transform, "🎰 레버 당기기 (50G)", 20, TextAnchor.MiddleCenter, Vector2.zero, sbRt.sizeDelta);
+
+            GameObject c1BtnObj = CreateUIObject("Contract1Btn", slotModalObj.transform);
+            RectTransform c1Rt = c1BtnObj.GetComponent<RectTransform>();
+            c1Rt.sizeDelta = new Vector2(260, 60);
+            c1Rt.anchoredPosition = new Vector2(-140, -95);
+            Image c1Img = c1BtnObj.AddComponent<Image>();
+            c1Img.color = new Color(0.25f, 0.15f, 0.22f);
+            Button c1Btn = c1BtnObj.AddComponent<Button>();
+            Text c1Txt = CreateText("C1Txt", c1BtnObj.transform, "🩸 [피의 계약]\n공격력 +24%", 15, TextAnchor.MiddleCenter, Vector2.zero, c1Rt.sizeDelta);
+
+            GameObject c2BtnObj = CreateUIObject("Contract2Btn", slotModalObj.transform);
+            RectTransform c2Rt = c2BtnObj.GetComponent<RectTransform>();
+            c2Rt.sizeDelta = new Vector2(260, 60);
+            c2Rt.anchoredPosition = new Vector2(140, -95);
+            Image c2Img = c2BtnObj.AddComponent<Image>();
+            c2Img.color = new Color(0.15f, 0.22f, 0.28f);
+            Button c2Btn = c2BtnObj.AddComponent<Button>();
+            Text c2Txt = CreateText("C2Txt", c2BtnObj.transform, "⚡ [마하 계약]\n기동/공속 강화", 15, TextAnchor.MiddleCenter, Vector2.zero, c2Rt.sizeDelta);
+
+            GameObject closeBtnObj = CreateUIObject("CloseBtn", slotModalObj.transform);
+            RectTransform cbRt = closeBtnObj.GetComponent<RectTransform>();
+            cbRt.sizeDelta = new Vector2(160, 42);
+            cbRt.anchoredPosition = new Vector2(0, -180);
+            Image cbImg = closeBtnObj.AddComponent<Image>();
+            cbImg.color = new Color(0.35f, 0.35f, 0.45f);
+            Button closeBtn = closeBtnObj.AddComponent<Button>();
+            CreateText("CbTxt", closeBtnObj.transform, "✖️ 닫기", 18, TextAnchor.MiddleCenter, Vector2.zero, cbRt.sizeDelta);
+
+            slotModalObj.SetActive(false);
+            slotMachine?.BindUI(slotPromptObj, slotModalObj, r1, r2, r3, resTxt, spinBtn, closeBtn, c1Btn, c2Btn, c1Txt, c2Txt);
 
             // 레벨업 패널
             GameObject lvlPanel = CreateUIObject("LevelUpPanel", canvasObj.transform);

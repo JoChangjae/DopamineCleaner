@@ -31,6 +31,14 @@ namespace DopamineCleaner.Meta
         public int researchSpdLevel = 0;
         public int researchMagLevel = 0;
         public int researchRevLevel = 0;
+
+        // 업적 및 누적 플레이 통계
+        public List<string> unlockedAchievements = new();
+        public int lifetimeKills = 0;
+        public int lifetimeFevers = 0;
+        public int lifetimeBossKills = 0;
+        public int lifetimeGamesPlayed = 0;
+        public int lifetimeGoldEarned = 0;
     }
 
     public class GameDataManager : MonoBehaviour
@@ -58,6 +66,14 @@ namespace DopamineCleaner.Meta
             else
             {
                 Destroy(gameObject);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
             }
         }
 

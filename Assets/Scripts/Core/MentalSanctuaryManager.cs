@@ -111,6 +111,8 @@ namespace DopamineCleaner.Core
             sanctuaryObj.SetActive(false);
         }
 
+        public GameObject ActiveSanctuary => isSanctuaryActive ? sanctuaryObj : null;
+
         private void UpdateSanctuaryLifecycle()
         {
             if (PlayerController.Instance == null || sanctuaryObj == null) return;
@@ -132,6 +134,7 @@ namespace DopamineCleaner.Core
                     IsInSanctuary = true;
                     // 초당 체력 회복
                     PlayerController.Instance.Heal(12f * Time.deltaTime);
+                    Meta.AchievementManager.Instance?.ReportSanctuaryHeal();
 
                     // 쉼터 체류 시간 누적
                     sanctuaryStayTimer += Time.deltaTime;

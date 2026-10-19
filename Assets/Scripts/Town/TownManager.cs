@@ -18,6 +18,7 @@ namespace DopamineCleaner.Town
         [SerializeField] private GameObject shopPanel;
         [SerializeField] private GameObject storagePanel;
         [SerializeField] private GameObject researchPanel;
+        [SerializeField] private GameObject achievementPanel;
         [SerializeField] private GameObject dungeonPanel;
 
         [Header("탭 버튼")]
@@ -25,6 +26,7 @@ namespace DopamineCleaner.Town
         [SerializeField] private Button tabShopBtn;
         [SerializeField] private Button tabStorageBtn;
         [SerializeField] private Button tabResearchBtn;
+        [SerializeField] private Button tabAchievementBtn;
         [SerializeField] private Button tabDungeonBtn;
 
         private void Awake()
@@ -48,7 +50,8 @@ namespace DopamineCleaner.Town
             tabShopBtn.onClick.AddListener(() => SwitchTab(1));
             tabStorageBtn.onClick.AddListener(() => SwitchTab(2));
             if (tabResearchBtn != null) tabResearchBtn.onClick.AddListener(() => SwitchTab(3));
-            tabDungeonBtn.onClick.AddListener(() => SwitchTab(4));
+            if (tabAchievementBtn != null) tabAchievementBtn.onClick.AddListener(() => SwitchTab(4));
+            tabDungeonBtn.onClick.AddListener(() => SwitchTab(5));
 
             RefreshHeader();
             SwitchTab(0); // 기본 탭: 캐릭터 선택소
@@ -85,14 +88,16 @@ namespace DopamineCleaner.Town
             if (shopPanel != null) shopPanel.SetActive(tabIndex == 1);
             if (storagePanel != null) storagePanel.SetActive(tabIndex == 2);
             if (researchPanel != null) researchPanel.SetActive(tabIndex == 3);
-            if (dungeonPanel != null) dungeonPanel.SetActive(tabIndex == 4);
+            if (achievementPanel != null) achievementPanel.SetActive(tabIndex == 4);
+            if (dungeonPanel != null) dungeonPanel.SetActive(tabIndex == 5);
 
             // 탭 열릴 때 해당 UI 갱신
             if (tabIndex == 0) GetComponentInChildren<CharacterSelectUI>(true)?.RefreshUI();
             if (tabIndex == 1) GetComponentInChildren<ShopUI>(true)?.RefreshUI();
             if (tabIndex == 2) GetComponentInChildren<StorageUI>(true)?.RefreshUI();
             if (tabIndex == 3) GetComponentInChildren<ResearchUI>(true)?.RefreshUI();
-            if (tabIndex == 4) GetComponentInChildren<DungeonSelectUI>(true)?.RefreshUI();
+            if (tabIndex == 4) GetComponentInChildren<AchievementUI>(true)?.RefreshUI();
+            if (tabIndex == 5) GetComponentInChildren<DungeonSelectUI>(true)?.RefreshUI();
         }
     }
 }

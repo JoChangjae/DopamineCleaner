@@ -18,6 +18,11 @@ namespace DopamineCleaner.UI
         [SerializeField] private Text timerText;
         [SerializeField] private Text stageKillsText;
         [SerializeField] private Text dashCooldownText;
+        [SerializeField] private Text ultimateCooldownText;
+
+        [Header("업적 달성 토스트")]
+        [SerializeField] private GameObject achievementToastPanel;
+        [SerializeField] private Text achievementToastText;
 
         [Header("피버 & 콤보 HUD")]
         [SerializeField] private Slider feverSlider;
@@ -59,7 +64,11 @@ namespace DopamineCleaner.UI
                 PlayerController.Instance.OnExpChanged += UpdateExpHUD;
                 PlayerController.Instance.OnLevelUp += ShowLevelUpUI;
                 PlayerController.Instance.OnDashCooldownChanged += UpdateDashHUD;
+                PlayerController.Instance.OnUltimateCooldownChanged += UpdateUltimateHUD;
+                UpdateUltimateHUD(PlayerController.Instance.UltimateRemainingTime, 20f);
             }
+
+            Meta.AchievementManager.OnAchievementUnlocked += ShowAchievementToast;
 
             if (GameManager.Instance != null)
             {
@@ -125,6 +134,17 @@ namespace DopamineCleaner.UI
                     outl.effectDistance = new Vector2(1.5f, -1.5f);
                 }
             }
+
+            if (ultimateCooldownText != null)
+            {
+                ultimateCooldownText.color = new Color(1f, 0.9f, 0.25f); // 골드 네온
+                if (!ultimateCooldownText.TryGetComponent<Outline>(out _))
+                {
+                    var outl = ultimateCooldownText.gameObject.AddComponent<Outline>();
+                    outl.effectColor = new Color(0f, 0f, 0f, 0.95f);
+                    outl.effectDistance = new Vector2(1.5f, -1.5f);
+                }
+            }
         }
 
         private void OnDestroy()
@@ -135,7 +155,9 @@ namespace DopamineCleaner.UI
                 PlayerController.Instance.OnExpChanged -= UpdateExpHUD;
                 PlayerController.Instance.OnLevelUp -= ShowLevelUpUI;
                 PlayerController.Instance.OnDashCooldownChanged -= UpdateDashHUD;
+                PlayerController.Instance.OnUltimateCooldownChanged -= UpdateUltimateHUD;
             }
+            Meta.AchievementManager.OnAchievementUnlocked -= ShowAchievementToast;
 
             if (GameManager.Instance != null)
             {
@@ -281,6 +303,37 @@ namespace DopamineCleaner.UI
                     dashCooldownText.text = dashStr;
                 }
             }
+        }
+
+        private void UpdateUltimateHUD(float currentCooldown, float maxCooldown)
+        {
+            if (ultimateCooldownText != null && PlayerController.Instance != null)
+            {
+                if (currentCooldown <= 0f)
+                {
+                    ultimateCooldownText.text = $"⚡ [Q] {PlayerController.Instance.UltimateSkillName} [READY!]";
+                    ultimateCooldownText.color = new Color(1f, 0.9f, 0.2f);
+                }
+                else
+                {
+                    ultimateCooldownText.text = $"⏳ [Q] {PlayerController.Instance.UltimateSkillName} ({currentCooldown:F1}s)";
+                    ultimateCooldownText.color = new Color(0.7f, 0.75f, 0.85f);
+                }
+            }
+        }
+
+        public void ShowAchievementToast(Meta.AchievementInfo ach)
+        {
+            if (achievementToastPanel == null || achievementToastText == null) return;
+            achievementToastText.text = $"🏆 [업적 달성!] {ach.title}\n{ach.description} (+{ach.goldReward}G)";
+            achievementToastPanel.SetActive(true);
+            CancelInvoke(nameof(HideAchievementToast));
+            Invoke(nameof(HideAchievementToast), 3.5f);
+        }
+
+        private void HideAchievementToast()
+        {
+            if (achievementToastPanel != null) achievementToastPanel.SetActive(false);
         }
 
         public void ShowLevelUpUI(int newLevel)

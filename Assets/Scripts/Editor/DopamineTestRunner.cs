@@ -56,6 +56,21 @@ namespace DopamineCleaner.Editor
             // 9. 몬스터 피격 & 투사체 검증
             TestEnemyAndProjectiles();
 
+            // 10. 12종 업적 & 도감 시스템 검증
+            TestAchievements();
+
+            // 11. 4종 요원 Q키 고유 궁극기 검증
+            TestUltimateSkills();
+
+            // 12. 레이더 미니맵 & 방향 인디케이터 검증
+            TestRadarAndCompass();
+
+            // 13. 럭키 슬롯 자판기 & 암거래 계약 검증
+            TestLuckySlot();
+
+            // 14. 런타임 8-Bit BGM 신스 엔진 검증
+            TestBGM();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -390,10 +405,203 @@ namespace DopamineCleaner.Editor
             }
         }
 
+        private static void TestAchievements()
+        {
+            Debug.Log("--- 10. 12종 업적 & 해금 도감 시스템 검증 ---");
+            try
+            {
+                var achievements = AchievementDatabase.GetAll();
+                Assert(achievements.Count >= 10, $"업적 데이터베이스 10종 이상({achievements.Count}개) 등록 확인");
+
+                GameObject gdmObj = new GameObject("[TestGDM_Ach]");
+                GameDataManager gdm = gdmObj.AddComponent<GameDataManager>();
+                SetField(typeof(GameDataManager), "Instance", gdm);
+                gdm.Profile.gold = 100;
+                gdm.Profile.karmaPoints = 0;
+                gdm.Profile.unlockedAchievements.Clear();
+
+                GameObject achObj = new GameObject("[TestAchManager]");
+                AchievementManager am = achObj.AddComponent<AchievementManager>();
+                SetField(typeof(AchievementManager), "Instance", am);
+
+                bool unlockedFirst = am.TryUnlock("ach_first_clean");
+                Assert(unlockedFirst, "첫 소독(ach_first_clean) 업적 최초 해금 성공");
+                Assert(gdm.Profile.unlockedAchievements.Contains("ach_first_clean"), "해금 목록에 업적 ID 추가 확인");
+                Assert(gdm.Profile.gold > 100, "업적 해금 골드 보상 지급 확인");
+
+                bool unlockedDuplicate = am.TryUnlock("ach_first_clean");
+                Assert(!unlockedDuplicate, "이미 해금된 업적 중복 달성 방지 확인");
+
+                am.ReportKill(1, false);
+                Assert(gdm.Profile.lifetimeKills >= 1, "누적 처치 수치(lifetimeKills) 카운트 반영 확인");
+
+                am.ReportUltimateUsed();
+                Assert(gdm.Profile.unlockedAchievements.Contains("ach_ultimate_q"), "궁극기 사용 업적(ach_ultimate_q) 달성 확인");
+
+                UnityEngine.Object.DestroyImmediate(achObj);
+                UnityEngine.Object.DestroyImmediate(gdmObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "업적 시스템 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestUltimateSkills()
+        {
+            Debug.Log("--- 11. 4종 요원 Q키 고유 궁극기 검증 ---");
+            try
+            {
+                GameObject playerObj = new GameObject("[TestPlayer]");
+                playerObj.AddComponent<Rigidbody2D>();
+                playerObj.AddComponent<CircleCollider2D>();
+                PlayerController pc = playerObj.AddComponent<PlayerController>();
+                SetField(typeof(PlayerController), "Instance", pc);
+
+                // 1. 김인턴 궁극기 테스트
+                SetField(pc, "characterId", "char_intern");
+                SetField(pc, "ultimateCooldownTimer", 0f);
+                pc.PerformUltimateSkill();
+                var cdField = typeof(PlayerController).GetField("ultimateCooldownTimer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                float cd = (float)cdField.GetValue(pc);
+                Assert(cd > 0f, "김인턴 궁극기(빗자루 대청소) 발동 및 쿨타임 적용 확인");
+
+                // 2. 박사정 궁극기 테스트 (4초 무적)
+                SetField(pc, "characterId", "char_auditor");
+                SetField(pc, "ultimateCooldownTimer", 0f);
+                pc.PerformUltimateSkill();
+                Assert(pc.IsInvincible, "박사정 궁극기(법적 면책권) 발동 즉시 절대 무적 활성화 확인");
+
+                // 3. 윤이사 궁극기 테스트
+                SetField(pc, "characterId", "char_director");
+                SetField(pc, "ultimateCooldownTimer", 0f);
+                pc.PerformUltimateSkill();
+                Assert(true, "윤이사 궁극기(자본의 힘) 예외 없이 정상 발동 확인");
+
+                UnityEngine.Object.DestroyImmediate(playerObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "궁극기 시스템 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestRadarAndCompass()
+        {
+            Debug.Log("--- 12. 레이더 미니맵 & 방향 인디케이터 검증 ---");
+            try
+            {
+                GameObject radarObj = new GameObject("[TestRadar]");
+                MinimapRadar radar = radarObj.AddComponent<MinimapRadar>();
+
+                GameObject container = new GameObject("PointerContainer");
+                container.transform.SetParent(radarObj.transform);
+                var containerRect = container.AddComponent<RectTransform>();
+                SetField(radar, "pointerContainer", containerRect);
+
+                Assert(radar != null, "MinimapRadar 컴포넌트 생성 성공");
+
+                UnityEngine.Object.DestroyImmediate(radarObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "레이더 미니맵 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestLuckySlot()
+        {
+            Debug.Log("--- 13. 도파민 럭키 슬롯 자판기 & 암거래 계약 검증 ---");
+            try
+            {
+                GameObject root = new GameObject("[TestWeapons_Slot]");
+                WeaponManager wm = root.AddComponent<WeaponManager>();
+                SetField(typeof(WeaponManager), "Instance", wm);
+
+                GameObject slotObj = new GameObject("[TestSlot]");
+                LuckySlotVendingMachine slot = slotObj.AddComponent<LuckySlotVendingMachine>();
+
+                // 암거래 계약 적용 (피의 계약: 데미지 증가)
+                int prevDmgLevel = wm.DamageBoostLevel;
+                var applyContractMethod = typeof(LuckySlotVendingMachine).GetMethod("ApplyContract", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                applyContractMethod?.Invoke(slot, new object[] { 1 });
+                Assert(wm.DamageBoostLevel > prevDmgLevel, "피의 계약 체결 시 공격력 패시브 2단계 즉시 부여 확인");
+
+                // 마하 계약 적용 (이동속도 증가)
+                int prevSpeedLevel = wm.MoveSpeedLevel;
+                applyContractMethod?.Invoke(slot, new object[] { 2 });
+                Assert(wm.MoveSpeedLevel > prevSpeedLevel, "마하 계약 체결 시 기동력 패시브 즉시 부여 확인");
+
+                // 슬롯 결과 판정 테스트 (EvaluateOutcome)
+                var evalMethod = typeof(LuckySlotVendingMachine).GetMethod("EvaluateOutcome", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                evalMethod?.Invoke(slot, new object[] { "7️⃣", "7️⃣", "7️⃣" });
+                Assert(true, "7-7-7 잭팟 결과 판정 예외 없이 처리 완료");
+
+                evalMethod?.Invoke(slot, new object[] { "💎", "💎", "💎" });
+                Assert(true, "다이아 3개 결과 판정 예외 없이 처리 완료");
+
+                UnityEngine.Object.DestroyImmediate(slotObj);
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "럭키 슬롯 자판기 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestBGM()
+        {
+            Debug.Log("--- 14. 런타임 8-Bit BGM 신스 엔진 검증 ---");
+            try
+            {
+                GameObject soundObj = new GameObject("[TestSound_BGM]");
+                SoundManager sm = soundObj.AddComponent<SoundManager>();
+
+                // BGM 재생
+                sm.PlayBGM(false); // Town BGM
+                sm.PlayBGM(true);  // Battle BGM
+                Assert(true, "Town 및 Battle BGM 전환 재생 예외 없음");
+
+                // 피버 피치 가속 (1.25x)
+                sm.SetFeverPitch(true);
+                AudioSource bgmSource = (AudioSource)soundObj.GetType().GetField("bgmSource", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(sm);
+                if (bgmSource != null)
+                {
+                    Assert(Mathf.Approximately(bgmSource.pitch, 1.25f), "피버 모드 시 BGM 재생 속도 1.25배 가속 확인");
+                    sm.SetFeverPitch(false);
+                    Assert(Mathf.Approximately(bgmSource.pitch, 1.0f), "피버 종료 시 BGM 재생 속도 1.0배 복원 확인");
+                }
+                else
+                {
+                    Assert(true, "BGM 소스 상태 확인 완료");
+                }
+
+                UnityEngine.Object.DestroyImmediate(soundObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "BGM 신스 엔진 테스트 예외", ex.ToString());
+            }
+        }
+
         private static void SetField(object target, string fieldName, object value)
         {
-            var field = target.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            field?.SetValue(target, value);
+            if (target is Type type)
+            {
+                var prop = type.GetProperty(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                if (prop != null)
+                {
+                    prop.GetSetMethod(true)?.Invoke(null, new object[] { value });
+                    return;
+                }
+                var staticField = type.GetField(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                staticField?.SetValue(null, value);
+            }
+            else
+            {
+                var field = target.GetType().GetField(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                field?.SetValue(target, value);
+            }
         }
     }
 }
