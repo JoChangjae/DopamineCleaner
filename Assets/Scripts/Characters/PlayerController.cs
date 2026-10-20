@@ -90,6 +90,7 @@ namespace DopamineCleaner.Characters
         public string CareerRankTitle { get; private set; } = "수습 사원";
         public float TotalDamageMultiplier { get; set; } = 1.0f;
         public float CooldownRateMultiplier { get; set; } = 1.0f;
+        public float CritChanceBonus { get; set; } = 0f;
 
         private void Awake()
         {
@@ -539,7 +540,7 @@ namespace DopamineCleaner.Characters
             Core.PixelParticleManager.Instance?.SpawnNeonPop(transform.position, new Color(0.3f, 1f, 0.6f), 20);
         }
 
-        private void InitCharacterStats()
+        public void InitCharacterStats()
         {
             if (Meta.GameDataManager.Instance != null)
             {
@@ -551,6 +552,18 @@ namespace DopamineCleaner.Characters
                 moveSpeed = (def.baseMoveSpeed + profile.contractSpeedLevel * 0.3f) * (1f + profile.researchSpdLevel * 0.06f);
                 magnetRadius = def.baseMagnetRadius * (1f + profile.researchMagLevel * 0.18f);
                 if (profile.researchRevLevel > 0) hasRevive = true;
+
+                // 사옥 리모델링 복지 가구 영구 버프 적용
+                float officeHpMult = 1f + Meta.GameDataManager.Instance.GetTotalFacilityBuff(Meta.FacilityBuffType.MaxHpPercent);
+                float officeSpdMult = 1f + Meta.GameDataManager.Instance.GetTotalFacilityBuff(Meta.FacilityBuffType.MoveSpeed);
+                float officeCdMult = Mathf.Max(0.5f, 1f - Meta.GameDataManager.Instance.GetTotalFacilityBuff(Meta.FacilityBuffType.CooldownReduction));
+                maxHP *= officeHpMult;
+                moveSpeed *= officeSpdMult;
+                dashCooldown *= officeCdMult;
+                ultimateCooldown *= officeCdMult;
+                CooldownRateMultiplier *= (1f + Meta.GameDataManager.Instance.GetTotalFacilityBuff(Meta.FacilityBuffType.CooldownReduction));
+                CritChanceBonus = Meta.GameDataManager.Instance.GetTotalFacilityBuff(Meta.FacilityBuffType.CritChance);
+                if (Meta.GameDataManager.Instance.GetTotalFacilityBuff(Meta.FacilityBuffType.ReviveChance) > 0f) hasRevive = true;
 
                 // 궁극기 및 고유 패시브 세팅
                 switch (characterId)

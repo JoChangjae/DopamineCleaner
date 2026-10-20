@@ -53,6 +53,7 @@ namespace DopamineCleaner.Meta
         public string equippedCompanionId = "pet_drone";
         public List<string> unlockedCompanionIds = new() { "pet_dog", "pet_drone" };
         public List<string> companionTiers = new(); // e.g. "pet_dog:1"
+        public List<string> officeFacilities = new(); // e.g. "fac_massage_chair:1"
     }
 
     [Serializable]
@@ -316,6 +317,78 @@ namespace DopamineCleaner.Meta
                 return true;
             }
             return false;
+        }
+
+                // ==========================================
+        // 사옥 리모델링 & 복지 가구 (Office Facilities)
+        // ==========================================
+        public int GetFacilityLevel(string facilityId)
+        {
+            if (Profile?.officeFacilities == null) return 0;
+            foreach (var item in Profile.officeFacilities)
+            {
+                var parts = item.Split(':');
+                if (parts.Length == 2 && parts[0] == facilityId && int.TryParse(parts[1], out int lv))
+                    return lv;
+            }
+            return 0;
+        }
+
+        public bool UpgradeFacility(string facilityId)
+        {
+            if (Profile == null) return false;
+            var def = OfficeFacilityDatabase.Get(facilityId);
+            if (def == null) return false;
+
+            int currentLv = GetFacilityLevel(facilityId);
+            if (currentLv >= def.maxLevel) return false;
+
+            int cost = def.GetCost(currentLv);
+            if (Profile.gold < cost) return false;
+
+            Profile.gold -= cost;
+            if (Profile.officeFacilities == null) Profile.officeFacilities = new List<string>();
+            Profile.officeFacilities.RemoveAll(item => item.StartsWith(facilityId + ":"));
+            Profile.officeFacilities.Add($"{facilityId}:{currentLv + 1}");
+            SaveProfile();
+            OnProfileUpdated?.Invoke();
+            return true;
+        }
+
+        public float GetTotalFacilityBuff(FacilityBuffType buffType)
+        {
+            float total = 0f;
+            var all = OfficeFacilityDatabase.GetAll();
+            foreach (var fac in all)
+            {
+                if (fac.buffType == buffType)
+                {
+                    int lv = GetFacilityLevel(fac.id);
+                    total += lv * fac.buffValuePerLevel;
+                }
+            }
+            return total;
+        }
+
+        public int GetTotalOfficeDecoLevel()
+        {
+            int total = 0;
+            var all = OfficeFacilityDatabase.GetAll();
+            foreach (var fac in all)
+            {
+                total += GetFacilityLevel(fac.id);
+            }
+            return total;
+        }
+
+        public string GetOfficeTierTitle(int totalLevel)
+        {
+            if (totalLevel >= 25) return "🏆 유니콘 초격차 스마트 본부";
+            if (totalLevel >= 18) return "🌟 글로벌 혁신 실리콘밸리 사옥";
+            if (totalLevel >= 12) return "🏢 복지 최우수 테크 센터";
+            if (totalLevel >= 6) return "☕ 쾌적한 스타트업 오피스";
+            if (totalLevel >= 1) return "📦 소규모 공유 오피스";
+            return "🏚️ 낡은 지하 임시 본부";
         }
 
         // ==========================================

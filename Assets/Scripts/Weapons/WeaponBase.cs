@@ -104,6 +104,10 @@ namespace DopamineCleaner.Weapons
             {
                 critChance += WeaponManager.Instance.CritChanceLevel * 0.08f;
             }
+            if (PlayerController.Instance != null)
+            {
+                critChance += PlayerController.Instance.CritChanceBonus;
+            }
 
             isCrit = Random.value < critChance;
             if (isCrit)

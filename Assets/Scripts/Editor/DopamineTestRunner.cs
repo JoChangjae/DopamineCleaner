@@ -142,6 +142,9 @@ namespace DopamineCleaner.Editor
             // 37. 🎵 신스웨이브 BGM, ⚔️ 보스 러시, 🐱 펫 진화/폭격 햄스터 & 📱 가상 조이스틱/패드
             TestPhase4MassiveExpansion();
 
+            // 38. 🏢 실리콘밸리형 본부 사옥 리모델링 & 영구 복지 가구 버프 검증
+            TestOfficeRemodelAndFacilityBuffs();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -1503,6 +1506,70 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "신규 콘텐츠 Phase 4 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestOfficeRemodelAndFacilityBuffs()
+        {
+            Debug.Log("--- 38. 🏢 실리콘밸리형 본부 사옥 리모델링 & 복지 가구 검증 ---");
+            try
+            {
+                // 1. 사옥 복지 가구 데이터베이스 검증 (6종)
+                var facilities = Meta.OfficeFacilityDatabase.GetAll();
+                Assert(facilities != null && facilities.Count == 6, "사옥 복지 가구 6종(안마의자/카페/오락기/데스크/수면캡슐/수족관) DB 등록 검증");
+
+                // 2. 가구 업그레이드 및 골드 소모 검증
+                if (Meta.GameDataManager.Instance == null)
+                {
+                    GameObject gdmObj = new GameObject("[TestGDM]");
+                    var gdm = gdmObj.AddComponent<Meta.GameDataManager>(); SetField(typeof(Meta.GameDataManager), "Instance", gdm);
+                }
+                Meta.GameDataManager.Instance.Profile.gold = 10000;
+                int startLv = Meta.GameDataManager.Instance.GetFacilityLevel("fac_massage_chair");
+                bool upSuccess = Meta.GameDataManager.Instance.UpgradeFacility("fac_massage_chair");
+                Assert(upSuccess && Meta.GameDataManager.Instance.GetFacilityLevel("fac_massage_chair") == startLv + 1, "최고급 안마의자 1단계 업그레이드 성공");
+
+                // 3. 누적 복지 버프 및 사옥 등급 칭호 검증
+                float hpBuff = Meta.GameDataManager.Instance.GetTotalFacilityBuff(Meta.FacilityBuffType.MaxHpPercent);
+                Assert(hpBuff >= 0.10f, "안마의자 최대 체력 누적 버프 계산 검증 성공");
+
+                int totalDecoLv = Meta.GameDataManager.Instance.GetTotalOfficeDecoLevel();
+                string tierTitle = Meta.GameDataManager.Instance.GetOfficeTierTitle(totalDecoLv);
+                Assert(!string.IsNullOrEmpty(tierTitle) && totalDecoLv > 0, $"본부 복지 등급 및 칭호 검증 성공: [{tierTitle}] (Lv.{totalDecoLv})");
+
+                // 4. 플레이어 컨트롤러 복지 버프 스탯 반영 검증
+                GameObject pObj = new GameObject("[TestPlayerWithOfficeBuff]");
+                var pc = pObj.AddComponent<Characters.PlayerController>();
+                pc.InitCharacterStats();
+                Assert(pc.MaxHP > 100f, $"복지 가구 버프 반영된 플레이어 MaxHP 검증 성공 ({pc.MaxHP} HP)");
+                UnityEngine.Object.DestroyImmediate(pObj);
+
+                // 5. 사옥 리모델링 UI (OfficeRemodelUI) 렌더링 검증
+                GameObject canvasObj = new GameObject("[TestRemodelCanvas]");
+                var canvas = canvasObj.AddComponent<Canvas>();
+                GameObject panelObj = new GameObject("RemodelPanel");
+                panelObj.transform.SetParent(canvasObj.transform);
+                var remodelUI = panelObj.AddComponent<Town.OfficeRemodelUI>();
+
+                GameObject container = new GameObject("Container");
+                container.transform.SetParent(panelObj.transform);
+                var headerTxt = new GameObject("Header").AddComponent<UnityEngine.UI.Text>();
+                headerTxt.transform.SetParent(panelObj.transform);
+                var buffTxt = new GameObject("BuffSummary").AddComponent<UnityEngine.UI.Text>();
+                buffTxt.transform.SetParent(panelObj.transform);
+
+                SetField(remodelUI, "cardContainer", container.transform);
+                SetField(remodelUI, "headerStatusText", headerTxt);
+                SetField(remodelUI, "buffSummaryText", buffTxt);
+
+                remodelUI.RefreshUI();
+                Assert(container.transform.childCount == 6, "OfficeRemodelUI 6종 가구 리모델링 카드 정상 생성 및 렌더링 검증 성공");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "사옥 리모델링 및 복지 가구 테스트 예외", ex.ToString());
             }
         }
 

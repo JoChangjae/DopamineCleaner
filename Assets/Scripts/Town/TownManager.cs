@@ -21,6 +21,7 @@ namespace DopamineCleaner.Town
         [SerializeField] private GameObject achievementPanel;
         [SerializeField] private GameObject dungeonPanel;
         [SerializeField] private GameObject hallOfFamePanel;
+        [SerializeField] private GameObject remodelPanel;
 
         [Header("탭 버튼")]
         [SerializeField] private Button tabCharBtn;
@@ -30,6 +31,7 @@ namespace DopamineCleaner.Town
         [SerializeField] private Button tabAchievementBtn;
         [SerializeField] private Button tabDungeonBtn;
         [SerializeField] private Button tabHallOfFameBtn;
+        [SerializeField] private Button tabRemodelBtn;
 
         [Header("화면 모드 버튼")]
         [SerializeField] private Button windowModeBtn;
@@ -62,6 +64,7 @@ namespace DopamineCleaner.Town
             if (tabAchievementBtn != null) tabAchievementBtn.onClick.AddListener(() => SwitchTab(4));
             if (tabDungeonBtn != null) tabDungeonBtn.onClick.AddListener(() => SwitchTab(5));
             if (tabHallOfFameBtn != null) tabHallOfFameBtn.onClick.AddListener(() => SwitchTab(6));
+            if (tabRemodelBtn != null) tabRemodelBtn.onClick.AddListener(() => SwitchTab(7));
 
             if (windowModeBtn != null)
             {
@@ -147,6 +150,7 @@ namespace DopamineCleaner.Town
             if (achievementPanel != null) achievementPanel.SetActive(tabIndex == 4);
             if (dungeonPanel != null) dungeonPanel.SetActive(tabIndex == 5);
             if (hallOfFamePanel != null) hallOfFamePanel.SetActive(tabIndex == 6);
+            if (remodelPanel != null) remodelPanel.SetActive(tabIndex == 7);
 
             // 탭 열릴 때 해당 UI 갱신
             if (tabIndex == 0) GetComponentInChildren<CharacterSelectUI>(true)?.RefreshUI();
@@ -156,6 +160,7 @@ namespace DopamineCleaner.Town
             if (tabIndex == 4) GetComponentInChildren<AchievementUI>(true)?.RefreshUI();
             if (tabIndex == 5) GetComponentInChildren<DungeonSelectUI>(true)?.RefreshUI();
             if (tabIndex == 6) GetComponentInChildren<HallOfFameUI>(true)?.RefreshLeaderboard();
+            if (tabIndex == 7) GetComponentInChildren<OfficeRemodelUI>(true)?.RefreshUI();
         }
     }
 }

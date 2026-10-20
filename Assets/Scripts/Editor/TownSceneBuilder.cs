@@ -174,6 +174,7 @@ namespace DopamineCleaner.Editor
             Button tabResearch = CreateButton("TabResearch", tabNavObj.transform, "🔬 연구소", 17, new Color(0.24f, 0.28f, 0.42f));
             Button tabAchieve = CreateButton("TabAchieve", tabNavObj.transform, "🏆 도감/실적", 17, new Color(0.24f, 0.28f, 0.42f));
             Button tabFame = CreateButton("TabHallOfFame", tabNavObj.transform, "👑 명예의 전당", 17, new Color(0.38f, 0.32f, 0.15f));
+            Button tabRemodel = CreateButton("TabRemodel", tabNavObj.transform, "🛋️ 사옥 리모델링", 17, new Color(0.24f, 0.42f, 0.35f));
             Button tabDungeon = CreateButton("TabDungeon", tabNavObj.transform, "🚀 작전 출동처", 17, new Color(0.85f, 0.35f, 0.38f));
 
             SetPrivateField(townMgr, "tabCharBtn", tabChar);
@@ -182,6 +183,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(townMgr, "tabResearchBtn", tabResearch);
             SetPrivateField(townMgr, "tabAchievementBtn", tabAchieve);
             SetPrivateField(townMgr, "tabHallOfFameBtn", tabFame);
+            SetPrivateField(townMgr, "tabRemodelBtn", tabRemodel);
             SetPrivateField(townMgr, "tabDungeonBtn", tabDungeon);
 
             // 메인 콘텐츠 영역 (중앙)
@@ -457,6 +459,47 @@ namespace DopamineCleaner.Editor
 
             SetPrivateField(ui, "researchContainer", cont.transform);
             SetPrivateField(ui, "researchCardPrefab", itemPrefab);
+
+            return panel;
+        }
+
+                private static GameObject CreateOfficeRemodelPanel(Transform parent)
+        {
+            GameObject panel = CreateUIObject("OfficeRemodelPanel", parent);
+            RectTransform rt = panel.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+
+            var ui = panel.AddComponent<Town.OfficeRemodelUI>();
+
+            // 상단 상태 및 복지 등급 바
+            Text headerTxt = CreateText("OfficeHeader", panel.transform, "🏢 낡은 지하 임시 본부 (복지 총합 Lv.0)  |  💰 보유 골드: 0 G", 24, TextAnchor.MiddleCenter, new Vector2(0, 360), new Vector2(1400, 35));
+            headerTxt.color = new Color(1f, 0.9f, 0.5f);
+            headerTxt.fontStyle = FontStyle.Bold;
+
+            // 종합 버프 요약 바
+            Text buffSummaryTxt = CreateText("BuffSummary", panel.transform, "현재 적용된 사옥 복지 버프 없음", 17, TextAnchor.MiddleCenter, new Vector2(0, 320), new Vector2(1400, 30));
+            buffSummaryTxt.color = new Color(0.85f, 0.9f, 1f);
+
+            // 가구 카드 그리드 컨테이너
+            GameObject container = CreateUIObject("FacilityGrid", panel.transform);
+            RectTransform cntRt = container.GetComponent<RectTransform>();
+            cntRt.anchorMin = new Vector2(0.5f, 0.5f);
+            cntRt.anchorMax = new Vector2(0.5f, 0.5f);
+            cntRt.sizeDelta = new Vector2(1540, 520);
+            cntRt.anchoredPosition = new Vector2(0, -35);
+
+            GridLayoutGroup glg = container.AddComponent<GridLayoutGroup>();
+            glg.cellSize = new Vector2(490, 240);
+            glg.spacing = new Vector2(25, 20);
+            glg.childAlignment = TextAnchor.MiddleCenter;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = 3;
+
+            SetPrivateField(ui, "headerStatusText", headerTxt);
+            SetPrivateField(ui, "buffSummaryText", buffSummaryTxt);
+            SetPrivateField(ui, "cardContainer", container.transform);
 
             return panel;
         }
