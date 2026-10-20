@@ -16,7 +16,7 @@ namespace DopamineCleaner.Editor
     {
         private static Font koreanFont;
 
-        [MenuItem("Dopamine Cleaner/✨ Build Complete Gameplay Scene (원클릭 자동 구성)")]
+        [MenuItem("Dopamine Cleaner/2. 🎮 인게임 던전 씬 구축 (Build MainGame Scene)")]
         public static void BuildScene()
         {
             EnsureTagsExist();
@@ -44,7 +44,7 @@ namespace DopamineCleaner.Editor
             CameraFollow camFollow = camObj.AddComponent<CameraFollow>();
 
             // 4. 예쁜 2D 도트 잔디 타일맵 배경 (Background Tiled)
-            GameObject bgObj = new GameObject("Background_MentalGarden");
+            GameObject bgObj = new GameObject("Background");
             bgObj.transform.position = Vector3.zero;
             Sprite bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Environment/bg_mental_garden.png");
             if (bgSprite != null)
@@ -116,6 +116,8 @@ namespace DopamineCleaner.Editor
             Meta.AchievementManager achieveMgr = sysObj.AddComponent<Meta.AchievementManager>();
             PixelParticleManager pixelParticleMgr = sysObj.AddComponent<PixelParticleManager>();
             BossTelegraphManager bossTelegraphMgr = sysObj.AddComponent<BossTelegraphManager>();
+            BreakroomManager breakroomMgr = sysObj.AddComponent<BreakroomManager>();
+            HRAuditManager auditMgr = sysObj.AddComponent<HRAuditManager>();
 
             // 7. 필드 럭키 슬롯 자판기
             GameObject slotMachineObj = new GameObject("LuckySlotMachine");
@@ -144,6 +146,9 @@ namespace DopamineCleaner.Editor
             canvasObj.AddComponent<UI.EvolutionTreeModalUI>();
             canvasObj.AddComponent<UI.SettingsModalUI>();
 
+            // 비밀 탕비실 딜레마 모달 (E 상호작용)
+            canvasObj.AddComponent<UI.BreakroomDilemmaModalUI>();
+
             // EventSystem
             GameObject esObj = new GameObject("EventSystem");
             esObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
@@ -169,7 +174,7 @@ namespace DopamineCleaner.Editor
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Dopamine Cleaner/🚀 Build Complete Game (Town + Dungeon)")]
+        [MenuItem("Dopamine Cleaner/3. 🚀 원클릭 전체 구축 (Town + MainGame)")]
         public static void BuildCompleteGame()
         {
             TownSceneBuilder.BuildTownScene();
@@ -391,31 +396,31 @@ namespace DopamineCleaner.Editor
             RectTransform smRt = slotModalObj.GetComponent<RectTransform>();
             smRt.anchorMin = new Vector2(0.5f, 0.5f);
             smRt.anchorMax = new Vector2(0.5f, 0.5f);
-            smRt.sizeDelta = new Vector2(650, 520);
+            smRt.sizeDelta = new Vector2(700, 560);
             Image smBg = slotModalObj.AddComponent<Image>();
             smBg.color = new Color(0.12f, 0.10f, 0.18f, 0.98f);
             Outline smOut = slotModalObj.AddComponent<Outline>();
             smOut.effectColor = new Color(1f, 0.3f, 0.8f);
             smOut.effectDistance = new Vector2(2f, -2f);
 
-            CreateText("SmTitle", slotModalObj.transform, "🎰 도파민 럭키 슬롯 & 암거래", 30, TextAnchor.MiddleCenter, new Vector2(0, 220), new Vector2(580, 45));
+            CreateText("SmTitle", slotModalObj.transform, "🎰 도파민 럭키 슬롯 & 암거래", 30, TextAnchor.MiddleCenter, new Vector2(0, 235), new Vector2(620, 45));
 
             GameObject reelsObj = CreateUIObject("ReelsGroup", slotModalObj.transform);
             RectTransform rgRt = reelsObj.GetComponent<RectTransform>();
-            rgRt.sizeDelta = new Vector2(460, 110);
-            rgRt.anchoredPosition = new Vector2(0, 120);
+            rgRt.sizeDelta = new Vector2(480, 110);
+            rgRt.anchoredPosition = new Vector2(0, 135);
             Image rgBg = reelsObj.AddComponent<Image>();
             rgBg.color = new Color(0.06f, 0.05f, 0.10f, 0.95f);
 
-            Text r1 = CreateText("Reel1", reelsObj.transform, "7️⃣", 52, TextAnchor.MiddleCenter, new Vector2(-140, 0), new Vector2(100, 100));
+            Text r1 = CreateText("Reel1", reelsObj.transform, "7️⃣", 52, TextAnchor.MiddleCenter, new Vector2(-150, 0), new Vector2(100, 100));
             Text r2 = CreateText("Reel2", reelsObj.transform, "💎", 52, TextAnchor.MiddleCenter, new Vector2(0, 0), new Vector2(100, 100));
-            Text r3 = CreateText("Reel3", reelsObj.transform, "🍒", 52, TextAnchor.MiddleCenter, new Vector2(140, 0), new Vector2(100, 100));
+            Text r3 = CreateText("Reel3", reelsObj.transform, "🍒", 52, TextAnchor.MiddleCenter, new Vector2(150, 0), new Vector2(100, 100));
 
-            Text resTxt = CreateText("ResText", slotModalObj.transform, "💰 50 골드로 레버를 당기세요!", 18, TextAnchor.MiddleCenter, new Vector2(0, 45), new Vector2(580, 35));
+            Text resTxt = CreateText("ResText", slotModalObj.transform, "💰 50 골드로 레버를 당기세요!", 18, TextAnchor.MiddleCenter, new Vector2(0, 50), new Vector2(640, 42));
 
             GameObject spinBtnObj = CreateUIObject("SpinBtn", slotModalObj.transform);
             RectTransform sbRt = spinBtnObj.GetComponent<RectTransform>();
-            sbRt.sizeDelta = new Vector2(240, 55);
+            sbRt.sizeDelta = new Vector2(250, 54);
             sbRt.anchoredPosition = new Vector2(0, -15);
             Image sbImg = spinBtnObj.AddComponent<Image>();
             sbImg.color = new Color(0.9f, 0.3f, 0.45f);
@@ -424,8 +429,8 @@ namespace DopamineCleaner.Editor
 
             GameObject c1BtnObj = CreateUIObject("Contract1Btn", slotModalObj.transform);
             RectTransform c1Rt = c1BtnObj.GetComponent<RectTransform>();
-            c1Rt.sizeDelta = new Vector2(260, 60);
-            c1Rt.anchoredPosition = new Vector2(-140, -95);
+            c1Rt.sizeDelta = new Vector2(270, 60);
+            c1Rt.anchoredPosition = new Vector2(-155, -95);
             Image c1Img = c1BtnObj.AddComponent<Image>();
             c1Img.color = new Color(0.25f, 0.15f, 0.22f);
             Button c1Btn = c1BtnObj.AddComponent<Button>();
@@ -433,8 +438,8 @@ namespace DopamineCleaner.Editor
 
             GameObject c2BtnObj = CreateUIObject("Contract2Btn", slotModalObj.transform);
             RectTransform c2Rt = c2BtnObj.GetComponent<RectTransform>();
-            c2Rt.sizeDelta = new Vector2(260, 60);
-            c2Rt.anchoredPosition = new Vector2(140, -95);
+            c2Rt.sizeDelta = new Vector2(270, 60);
+            c2Rt.anchoredPosition = new Vector2(155, -95);
             Image c2Img = c2BtnObj.AddComponent<Image>();
             c2Img.color = new Color(0.15f, 0.22f, 0.28f);
             Button c2Btn = c2BtnObj.AddComponent<Button>();
@@ -442,8 +447,8 @@ namespace DopamineCleaner.Editor
 
             GameObject closeBtnObj = CreateUIObject("CloseBtn", slotModalObj.transform);
             RectTransform cbRt = closeBtnObj.GetComponent<RectTransform>();
-            cbRt.sizeDelta = new Vector2(160, 42);
-            cbRt.anchoredPosition = new Vector2(0, -180);
+            cbRt.sizeDelta = new Vector2(180, 44);
+            cbRt.anchoredPosition = new Vector2(0, -190);
             Image cbImg = closeBtnObj.AddComponent<Image>();
             cbImg.color = new Color(0.35f, 0.35f, 0.45f);
             Button closeBtn = closeBtnObj.AddComponent<Button>();
@@ -537,7 +542,7 @@ namespace DopamineCleaner.Editor
 
             CreateText("PauseTitle", pausePanelObj.transform, "⏸️ 작전 일시정지 (PAUSED)", 44, TextAnchor.MiddleCenter, new Vector2(0, 370));
 
-            Text pauseEquipTxt = CreateText("PauseEquipText", pausePanelObj.transform, "장비 정보를 불러오는 중...", 20, TextAnchor.MiddleCenter, new Vector2(0, 50), new Vector2(920, 520));
+            Text pauseEquipTxt = CreateText("PauseEquipText", pausePanelObj.transform, "장비 정보를 불러오는 중...", 20, TextAnchor.MiddleCenter, new Vector2(0, 65), new Vector2(920, 440));
             pauseEquipTxt.lineSpacing = 1.3f;
             pauseEquipTxt.color = new Color(0.9f, 0.88f, 0.95f);
 
@@ -761,53 +766,118 @@ namespace DopamineCleaner.Editor
         {
             GameObject cardObj = CreateUIObject("UpgradeCard", null);
             RectTransform rt = cardObj.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(280, 420);
+            rt.sizeDelta = new Vector2(290, 430);
 
+            // 1. 카드 본체 배경 (다크 사이버 슬레이트)
             Image cardBg = cardObj.AddComponent<Image>();
-            cardBg.color = new Color(0.98f, 0.96f, 0.94f);
+            cardBg.color = new Color(0.11f, 0.10f, 0.17f, 0.98f);
+
+            Outline cardOutline = cardObj.AddComponent<Outline>();
+            cardOutline.effectColor = new Color(0.68f, 0.42f, 1f, 1f);
+            cardOutline.effectDistance = new Vector2(2, -2);
 
             Button btn = cardObj.AddComponent<Button>();
             UpgradeCardUI cardUI = cardObj.AddComponent<UpgradeCardUI>();
 
-            // 아이콘
-            Text icon = CreateText("CardIcon", cardObj.transform, "💧", 52, TextAnchor.MiddleCenter, new Vector2(0, 95));
-            RectTransform iconRt = icon.GetComponent<RectTransform>();
-            iconRt.sizeDelta = new Vector2(80, 80);
-
-            // 스킬 이름
-            Text title = CreateText("CardTitle", cardObj.transform, "스킬 이름", 22, TextAnchor.MiddleCenter, new Vector2(0, 25));
-            RectTransform titleRt = title.GetComponent<RectTransform>();
-            titleRt.sizeDelta = new Vector2(250, 40);
-            title.color = new Color(0.18f, 0.12f, 0.24f);
-            title.fontStyle = FontStyle.Bold;
-
-            // 스킬 설명 (카드 너비 280 안에서 여유있게 줄바꿈되도록 240 너비 지정)
-            Text desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 16, TextAnchor.UpperCenter, new Vector2(0, -90));
-            RectTransform descRt = desc.GetComponent<RectTransform>();
-            descRt.sizeDelta = new Vector2(240, 130);
-            desc.color = new Color(0.32f, 0.28f, 0.38f);
-            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
-            desc.verticalOverflow = VerticalWrapMode.Truncate;
-            desc.lineSpacing = 1.2f;
-
-            // 진화 뱃지
-            GameObject badgeObj = CreateUIObject("EvoBadge", cardObj.transform);
+            // 2. 상단 카테고리 뱃지
+            GameObject badgeObj = CreateUIObject("TypeBadge", cardObj.transform);
             RectTransform bRt = badgeObj.GetComponent<RectTransform>();
-            bRt.sizeDelta = new Vector2(120, 28);
-            bRt.anchoredPosition = new Vector2(0, 165);
+            bRt.sizeDelta = new Vector2(140, 26);
+            bRt.anchoredPosition = new Vector2(0, 185);
             Image bImg = badgeObj.AddComponent<Image>();
-            bImg.color = new Color(1f, 0.78f, 0.22f);
-            Text bText = CreateText("BadgeText", badgeObj.transform, "EVOLUTION", 12, TextAnchor.MiddleCenter, Vector2.zero);
-            RectTransform bTextRt = bText.GetComponent<RectTransform>();
-            bTextRt.sizeDelta = new Vector2(115, 26);
-            bText.color = new Color(0.35f, 0.18f, 0.02f);
+            bImg.color = new Color(0.24f, 0.14f, 0.40f, 0.95f);
+            Outline bOutline = badgeObj.AddComponent<Outline>();
+            bOutline.effectColor = new Color(0.45f, 0.35f, 0.65f, 0.5f);
+            bOutline.effectDistance = new Vector2(1, -1);
+
+            Text bText = CreateText("BadgeText", badgeObj.transform, "⚔️ 공격 무기", 13, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(136, 24));
+            bText.color = new Color(0.85f, 0.75f, 1f);
             bText.fontStyle = FontStyle.Bold;
 
+            // 3. 아이콘 프레임 & 도트 스프라이트 이미지
+            GameObject iconPlate = CreateUIObject("IconPlate", cardObj.transform);
+            RectTransform ipRt = iconPlate.GetComponent<RectTransform>();
+            ipRt.sizeDelta = new Vector2(80, 80);
+            ipRt.anchoredPosition = new Vector2(0, 120);
+            Image ipImg = iconPlate.AddComponent<Image>();
+            ipImg.color = new Color(0.18f, 0.16f, 0.26f, 1f);
+            Outline ipOutline = iconPlate.AddComponent<Outline>();
+            ipOutline.effectColor = new Color(0.35f, 0.32f, 0.48f, 0.6f);
+            ipOutline.effectDistance = new Vector2(1, -1);
+
+            // 도트 스프라이트 표시용 Image
+            GameObject iconImgObj = CreateUIObject("IconImage", iconPlate.transform);
+            RectTransform iconImgRt = iconImgObj.GetComponent<RectTransform>();
+            iconImgRt.sizeDelta = new Vector2(60, 60);
+            iconImgRt.anchoredPosition = Vector2.zero;
+            Image iconImg = iconImgObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+
+            // 텍스트 폴백 (도트 미로드 시)
+            Text icon = CreateText("CardIcon", iconPlate.transform, "💧", 46, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(76, 76));
+            icon.color = Color.white;
+            icon.gameObject.SetActive(false);
+
+            // 4. 스킬 타이틀 (선명한 화이트)
+            Text title = CreateText("CardTitle", cardObj.transform, "스킬 이름", 20, TextAnchor.MiddleCenter, new Vector2(0, 55), new Vector2(260, 34));
+            title.color = Color.white;
+            title.fontStyle = FontStyle.Bold;
+
+            // 5. 스킬 설명 (가독성 높은 실버/화이트)
+            Text desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 14, TextAnchor.UpperCenter, new Vector2(0, -5), new Vector2(256, 74));
+            desc.color = new Color(0.86f, 0.86f, 0.92f);
+            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
+            desc.verticalOverflow = VerticalWrapMode.Truncate;
+            desc.lineSpacing = 1.25f;
+
+            // 6. 진화 족보 가이드 전용 박스 (고대비 전용 공간)
+            GameObject recipeBoxObj = CreateUIObject("RecipeBox", cardObj.transform);
+            RectTransform rbRt = recipeBoxObj.GetComponent<RectTransform>();
+            rbRt.sizeDelta = new Vector2(264, 58);
+            rbRt.anchoredPosition = new Vector2(0, -92);
+            Image rbImg = recipeBoxObj.AddComponent<Image>();
+            rbImg.color = new Color(0.08f, 0.07f, 0.13f, 0.95f);
+            Outline rbOutline = recipeBoxObj.AddComponent<Outline>();
+            rbOutline.effectColor = new Color(0.28f, 0.25f, 0.42f, 0.7f);
+            rbOutline.effectDistance = new Vector2(1, -1);
+
+            Text recipeText = CreateText("RecipeText", recipeBoxObj.transform, "진화 가이드", 13, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(256, 52));
+            recipeText.color = new Color(0.9f, 0.9f, 0.95f);
+            recipeText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            recipeText.verticalOverflow = VerticalWrapMode.Truncate;
+            recipeText.lineSpacing = 1.2f;
+
+            // 7. 하단 선택 버튼
+            GameObject selBtnObj = CreateUIObject("SelectBtn", cardObj.transform);
+            RectTransform sbRt = selBtnObj.GetComponent<RectTransform>();
+            sbRt.sizeDelta = new Vector2(240, 46);
+            sbRt.anchoredPosition = new Vector2(0, -168);
+            Image sbImg = selBtnObj.AddComponent<Image>();
+            sbImg.color = new Color(0.55f, 0.35f, 0.88f, 1f);
+            Button selBtn = selBtnObj.AddComponent<Button>();
+
+            Text sbText = CreateText("SelectBtnText", selBtnObj.transform, "선택", 16, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(230, 42));
+            sbText.color = Color.white;
+            sbText.fontStyle = FontStyle.Bold;
+
+            // 필드 바인딩
+            SetPrivateField(cardUI, "cardBackground", cardBg);
+            SetPrivateField(cardUI, "cardOutline", cardOutline);
+            SetPrivateField(cardUI, "iconImage", iconImg);
             SetPrivateField(cardUI, "iconText", icon);
             SetPrivateField(cardUI, "titleText", title);
             SetPrivateField(cardUI, "descriptionText", desc);
             SetPrivateField(cardUI, "evoBadge", badgeObj);
+            SetPrivateField(cardUI, "typeBadgeText", bText);
+            SetPrivateField(cardUI, "typeBadgeBg", bImg);
+            SetPrivateField(cardUI, "recipeBox", recipeBoxObj);
+            SetPrivateField(cardUI, "recipeGuideText", recipeText);
             SetPrivateField(cardUI, "selectButton", btn);
+            SetPrivateField(cardUI, "selectButtonBg", sbImg);
+            SetPrivateField(cardUI, "selectButtonText", sbText);
+
+            // 하단 버튼 클릭도 전체 카드 클릭과 동일하게 호출
+            selBtn.onClick.AddListener(() => btn.onClick.Invoke());
 
             string path = "Assets/Prefabs/UpgradeCardPrefab.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(cardObj, path);

@@ -1368,6 +1368,8 @@ namespace DopamineCleaner.Editor
 
         private static void SetField(object target, string fieldName, object value)
         {
+            if (target == null) return;
+
             if (target is Type type)
             {
                 var prop = type.GetProperty(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
@@ -1381,6 +1383,12 @@ namespace DopamineCleaner.Editor
             }
             else
             {
+                var prop = target.GetType().GetProperty(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (prop != null)
+                {
+                    prop.GetSetMethod(true)?.Invoke(target, new object[] { value });
+                    return;
+                }
                 var field = target.GetType().GetField(fieldName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 field?.SetValue(target, value);
             }

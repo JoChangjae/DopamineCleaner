@@ -47,6 +47,7 @@ namespace DopamineCleaner.Weapons
         public string title;
         public string description;
         public string iconText;
+        public Sprite iconSprite;
         public bool isEvolution;
     }
 

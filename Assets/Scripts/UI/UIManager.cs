@@ -104,6 +104,8 @@ namespace DopamineCleaner.UI
             if (feverBanner != null) feverBanner.SetActive(false);
             if (pausePanel != null) pausePanel.SetActive(false);
 
+            EnsureServerBlackoutVignette();
+
             // HUD 텍스트 시인성 극대화 (골드/민트 색상 + 블랙 아웃라인)
             if (timerText != null)
             {
@@ -584,30 +586,114 @@ namespace DopamineCleaner.UI
             GameObject cardObj = new GameObject("FallbackCard");
             cardObj.transform.SetParent(parent, false);
             RectTransform rt = cardObj.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(280, 420);
+            rt.sizeDelta = new Vector2(290, 430);
 
+            // 1. 배경 및 테두리 (다크 사이버 슬레이트)
             Image img = cardObj.AddComponent<Image>();
-            img.color = new Color(0.96f, 0.94f, 0.98f);
+            img.color = new Color(0.11f, 0.10f, 0.17f, 0.98f);
+
+            Outline cardOutline = cardObj.AddComponent<Outline>();
+            cardOutline.effectColor = new Color(0.68f, 0.42f, 1f, 1f);
+            cardOutline.effectDistance = new Vector2(2, -2);
 
             Button btn = cardObj.AddComponent<Button>();
             UpgradeCardUI cardUI = cardObj.AddComponent<UpgradeCardUI>();
 
-            Text icon = CreateFallbackText("Icon", cardObj.transform, info.iconText, 48, new Vector2(0, 90), new Vector2(100, 80));
-            Text title = CreateFallbackText("Title", cardObj.transform, info.title, 20, new Vector2(0, 20), new Vector2(260, 40));
-            title.color = new Color(0.15f, 0.12f, 0.22f);
+            // 2. 상단 타입 뱃지
+            GameObject badgeObj = new GameObject("TypeBadge");
+            badgeObj.transform.SetParent(cardObj.transform, false);
+            RectTransform bRt = badgeObj.AddComponent<RectTransform>();
+            bRt.sizeDelta = new Vector2(140, 26);
+            bRt.anchoredPosition = new Vector2(0, 185);
+            Image bImg = badgeObj.AddComponent<Image>();
+            bImg.color = new Color(0.24f, 0.14f, 0.40f, 0.95f);
+            Text bText = CreateFallbackText("BadgeText", badgeObj.transform, "⚔️ 공격 무기", 13, Vector2.zero, new Vector2(136, 24));
+            bText.color = new Color(0.85f, 0.75f, 1f);
+            bText.fontStyle = FontStyle.Bold;
+
+            // 3. 아이콘 플레이트
+            GameObject iconPlate = new GameObject("IconPlate");
+            iconPlate.transform.SetParent(cardObj.transform, false);
+            RectTransform ipRt = iconPlate.AddComponent<RectTransform>();
+            ipRt.sizeDelta = new Vector2(80, 80);
+            ipRt.anchoredPosition = new Vector2(0, 120);
+            Image ipImg = iconPlate.AddComponent<Image>();
+            ipImg.color = new Color(0.18f, 0.16f, 0.26f, 1f);
+
+            GameObject iconImgObj = new GameObject("IconImage");
+            iconImgObj.transform.SetParent(iconPlate.transform, false);
+            RectTransform iconImgRt = iconImgObj.AddComponent<RectTransform>();
+            iconImgRt.sizeDelta = new Vector2(60, 60);
+            iconImgRt.anchoredPosition = Vector2.zero;
+            Image iconImg = iconImgObj.AddComponent<Image>();
+            iconImg.preserveAspect = true;
+
+            Text icon = CreateFallbackText("Icon", iconPlate.transform, info.iconText, 46, Vector2.zero, new Vector2(76, 76));
+            icon.color = Color.white;
+            icon.gameObject.SetActive(false);
+
+            // 4. 스킬 타이틀
+            Text title = CreateFallbackText("Title", cardObj.transform, info.title, 20, new Vector2(0, 55), new Vector2(260, 34));
+            title.color = Color.white;
             title.fontStyle = FontStyle.Bold;
 
-            Text desc = CreateFallbackText("Desc", cardObj.transform, info.description, 15, new Vector2(0, -80), new Vector2(240, 120));
-            desc.color = new Color(0.35f, 0.3f, 0.4f);
+            // 5. 스킬 설명
+            Text desc = CreateFallbackText("Desc", cardObj.transform, info.description, 14, new Vector2(0, -5), new Vector2(256, 74));
+            desc.color = new Color(0.86f, 0.86f, 0.92f);
+            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
+            desc.verticalOverflow = VerticalWrapMode.Truncate;
+            desc.lineSpacing = 1.25f;
 
-            var fIcon = typeof(UpgradeCardUI).GetField("iconText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            fIcon?.SetValue(cardUI, icon);
-            var fTitle = typeof(UpgradeCardUI).GetField("titleText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            fTitle?.SetValue(cardUI, title);
-            var fDesc = typeof(UpgradeCardUI).GetField("descriptionText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            fDesc?.SetValue(cardUI, desc);
-            var fBtn = typeof(UpgradeCardUI).GetField("selectButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            fBtn?.SetValue(cardUI, btn);
+            // 6. 진화 족보 가이드 전용 박스
+            GameObject recipeBoxObj = new GameObject("RecipeBox");
+            recipeBoxObj.transform.SetParent(cardObj.transform, false);
+            RectTransform rbRt = recipeBoxObj.AddComponent<RectTransform>();
+            rbRt.sizeDelta = new Vector2(264, 58);
+            rbRt.anchoredPosition = new Vector2(0, -92);
+            Image rbImg = recipeBoxObj.AddComponent<Image>();
+            rbImg.color = new Color(0.08f, 0.07f, 0.13f, 0.95f);
+            Outline rbOutline = recipeBoxObj.AddComponent<Outline>();
+            rbOutline.effectColor = new Color(0.28f, 0.25f, 0.42f, 0.7f);
+            rbOutline.effectDistance = new Vector2(1, -1);
+
+            Text recipeText = CreateFallbackText("RecipeText", recipeBoxObj.transform, "", 13, Vector2.zero, new Vector2(256, 52));
+            recipeText.color = new Color(0.9f, 0.9f, 0.95f);
+            recipeText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            recipeText.verticalOverflow = VerticalWrapMode.Truncate;
+            recipeText.lineSpacing = 1.2f;
+
+            // 7. 하단 선택 버튼
+            GameObject selBtnObj = new GameObject("SelectBtn");
+            selBtnObj.transform.SetParent(cardObj.transform, false);
+            RectTransform sbRt = selBtnObj.AddComponent<RectTransform>();
+            sbRt.sizeDelta = new Vector2(240, 46);
+            sbRt.anchoredPosition = new Vector2(0, -168);
+            Image sbImg = selBtnObj.AddComponent<Image>();
+            sbImg.color = new Color(0.55f, 0.35f, 0.88f, 1f);
+            Button selBtn = selBtnObj.AddComponent<Button>();
+
+            Text sbText = CreateFallbackText("SelectBtnText", selBtnObj.transform, "선택", 16, Vector2.zero, new Vector2(230, 42));
+            sbText.color = Color.white;
+            sbText.fontStyle = FontStyle.Bold;
+
+            selBtn.onClick.AddListener(() => btn.onClick.Invoke());
+
+            // 필드 바인딩
+            var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            typeof(UpgradeCardUI).GetField("cardBackground", flags)?.SetValue(cardUI, img);
+            typeof(UpgradeCardUI).GetField("cardOutline", flags)?.SetValue(cardUI, cardOutline);
+            typeof(UpgradeCardUI).GetField("iconImage", flags)?.SetValue(cardUI, iconImg);
+            typeof(UpgradeCardUI).GetField("iconText", flags)?.SetValue(cardUI, icon);
+            typeof(UpgradeCardUI).GetField("titleText", flags)?.SetValue(cardUI, title);
+            typeof(UpgradeCardUI).GetField("descriptionText", flags)?.SetValue(cardUI, desc);
+            typeof(UpgradeCardUI).GetField("evoBadge", flags)?.SetValue(cardUI, badgeObj);
+            typeof(UpgradeCardUI).GetField("typeBadgeText", flags)?.SetValue(cardUI, bText);
+            typeof(UpgradeCardUI).GetField("typeBadgeBg", flags)?.SetValue(cardUI, bImg);
+            typeof(UpgradeCardUI).GetField("recipeBox", flags)?.SetValue(cardUI, recipeBoxObj);
+            typeof(UpgradeCardUI).GetField("recipeGuideText", flags)?.SetValue(cardUI, recipeText);
+            typeof(UpgradeCardUI).GetField("selectButton", flags)?.SetValue(cardUI, btn);
+            typeof(UpgradeCardUI).GetField("selectButtonBg", flags)?.SetValue(cardUI, sbImg);
+            typeof(UpgradeCardUI).GetField("selectButtonText", flags)?.SetValue(cardUI, sbText);
 
             return cardObj;
         }
@@ -624,6 +710,7 @@ namespace DopamineCleaner.UI
             txt.text = content;
             txt.fontSize = fontSize;
             txt.alignment = TextAnchor.MiddleCenter;
+            txt.supportRichText = true;
             txt.font = Font.CreateDynamicFontFromOSFont(new string[] { "Malgun Gothic", "맑은 고딕", "Arial" }, fontSize);
             return txt;
         }
@@ -981,6 +1068,48 @@ namespace DopamineCleaner.UI
             SoundManager.Instance?.Play(SoundEffect.Dash, 0.5f);
             if (pausePanel != null) pausePanel.SetActive(false);
             GameManager.Instance?.TriggerGameOver(false);
+        }
+
+        private GameObject serverBlackoutVignetteObj;
+
+        public void EnsureServerBlackoutVignette()
+        {
+            if (Meta.GameDataManager.Instance == null || !Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.ServerBlackout))
+            {
+                if (serverBlackoutVignetteObj != null) serverBlackoutVignetteObj.SetActive(false);
+                return;
+            }
+
+            if (serverBlackoutVignetteObj == null)
+            {
+                serverBlackoutVignetteObj = new GameObject("ServerBlackoutVignette");
+                serverBlackoutVignetteObj.transform.SetParent(transform, false);
+                serverBlackoutVignetteObj.transform.SetAsFirstSibling();
+
+                RectTransform rt = serverBlackoutVignetteObj.AddComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.sizeDelta = Vector2.zero;
+
+                Image img = serverBlackoutVignetteObj.AddComponent<Image>();
+                img.raycastTarget = false;
+                img.color = new Color(0.02f, 0.02f, 0.06f, 0.58f); // 딥 다크 블랙아웃 틴트
+
+                GameObject tObj = new GameObject("BlackoutLabel");
+                tObj.transform.SetParent(serverBlackoutVignetteObj.transform, false);
+                RectTransform trt = tObj.AddComponent<RectTransform>();
+                trt.anchorMin = new Vector2(0.5f, 1f);
+                trt.anchorMax = new Vector2(0.5f, 1f);
+                trt.sizeDelta = new Vector2(400, 30);
+                trt.anchoredPosition = new Vector2(0, -65);
+                Text txt = tObj.AddComponent<Text>();
+                txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                txt.fontSize = 15;
+                txt.alignment = TextAnchor.MiddleCenter;
+                txt.color = new Color(1f, 0.4f, 0.4f, 0.85f);
+                txt.text = "🔌 [전산망 블랙아웃 조약 발효 중]";
+            }
+            serverBlackoutVignetteObj.SetActive(true);
         }
     }
 }

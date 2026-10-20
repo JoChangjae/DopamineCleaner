@@ -62,8 +62,14 @@ namespace DopamineCleaner.Items
             ExpGem nearestGem = null;
             float minDistanceSq = 9999f;
 
-            for (int i = 0; i < gemPool.Count; i++)
+            for (int i = gemPool.Count - 1; i >= 0; i--)
             {
+                if (gemPool[i] == null)
+                {
+                    gemPool.RemoveAt(i);
+                    continue;
+                }
+
                 if (gemPool[i].gameObject.activeSelf)
                 {
                     activeCount++;
@@ -79,8 +85,8 @@ namespace DopamineCleaner.Items
                 }
             }
 
-            // 근처 1.8 유닛 내에 기존 보석이 있거나, 활성 보석이 45개 이상이면 병합!
-            if (nearestGem != null && (minDistanceSq < 3.24f || activeCount >= 45))
+            // 근처 1.8 유닛 내에 기존 보석이 있거나, 활성 보석이 100개 이상으로 많을 때만 3.5 유닛 내 병합
+            if (nearestGem != null && (minDistanceSq < 3.24f || (activeCount >= 100 && minDistanceSq < 12.25f)))
             {
                 nearestGem.AddExp(exp);
                 return;
@@ -96,7 +102,7 @@ namespace DopamineCleaner.Items
         {
             for (int i = 0; i < gemPool.Count; i++)
             {
-                if (!gemPool[i].gameObject.activeSelf)
+                if (gemPool[i] != null && !gemPool[i].gameObject.activeSelf)
                     return gemPool[i];
             }
 

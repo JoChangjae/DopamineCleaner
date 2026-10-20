@@ -54,6 +54,14 @@ namespace DopamineCleaner.Core
             }
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
         private void Start()
         {
             StartNewGame();
@@ -132,6 +140,35 @@ namespace DopamineCleaner.Core
             SetState(GameState.Playing);
             OnKillsUpdated?.Invoke(stageKills, totalKills);
             OnStageChanged?.Invoke(currentStage);
+
+            ApplyMapEnvironmentSprite();
+        }
+
+        private void ApplyMapEnvironmentSprite()
+        {
+            if (Meta.GameDataManager.Instance == null) return;
+            string mapId = Meta.GameDataManager.Instance.SelectedMapId;
+            string spriteName = mapId switch
+            {
+                "map_office" => "bg_office_carpet",
+                "map_highway" => "bg_highway_road",
+                _ => "bg_hospital_floor"
+            };
+
+            GameObject bgObj = GameObject.Find("Background");
+            if (bgObj != null && bgObj.TryGetComponent<SpriteRenderer>(out var sr))
+            {
+                Sprite mapSprite = Resources.Load<Sprite>($"Environment/{spriteName}") ??
+#if UNITY_EDITOR
+                    UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Environment/{spriteName}.png") ??
+#endif
+                    Resources.Load<Sprite>("Environment/bg_mental_garden");
+
+                if (mapSprite != null)
+                {
+                    sr.sprite = mapSprite;
+                }
+            }
         }
 
         private void EnsureCompanionPet()
@@ -278,6 +315,12 @@ namespace DopamineCleaner.Core
                     goldMult *= 2.0f;
                     karmaMult *= 2.0f;
                 }
+
+                // 블랙기업 근로 조약 추가 성과급 배율 적용
+                float pactGoldBonus = Meta.GameDataManager.Instance.GetActivePactGoldMultiplier();
+                float pactKarmaBonus = Meta.GameDataManager.Instance.GetActivePactKarmaMultiplier();
+                goldMult *= (1f + pactGoldBonus);
+                karmaMult *= (1f + pactKarmaBonus);
             }
 
             int killBonusGold = totalKills * 3;
@@ -295,6 +338,10 @@ namespace DopamineCleaner.Core
             {
                 EarnedGold = Mathf.RoundToInt((baseGold + killBonusGold + survivalBonusGold) * goldMult) + BonusGold + overtimeGold;
                 EarnedKarma = Mathf.Max(1, Mathf.RoundToInt(baseKarma * karmaMult));
+
+                // 사원 승진을 위한 던전 정화 성공 기록 누적
+                string charId = Meta.GameDataManager.Instance?.Profile?.selectedCharacterId ?? "char_intern";
+                Meta.GameDataManager.Instance?.RecordCharacterClear(charId);
             }
             else
             {

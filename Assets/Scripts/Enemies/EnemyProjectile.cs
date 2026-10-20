@@ -12,6 +12,11 @@ namespace DopamineCleaner.Enemies
 
         public void Initialize(Vector2 dir, float spd, float dmg)
         {
+            if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.NotificationBombard))
+            {
+                spd *= 1.25f; // 스팸 알림 폭탄 조약: 탄환 비행 속도 +25%
+            }
+
             direction = dir.normalized;
             speed = spd;
             damage = dmg;

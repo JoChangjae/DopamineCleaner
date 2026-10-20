@@ -13,7 +13,8 @@ namespace DopamineCleaner.Enemies
         NotificationGhost, // 알림 유령 (스마트폰 알림, 고속 이동)
         ShortsRunner,      // 숏폼 알고리즘 (초고속 지그재그 돌진)
         SpamShooter,       // 스팸/악플러 (원거리 투사체 사격)
-        DopamineBoss       // 도파민 거대 보스
+        DopamineBoss,      // 도파민 거대 보스
+        AuditorKim         // 불시 특별 감사 김감사 부장
     }
 
     [RequireComponent(typeof(CircleCollider2D))]
@@ -175,6 +176,19 @@ namespace DopamineCleaner.Enemies
                     SetVisualColor(GetBossStageColor(stage));
                     transform.localScale = Vector3.one * 2.8f;
                     break;
+
+                case EnemyType.AuditorKim:
+                    maxHP = (550f + (stage - 1) * 200f + survivalSec * 0.8f) * stageMult;
+                    moveSpeed = 2.2f;
+                    damage = 18f + (stage - 1) * 4f;
+                    baseExp = 45;
+                    SetVisualColor(new Color(0.95f, 0.25f, 0.25f)); // 특별 감사 붉은 정장
+                    transform.localScale = Vector3.one * 1.8f;
+                    EnsureNameplate();
+                    nameplateText.gameObject.SetActive(true);
+                    nameplateText.text = "💼 [본사 감사팀장] 김감사 부장";
+                    nameplateText.color = new Color(1f, 0.3f, 0.3f);
+                    break;
             }
 
             if (Meta.GameDataManager.Instance != null)
@@ -183,6 +197,11 @@ namespace DopamineCleaner.Enemies
                 maxHP *= diff.enemyHpMult;
                 damage *= diff.enemyDmgMult;
                 moveSpeed *= diff.enemySpeedMult;
+
+                if (Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.WeekendOverwork))
+                {
+                    moveSpeed *= 1.25f; // 주말 특근 조약: 몬스터 이동속도 +25%
+                }
             }
 
             if (IsElite)
@@ -283,6 +302,37 @@ namespace DopamineCleaner.Enemies
                     }
                 }
             }
+            else if (enemyType == EnemyType.AuditorKim)
+            {
+                if (!isBossSpecialActing)
+                {
+                    transform.position += dir * (moveSpeed * Time.deltaTime);
+
+                    // 1. 서류 뭉치 8방향 사격
+                    specialActionTimer -= Time.deltaTime;
+                    if (specialActionTimer <= 0f)
+                    {
+                        specialActionTimer = 3.2f;
+                        FireBossRadialBurst(10);
+                    }
+
+                    // 2. 5초 주기 돌진 및 충격파 필살기
+                    bossPatternTimer -= Time.deltaTime;
+                    if (bossPatternTimer <= 0f)
+                    {
+                        bossPatternTimer = 5.2f;
+                        bossPatternIndex++;
+                        if (bossPatternIndex % 2 == 1)
+                        {
+                            StartCoroutine(BossTelegraphDashRoutine(playerPos));
+                        }
+                        else
+                        {
+                            StartCoroutine(BossTelegraphShockwaveRoutine());
+                        }
+                    }
+                }
+            }
             else
             {
                 // 기본 추적 이동
@@ -318,7 +368,7 @@ namespace DopamineCleaner.Enemies
                     currentHP = Mathf.Min(maxHP, currentHP + 6f);
                     transform.localScale *= 1.015f;
                     UpdateNameplate();
-                    Destroy(g.gameObject);
+                    g.gameObject.SetActive(false);
                     break; // 1틱당 1개 흡수
                 }
             }
@@ -567,6 +617,63 @@ namespace DopamineCleaner.Enemies
                 else if (roll < 60)
                     ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 0.4f, GemType.Chest, 0);
             }
+
+            if (enemyType == EnemyType.AuditorKim)
+            {
+                SpawnSeveranceLoot(transform.position);
+                Core.HRAuditManager.Instance?.OnAuditorDefeated();
+            }
+        }
+
+        private void SpawnSeveranceLoot(Vector3 pos)
+        {
+            GameObject boxObj = new GameObject("GoldenSeveranceBox");
+            boxObj.transform.position = pos;
+
+            SpriteRenderer sr = boxObj.AddComponent<SpriteRenderer>();
+            Texture2D tex = CreateSeveranceBoxTex();
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 16);
+            sr.sortingOrder = 22;
+            boxObj.transform.localScale = Vector3.one * 1.6f;
+
+            CircleCollider2D col = boxObj.AddComponent<CircleCollider2D>();
+            col.radius = 1.2f;
+            col.isTrigger = true;
+
+            boxObj.AddComponent<SeveranceBoxTrigger>();
+
+            for (int i = 0; i < 4; i++)
+            {
+                ItemManager.Instance?.SpawnGem(pos + (Vector3)(Random.insideUnitCircle * 1.5f), GemType.Pink, 25);
+            }
+        }
+
+        private Texture2D CreateSeveranceBoxTex()
+        {
+            Texture2D tex = new Texture2D(32, 32);
+            tex.filterMode = FilterMode.Point;
+            Color gold = new Color(1f, 0.85f, 0.2f);
+            Color darkGold = new Color(0.7f, 0.55f, 0.1f);
+            Color ribbon = new Color(0.95f, 0.2f, 0.25f);
+
+            for (int y = 0; y < 32; y++)
+            {
+                for (int x = 0; x < 32; x++)
+                {
+                    if (x >= 6 && x <= 26 && y >= 6 && y <= 26)
+                    {
+                        if (x == 15 || x == 16 || y == 15 || y == 16) tex.SetPixel(x, y, ribbon);
+                        else if (x == 6 || x == 26 || y == 6 || y == 26) tex.SetPixel(x, y, darkGold);
+                        else tex.SetPixel(x, y, gold);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            tex.Apply();
+            return tex;
         }
 
         private void SetVisualColor(Color c)

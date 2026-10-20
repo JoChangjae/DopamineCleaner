@@ -13,7 +13,7 @@ namespace DopamineCleaner.Characters
         TomatoKnight   // 탱커형, 높은 체력 & 부활
     }
 
-    [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
+    [RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D))]
     public class PlayerController : MonoBehaviour
     {
         public static PlayerController Instance { get; private set; }
@@ -81,6 +81,13 @@ namespace DopamineCleaner.Characters
         public bool IsDashing => dashTimer > 0f;
         public bool IsInvincible => invincibleTimer > 0f || IsDashing;
 
+        // 사원 승진 직급 및 런타임 버프 배율
+        public CareerRank CurrentCareerRank { get; private set; } = CareerRank.Intern;
+        public int CareerClearCount { get; private set; } = 0;
+        public string CareerRankTitle { get; private set; } = "수습 사원";
+        public float TotalDamageMultiplier { get; set; } = 1.0f;
+        public float CooldownRateMultiplier { get; set; } = 1.0f;
+
         private void Awake()
         {
             if (Instance == null)
@@ -95,6 +102,14 @@ namespace DopamineCleaner.Characters
             {
                 GameObject dm = new GameObject("[GameDataManager]");
                 dm.AddComponent<Meta.GameDataManager>();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
             }
         }
 
@@ -308,6 +323,11 @@ namespace DopamineCleaner.Characters
 
         public void Heal(float amount)
         {
+            if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.AIPressure))
+            {
+                amount *= 0.5f; // AI 실적 압박 조약: 회복량 50% 삭감
+            }
+
             currentHP = Mathf.Min(maxHP, currentHP + amount);
             OnHealthChanged?.Invoke(currentHP, maxHP);
         }
@@ -328,6 +348,11 @@ namespace DopamineCleaner.Characters
 
         public void AddExp(float exp)
         {
+            if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.NotificationBombard))
+            {
+                exp *= 1.25f; // 스팸 폭격 조약: 경험치 획득량 +25%
+            }
+
             currentExp += exp;
 
             bool leveledUp = false;
@@ -576,6 +601,23 @@ namespace DopamineCleaner.Characters
                     if (itemId == "item_speed_booster") moveSpeed *= 1.15f;
                     if (itemId == "item_revive_policy") hasRevive = true;
                 }
+
+                // 사원 직급 전직(Career Rank) 특전 적용
+                var career = Meta.GameDataManager.Instance.GetCareerData(characterId);
+                CurrentCareerRank = (Meta.CareerRank)career.rankLevel;
+                CareerClearCount = career.clearCount;
+                var rankDef = Meta.CareerDatabase.Get(CurrentCareerRank);
+                CareerRankTitle = rankDef.rankTitle;
+
+                maxHP *= (1f + rankDef.hpBonusPercent);
+                moveSpeed *= (1f + rankDef.spdBonusPercent);
+                TotalDamageMultiplier *= (1f + rankDef.dmgBonusPercent);
+                if (rankDef.cooldownReductionPercent > 0f)
+                {
+                    dashCooldown *= (1f - rankDef.cooldownReductionPercent);
+                    ultimateCooldown *= (1f - rankDef.cooldownReductionPercent);
+                    CooldownRateMultiplier *= (1f + rankDef.cooldownReductionPercent);
+                }
             }
             else
             {
@@ -586,6 +628,11 @@ namespace DopamineCleaner.Characters
                 UltimateSkillName = "전면 대청소";
                 UltimateSkillIcon = "🧹";
                 ultimateCooldown = 16f;
+                CurrentCareerRank = Meta.CareerRank.Intern;
+                CareerClearCount = 0;
+                CareerRankTitle = "수습 사원";
+                TotalDamageMultiplier = 1.0f;
+                CooldownRateMultiplier = 1.0f;
             }
 
             currentHP = maxHP;

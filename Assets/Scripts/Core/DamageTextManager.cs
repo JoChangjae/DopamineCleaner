@@ -145,7 +145,10 @@ namespace DopamineCleaner.Core
             GameObject obj = new GameObject("DamageText");
             obj.transform.SetParent(transform);
             obj.AddComponent<TextMesh>();
-            obj.AddComponent<MeshRenderer>();
+            if (obj.GetComponent<MeshRenderer>() == null)
+            {
+                obj.AddComponent<MeshRenderer>();
+            }
             DamageText dt = obj.AddComponent<DamageText>();
             obj.SetActive(false);
             pool.Enqueue(dt);

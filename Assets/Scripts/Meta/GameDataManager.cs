@@ -46,6 +46,12 @@ namespace DopamineCleaner.Meta
 
         // 최근 5회 작전 기록실
         public List<CombatRecord> combatRecords = new();
+
+        // 사원 승진 및 직급 이력 데이터
+        public List<CharacterCareerData> characterCareers = new();
+
+        // 활성화된 블랙기업 근로 조약 목록
+        public List<string> activePactIds = new();
     }
 
     [Serializable]
@@ -172,11 +178,17 @@ namespace DopamineCleaner.Meta
             if (Profile.combatRecords == null)
                 Profile.combatRecords = new();
 
+            if (Profile.characterCareers == null)
+                Profile.characterCareers = new();
+
+            if (Profile.activePactIds == null)
+                Profile.activePactIds = new();
+
             OnProfileUpdated?.Invoke();
         }
 
         // ==========================================
-        // 캐릭터 관리
+        // 캐릭터 관리 및 승진 (Career Advancement)
         // ==========================================
         public bool SelectCharacter(string charId)
         {
