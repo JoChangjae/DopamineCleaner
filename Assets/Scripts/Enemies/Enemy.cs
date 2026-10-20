@@ -140,7 +140,7 @@ namespace DopamineCleaner.Enemies
                     maxHP = (28f + survivalSec * 0.28f) * stageMult;
                     moveSpeed = Random.Range(1.6f, 2.0f);
                     damage = 10f + (stage - 1) * 3f;
-                    baseExp = 3;
+                    baseExp = 2;
                     SetVisualColor(new Color(0.75f, 0.88f, 0.92f)); // 포근한 하늘빛
                     transform.localScale = Vector3.one * 1.3f;
                     break;
@@ -149,7 +149,7 @@ namespace DopamineCleaner.Enemies
                     maxHP = (45f + survivalSec * 0.40f) * stageMult;
                     moveSpeed = Random.Range(3.4f, 4.2f);
                     damage = 14f + (stage - 1) * 4f;
-                    baseExp = 8;
+                    baseExp = 3;
                     SetVisualColor(new Color(1.0f, 0.76f, 0.82f)); // 핑크
                     transform.localScale = Vector3.one * 1.1f;
                     break;
@@ -158,7 +158,7 @@ namespace DopamineCleaner.Enemies
                     maxHP = (35f + survivalSec * 0.30f) * stageMult;
                     moveSpeed = Random.Range(4.5f, 5.5f);
                     damage = 12f + (stage - 1) * 3f;
-                    baseExp = 6;
+                    baseExp = 3;
                     SetVisualColor(new Color(1.0f, 0.45f, 0.2f)); // 번갯빛 주황
                     transform.localScale = Vector3.one * 0.85f;
                     break;
@@ -167,7 +167,7 @@ namespace DopamineCleaner.Enemies
                     maxHP = (30f + survivalSec * 0.25f) * stageMult;
                     moveSpeed = 2.0f;
                     damage = 10f + (stage - 1) * 3f;
-                    baseExp = 7;
+                    baseExp = 4;
                     SetVisualColor(new Color(0.95f, 0.25f, 0.35f)); // 핏빛 빨강
                     transform.localScale = Vector3.one * 1.0f;
                     break;
@@ -176,7 +176,7 @@ namespace DopamineCleaner.Enemies
                     maxHP = (85f + survivalSec * 0.65f) * stageMult;
                     moveSpeed = 1.35f;
                     damage = 18f + (stage - 1) * 4f;
-                    baseExp = 15;
+                    baseExp = 8;
                     SetVisualColor(new Color(0.7f, 0.45f, 0.95f)); // 심연의 암자색
                     transform.localScale = Vector3.one * 1.55f;
                     break;
@@ -734,7 +734,7 @@ namespace DopamineCleaner.Enemies
 
             for (int i = 0; i < 4; i++)
             {
-                ItemManager.Instance?.SpawnGem(pos + (Vector3)(Random.insideUnitCircle * 1.5f), GemType.Pink, 25);
+                ItemManager.Instance?.SpawnGem(pos + (Vector3)(Random.insideUnitCircle * 1.5f), GemType.Pink, 10);
             }
         }
 

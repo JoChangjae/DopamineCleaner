@@ -53,7 +53,7 @@ namespace DopamineCleaner.Characters
         [Header("경험치 및 레벨업")]
         [SerializeField] private int currentLevel = 1;
         [SerializeField] private float currentExp = 0f;
-        [SerializeField] private float nextLevelExp = 10f;
+        [SerializeField] private float nextLevelExp = 25f;
         [SerializeField] private float magnetRadius = 3.5f;
 
         [Header("뽀모도로 부활 (Angel Revive)")]
@@ -351,6 +351,26 @@ namespace DopamineCleaner.Characters
             }
         }
 
+        public static float CalculateRequiredExp(int level)
+        {
+            if (level <= 1) return 25f;
+            if (level <= 20)
+            {
+                // 1~20 레벨: 25 -> 42 -> 59 -> 76 ... (레벨당 +17, 안정적인 초반 성장 템포)
+                return 25f + (level - 1) * 17f;
+            }
+            else if (level <= 40)
+            {
+                // 21~40 레벨: 365 -> 405 -> 445 ... (레벨당 +40, 빌드 완성기)
+                return 365f + (level - 20) * 40f;
+            }
+            else
+            {
+                // 41 레벨 이후: 1165 -> 1235 ... (레벨당 +70, 후반 극한 도전)
+                return 1165f + (level - 40) * 70f;
+            }
+        }
+
         public void AddExp(float exp)
         {
             if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.IsPactActive(Meta.PactType.NotificationBombard))
@@ -365,7 +385,7 @@ namespace DopamineCleaner.Characters
             {
                 currentExp -= nextLevelExp;
                 currentLevel++;
-                nextLevelExp = Mathf.Round(nextLevelExp * 1.35f + 5f);
+                nextLevelExp = CalculateRequiredExp(currentLevel);
                 leveledUp = true;
                 OnLevelUp?.Invoke(currentLevel);
                 GameManager.Instance?.SetState(GameState.LevelUp);
@@ -653,6 +673,9 @@ namespace DopamineCleaner.Characters
             }
 
             currentHP = maxHP;
+            currentLevel = 1;
+            currentExp = 0f;
+            nextLevelExp = CalculateRequiredExp(1);
         }
         private void TriggerWorkLifeDashBurst()
         {
