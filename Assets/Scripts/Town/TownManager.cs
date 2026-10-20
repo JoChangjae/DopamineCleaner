@@ -42,6 +42,7 @@ namespace DopamineCleaner.Town
 
         private void Awake()
         {
+            Time.timeScale = 1f;
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
         }

@@ -60,8 +60,7 @@ namespace DopamineCleaner.Editor
             // TownManager & Pixel Atmosphere
             TownManager townMgr = canvasObj.AddComponent<TownManager>();
             canvasObj.AddComponent<TownPixelAtmosphere>();
-            canvasObj.AddComponent<CyberTerminalBootUI>();
-            canvasObj.AddComponent<UI.SettingsModalUI>();
+                        canvasObj.AddComponent<UI.SettingsModalUI>();
             canvasObj.AddComponent<UI.EvolutionTreeModalUI>();
 
             // 배경 패널
@@ -222,6 +221,11 @@ namespace DopamineCleaner.Editor
             GameObject famePanel = CreateHallOfFamePanel(contentArea.transform);
             SetPrivateField(townMgr, "hallOfFamePanel", famePanel);
             famePanel.SetActive(false);
+
+            // 7. 사옥 리모델링 패널
+            GameObject remodelPanel = CreateOfficeRemodelPanel(contentArea.transform);
+            SetPrivateField(townMgr, "remodelPanel", remodelPanel);
+            remodelPanel.SetActive(false);
 
             // 7. 정화 구역 출동처 패널
             GameObject dungeonPanel = CreateDungeonSelectPanel(contentArea.transform);
