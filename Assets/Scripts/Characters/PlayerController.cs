@@ -30,6 +30,7 @@ namespace DopamineCleaner.Characters
         [SerializeField] private float dashCooldown = 3.0f;
         private float dashTimer = 0f;
         private float dashCooldownTimer = 0f;
+        private float worklifeSpeedBoostTimer = 0f;
         public bool IsDashReady => dashCooldownTimer <= 0f;
         public float DashRemainingCooldown => Mathf.Max(0f, dashCooldownTimer);
 
@@ -652,6 +653,46 @@ namespace DopamineCleaner.Characters
             }
 
             currentHP = maxHP;
+        }
+        private void TriggerWorkLifeDashBurst()
+        {
+            worklifeSpeedBoostTimer = 2.5f;
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 4.0f);
+            foreach (var hit in hits)
+            {
+                if (hit != null && hit.TryGetComponent<Enemies.Enemy>(out var enemy))
+                {
+                    Vector2 dir = ((Vector2)enemy.transform.position - (Vector2)transform.position).normalized;
+                    enemy.TakeDamage(80f, dir, 2.0f);
+                }
+            }
+            SoundManager.Instance?.Play(SoundEffect.Explosion, 0.45f);
+            PixelParticleManager.Instance?.SpawnNeonPop(transform.position, new Color(1f, 0.45f, 0.1f), 14);
+            CameraFollow.Instance?.Shake(0.15f, 0.2f);
+        }
+
+        private void TriggerImmortalDetoxRevive()
+        {
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 9.0f);
+            foreach (var hit in hits)
+            {
+                if (hit != null && hit.TryGetComponent<Enemies.Enemy>(out var enemy))
+                {
+                    Vector2 dir = ((Vector2)enemy.transform.position - (Vector2)transform.position).normalized;
+                    enemy.TakeDamage(120f, dir, 3.5f);
+                }
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                Vector3 offset = (Vector3)UnityEngine.Random.insideUnitCircle * 2.0f;
+                Items.ItemManager.Instance?.SpawnGem(transform.position + offset, Items.GemType.MegaPink, 50);
+            }
+            Items.ItemManager.Instance?.SpawnGem(transform.position, Items.GemType.Cake, 0);
+
+            SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.8f);
+            PixelParticleManager.Instance?.SpawnNeonPop(transform.position, new Color(0.4f, 1f, 0.8f), 24);
+            CameraFollow.Instance?.Shake(0.3f, 0.4f);
         }
     }
 }

@@ -121,4 +121,62 @@ namespace DopamineCleaner.Meta
             return new List<OfficeFacilityDefinition>(facilities.Values);
         }
     }
+
+    [Serializable]
+    public class OfficeSynergySet
+    {
+        public string id;
+        public string name;
+        public string icon;
+        public string requiredFacility1;
+        public int requiredLevel1;
+        public string requiredFacility2;
+        public int requiredLevel2;
+        public string effectDescription;
+
+        public OfficeSynergySet(string id, string name, string icon, string f1, int l1, string f2, int l2, string desc)
+        {
+            this.id = id;
+            this.name = name;
+            this.icon = icon;
+            this.requiredFacility1 = f1;
+            this.requiredLevel1 = l1;
+            this.requiredFacility2 = f2;
+            this.requiredLevel2 = l2;
+            this.effectDescription = desc;
+        }
+
+        public bool IsActive(Func<string, int> getLevelFunc)
+        {
+            return getLevelFunc(requiredFacility1) >= requiredLevel1 &&
+                   getLevelFunc(requiredFacility2) >= requiredLevel2;
+        }
+    }
+
+    public static class OfficeSynergyDatabase
+    {
+        private static readonly List<OfficeSynergySet> sets = new();
+
+        static OfficeSynergyDatabase()
+        {
+            sets.Add(new OfficeSynergySet(
+                "syn_overwork", "야근 전사 세트", "☕",
+                "fac_massage_chair", 3, "fac_espresso_bar", 3,
+                "피버 타임 지속 시간 +3.0초 & 피버 중 주변 5m 적들에게 1초마다 160 DMG 감전 펄스 방출"));
+
+            sets.Add(new OfficeSynergySet(
+                "syn_worklife", "MZ 워라밸 세트", "🏃",
+                "fac_standing_desk", 3, "fac_arcade_machine", 3,
+                "대시 후 2.5초간 이동속도 +30% & 대시 궤적에 화염 폭발 (80 DMG + 넉백)"));
+
+            sets.Add(new OfficeSynergySet(
+                "syn_immortal", "불멸의 디톡스 세트", "💖",
+                "fac_sleep_capsule", 2, "fac_neon_aquarium", 3,
+                "사망 부활 시 화면 전체 적 4초간 완전 기절 & 황금 보석 5개 즉시 폭발 생성"));
+        }
+
+        public static List<OfficeSynergySet> GetAll() => sets;
+
+        public static OfficeSynergySet Get(string id) => sets.Find(s => s.id == id);
+    }
 }

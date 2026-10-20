@@ -21,6 +21,7 @@ namespace DopamineCleaner.Core
         private float comboTimer = 0f;
 
         private float feverTimer = 0f;
+        private float overworkPulseTimer = 0f;
 
         public float CurrentFever => currentFever;
         public float MaxFever => maxFever;
@@ -160,6 +161,28 @@ namespace DopamineCleaner.Core
             if (PlayerController.Instance != null)
             {
                 PlayerController.Instance.UpgradeMagnet(-15f);
+            }
+        }
+        private void TriggerOverworkShockwave()
+        {
+            Vector3 center = PlayerController.Instance != null ? PlayerController.Instance.transform.position : Vector3.zero;
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(center, 6.5f);
+            int hitCount = 0;
+            foreach (var col in colliders)
+            {
+                if (col != null && col.TryGetComponent<Enemies.Enemy>(out var enemy))
+                {
+                    Vector2 dir = ((Vector2)enemy.transform.position - (Vector2)center).normalized;
+                    enemy.TakeDamage(160f, dir, 2.0f);
+                    hitCount++;
+                }
+            }
+
+            if (hitCount > 0)
+            {
+                SoundManager.Instance?.Play(SoundEffect.Laser, 0.5f);
+                CameraFollow.Instance?.Shake(0.18f, 0.2f);
+                PixelParticleManager.Instance?.SpawnNeonPop(center, new Color(0.3f, 0.9f, 1f), 12);
             }
         }
     }

@@ -54,6 +54,7 @@ namespace DopamineCleaner.Meta
         public List<string> unlockedCompanionIds = new() { "pet_dog", "pet_drone" };
         public List<string> companionTiers = new(); // e.g. "pet_dog:1"
         public List<string> officeFacilities = new(); // e.g. "fac_massage_chair:1"
+        public long lastWelfareClaimTimestamp = 0;
     }
 
     [Serializable]
@@ -381,7 +382,7 @@ namespace DopamineCleaner.Meta
             return total;
         }
 
-        public string GetOfficeTierTitle(int totalLevel)
+                public string GetOfficeTierTitle(int totalLevel)
         {
             if (totalLevel >= 25) return "🏆 유니콘 초격차 스마트 본부";
             if (totalLevel >= 18) return "🌟 글로벌 혁신 실리콘밸리 사옥";
@@ -389,6 +390,73 @@ namespace DopamineCleaner.Meta
             if (totalLevel >= 6) return "☕ 쾌적한 스타트업 오피스";
             if (totalLevel >= 1) return "📦 소규모 공유 오피스";
             return "🏚️ 낡은 지하 임시 본부";
+        }
+
+        // ==========================================
+        // 방치형 사내 복지 기금 (Idle Welfare Fund)
+        // ==========================================
+        public int GetPendingWelfareGold()
+        {
+            if (Profile == null) return 0;
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (Profile.lastWelfareClaimTimestamp <= 0)
+            {
+                Profile.lastWelfareClaimTimestamp = now;
+                return 0;
+            }
+            long elapsedSec = Math.Max(0L, now - Profile.lastWelfareClaimTimestamp);
+            int minutes = (int)(elapsedSec / 60);
+            int totalDecoLv = GetTotalOfficeDecoLevel();
+            int goldPerMin = 10 + totalDecoLv * 6;
+            int maxCap = 2500 + totalDecoLv * 350;
+            return Mathf.Min(maxCap, minutes * goldPerMin);
+        }
+
+        public int GetPendingWelfareKarma()
+        {
+            if (Profile == null) return 0;
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (Profile.lastWelfareClaimTimestamp <= 0) return 0;
+            long elapsedSec = Math.Max(0L, now - Profile.lastWelfareClaimTimestamp);
+            int intervals = (int)(elapsedSec / 1800);
+            int totalDecoLv = GetTotalOfficeDecoLevel();
+            if (totalDecoLv < 5) return 0;
+            int maxCap = 2 + totalDecoLv / 4;
+            return Mathf.Min(maxCap, intervals);
+        }
+
+        public bool ClaimWelfareFund(out int claimedGold, out int claimedKarma)
+        {
+            claimedGold = GetPendingWelfareGold();
+            claimedKarma = GetPendingWelfareKarma();
+            if (claimedGold <= 0 && claimedKarma <= 0) return false;
+
+            Profile.gold += claimedGold;
+            Profile.karmaPoints += claimedKarma;
+            Profile.lastWelfareClaimTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            SaveProfile();
+            OnProfileUpdated?.Invoke();
+            return true;
+        }
+
+        // ==========================================
+        // 특수 복지 가구 세트 시너지 (Facility Synergies)
+        // ==========================================
+        public bool IsSynergyActive(string synergyId)
+        {
+            var set = OfficeSynergyDatabase.Get(synergyId);
+            return set != null && set.IsActive(GetFacilityLevel);
+        }
+
+        public List<OfficeSynergySet> GetActiveSynergies()
+        {
+            List<OfficeSynergySet> active = new();
+            foreach (var s in OfficeSynergyDatabase.GetAll())
+            {
+                if (s.IsActive(GetFacilityLevel))
+                    active.Add(s);
+            }
+            return active;
         }
 
         // ==========================================

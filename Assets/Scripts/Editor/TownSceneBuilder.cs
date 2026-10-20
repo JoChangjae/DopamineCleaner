@@ -473,32 +473,83 @@ namespace DopamineCleaner.Editor
 
             var ui = panel.AddComponent<Town.OfficeRemodelUI>();
 
-            // 상단 상태 및 복지 등급 바
-            Text headerTxt = CreateText("OfficeHeader", panel.transform, "🏢 낡은 지하 임시 본부 (복지 총합 Lv.0)  |  💰 보유 골드: 0 G", 24, TextAnchor.MiddleCenter, new Vector2(0, 360), new Vector2(1400, 35));
+            // 1. 상단 상태 및 복지 등급 바
+            Text headerTxt = CreateText("OfficeHeader", panel.transform, "🏢 낡은 지하 임시 본부 (복지 총합 Lv.0)  |  💰 보유 골드: 0 G", 23, TextAnchor.MiddleCenter, new Vector2(0, 390), new Vector2(1500, 32));
             headerTxt.color = new Color(1f, 0.9f, 0.5f);
             headerTxt.fontStyle = FontStyle.Bold;
 
-            // 종합 버프 요약 바
-            Text buffSummaryTxt = CreateText("BuffSummary", panel.transform, "현재 적용된 사옥 복지 버프 없음", 17, TextAnchor.MiddleCenter, new Vector2(0, 320), new Vector2(1400, 30));
+            // 2. 종합 버프 요약 바
+            Text buffSummaryTxt = CreateText("BuffSummary", panel.transform, "현재 적용된 사옥 복지 버프 없음", 16, TextAnchor.MiddleCenter, new Vector2(0, 358), new Vector2(1500, 26));
             buffSummaryTxt.color = new Color(0.85f, 0.9f, 1f);
 
-            // 가구 카드 그리드 컨테이너
+            // 3. 방치형 복지 기금 보관소 바 (Vault Bar)
+            GameObject vaultBar = CreateUIObject("WelfareVaultBar", panel.transform);
+            RectTransform vRt = vaultBar.GetComponent<RectTransform>();
+            vRt.anchorMin = new Vector2(0.5f, 0.5f);
+            vRt.anchorMax = new Vector2(0.5f, 0.5f);
+            vRt.sizeDelta = new Vector2(1500, 50);
+            vRt.anchoredPosition = new Vector2(0, 305);
+            Image vBg = vaultBar.AddComponent<Image>();
+            vBg.color = new Color(0.14f, 0.16f, 0.22f, 0.95f);
+
+            Text vaultTxt = CreateText("VaultInfo", vaultBar.transform, "🎁 [사내 복지 기금] 미수령 기금: 0 G", 16, TextAnchor.MiddleLeft, new Vector2(25, 0), new Vector2(980, 40));
+            vaultTxt.color = Color.white;
+
+            Button claimBtn = CreateButton("ClaimBtn", vaultBar.transform, "📦 복지 기금 적립 대기 중", 15, new Color(0.2f, 0.6f, 0.45f));
+            RectTransform cbRt = claimBtn.GetComponent<RectTransform>();
+            cbRt.anchorMin = new Vector2(1f, 0.5f);
+            cbRt.anchorMax = new Vector2(1f, 0.5f);
+            cbRt.pivot = new Vector2(1f, 0.5f);
+            cbRt.sizeDelta = new Vector2(340, 38);
+            cbRt.anchoredPosition = new Vector2(-15, 0);
+            Text claimBtnTxt = claimBtn.GetComponentInChildren<Text>();
+
+            // 4. 복지 세트 시너지 바
+            GameObject synergyBar = CreateUIObject("SynergyBar", panel.transform);
+            RectTransform sRt = synergyBar.GetComponent<RectTransform>();
+            sRt.anchorMin = new Vector2(0.5f, 0.5f);
+            sRt.anchorMax = new Vector2(0.5f, 0.5f);
+            sRt.sizeDelta = new Vector2(1500, 44);
+            sRt.anchoredPosition = new Vector2(0, 246);
+
+            HorizontalLayoutGroup sHlg = synergyBar.AddComponent<HorizontalLayoutGroup>();
+            sHlg.spacing = 20;
+            sHlg.childAlignment = TextAnchor.MiddleCenter;
+            sHlg.childControlWidth = true;
+            sHlg.childControlHeight = true;
+
+            // 5. 사옥 디오라마 쇼케이스 (HQ Diorama Showcase)
+            GameObject dioramaObj = CreateUIObject("OfficeDiorama", panel.transform);
+            RectTransform dRt = dioramaObj.GetComponent<RectTransform>();
+            dRt.anchorMin = new Vector2(0.5f, 0.5f);
+            dRt.anchorMax = new Vector2(0.5f, 0.5f);
+            dRt.sizeDelta = new Vector2(1500, 125);
+            dRt.anchoredPosition = new Vector2(0, 150);
+
+            var diorama = dioramaObj.AddComponent<Town.TownOfficeDiorama>();
+
+            // 6. 가구 카드 그리드 컨테이너
             GameObject container = CreateUIObject("FacilityGrid", panel.transform);
             RectTransform cntRt = container.GetComponent<RectTransform>();
             cntRt.anchorMin = new Vector2(0.5f, 0.5f);
             cntRt.anchorMax = new Vector2(0.5f, 0.5f);
-            cntRt.sizeDelta = new Vector2(1540, 520);
-            cntRt.anchoredPosition = new Vector2(0, -35);
+            cntRt.sizeDelta = new Vector2(1540, 470);
+            cntRt.anchoredPosition = new Vector2(0, -170);
 
             GridLayoutGroup glg = container.AddComponent<GridLayoutGroup>();
-            glg.cellSize = new Vector2(490, 240);
-            glg.spacing = new Vector2(25, 20);
+            glg.cellSize = new Vector2(490, 225);
+            glg.spacing = new Vector2(25, 16);
             glg.childAlignment = TextAnchor.MiddleCenter;
             glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             glg.constraintCount = 3;
 
             SetPrivateField(ui, "headerStatusText", headerTxt);
             SetPrivateField(ui, "buffSummaryText", buffSummaryTxt);
+            SetPrivateField(ui, "welfareFundInfoText", vaultTxt);
+            SetPrivateField(ui, "welfareClaimBtn", claimBtn);
+            SetPrivateField(ui, "welfareClaimBtnText", claimBtnTxt);
+            SetPrivateField(ui, "synergyContainer", synergyBar.transform);
+            SetPrivateField(ui, "officeDiorama", diorama);
             SetPrivateField(ui, "cardContainer", container.transform);
 
             return panel;

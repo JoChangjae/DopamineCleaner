@@ -145,6 +145,9 @@ namespace DopamineCleaner.Editor
             // 38. 🏢 실리콘밸리형 본부 사옥 리모델링 & 영구 복지 가구 버프 검증
             TestOfficeRemodelAndFacilityBuffs();
 
+            // 39. 🖼️ 본부 사옥 디오라마, 방치형 복지 기금 및 세트 시너지 검증
+            TestOfficeDioramaAndSynergyAndWelfare();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -1570,6 +1573,74 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "사옥 리모델링 및 복지 가구 테스트 예외", ex.ToString());
+            }
+        }
+
+                private static void TestOfficeDioramaAndSynergyAndWelfare()
+        {
+            Debug.Log("--- 39. 🖼️ 본부 사옥 디오라마, 방치형 복지 기금 및 세트 시너지 검증 ---");
+            try
+            {
+                // 1. 세트 시너지 데이터베이스 검증 (3종)
+                var synergies = Meta.OfficeSynergyDatabase.GetAll();
+                Assert(synergies != null && synergies.Count == 3, "특수 복지 가구 세트 시너지 3종(야근전사/워라밸/불사디톡스) DB 검증 성공");
+
+                if (Meta.GameDataManager.Instance == null)
+                {
+                    GameObject gdmObj = new GameObject("[TestGDM_Synergy]");
+                    var gdm = gdmObj.AddComponent<Meta.GameDataManager>();
+                    SetField(typeof(Meta.GameDataManager), "Instance", gdm);
+                }
+
+                // 2. 세트 시너지 활성화 판정 검증
+                bool synActiveBefore = Meta.GameDataManager.Instance.IsSynergyActive("syn_worklife");
+                // 아케이드 & 모션데스크를 Lv.3으로 강제 설정
+                Meta.GameDataManager.Instance.Profile.officeFacilities.RemoveAll(x => x.StartsWith("fac_arcade_machine:") || x.StartsWith("fac_standing_desk:"));
+                Meta.GameDataManager.Instance.Profile.officeFacilities.Add("fac_arcade_machine:3");
+                Meta.GameDataManager.Instance.Profile.officeFacilities.Add("fac_standing_desk:3");
+                bool synActiveAfter = Meta.GameDataManager.Instance.IsSynergyActive("syn_worklife");
+                Assert(synActiveAfter, "워라밸 쾌속 세트(오락기 Lv.3 + 모션데스크 Lv.3) 시너지 활성화 검증 성공");
+
+                // 3. 방치형 복지 기금 누적 및 수령 검증
+                Meta.GameDataManager.Instance.Profile.lastWelfareClaimTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3600; // 1시간 경과 모의
+                int pendingGold = Meta.GameDataManager.Instance.GetPendingWelfareGold();
+                int pendingKarma = Meta.GameDataManager.Instance.GetPendingWelfareKarma();
+                Assert(pendingGold > 0, $"1시간 경과 후 방치형 복지 기금 누적 확인: {pendingGold:N0} G (카르마: {pendingKarma} P)");
+
+                int goldBefore = Meta.GameDataManager.Instance.Profile.gold;
+                bool claimSuccess = Meta.GameDataManager.Instance.ClaimWelfareFund(out int cGold, out int cKarma);
+                Assert(claimSuccess && Meta.GameDataManager.Instance.Profile.gold == goldBefore + cGold, "사내 복지 기금 일괄 수령 및 보유 골드 정상 반영 성공");
+                Assert(Meta.GameDataManager.Instance.GetPendingWelfareGold() == 0, "기금 수령 후 미수령 골드 0G 초기화 검증 성공");
+
+                // 4. 사옥 디오라마 (TownOfficeDiorama) 슬롯 및 픽셀 렌더링 검증
+                GameObject dioramaCanvas = new GameObject("[TestDioramaCanvas]");
+                dioramaCanvas.AddComponent<Canvas>();
+                var diorama = dioramaCanvas.AddComponent<Town.TownOfficeDiorama>();
+                diorama.BuildDioramaSlots();
+                diorama.RefreshDiorama();
+                Assert(dioramaCanvas.transform.childCount == 6, "TownOfficeDiorama 6종 복지 가구 실시간 픽셀 도트 슬롯 생성 및 렌더링 검증 성공");
+
+                // 5. OfficeRemodelUI 신규 요소 갱신 검증
+                GameObject panelObj = new GameObject("TestRemodelPanel_Upgrade");
+                panelObj.transform.SetParent(dioramaCanvas.transform);
+                var remodelUI = panelObj.AddComponent<Town.OfficeRemodelUI>();
+                var synergyContainer = new GameObject("SynergyContainer");
+                synergyContainer.transform.SetParent(panelObj.transform);
+                var cardContainer = new GameObject("CardContainer");
+                cardContainer.transform.SetParent(panelObj.transform);
+
+                SetField(remodelUI, "synergyContainer", synergyContainer.transform);
+                SetField(remodelUI, "cardContainer", cardContainer.transform);
+                SetField(remodelUI, "officeDiorama", diorama);
+
+                remodelUI.RefreshUI();
+                Assert(synergyContainer.transform.childCount == 3, "OfficeRemodelUI 내 3대 세트 시너지 상태 배지 정상 렌더링 검증 성공");
+
+                UnityEngine.Object.DestroyImmediate(dioramaCanvas);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "본부 사옥 디오라마, 복지 기금 및 세트 시너지 테스트 예외", ex.ToString());
             }
         }
 
