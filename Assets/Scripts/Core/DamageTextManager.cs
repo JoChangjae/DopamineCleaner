@@ -102,20 +102,30 @@ namespace DopamineCleaner.Core
 
     public class DamageTextManager : MonoBehaviour
     {
-        public static DamageTextManager Instance { get; private set; }
+        private static DamageTextManager instance;
+        public static DamageTextManager Instance
+        {
+            get
+            {
+                if (instance == null) instance = FindAnyObjectByType<DamageTextManager>();
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         private readonly Queue<DamageText> pool = new();
         private const int InitialPoolSize = 30;
 
         private void Awake()
         {
-            if (Instance == null)
+            if (instance == null || instance == this)
             {
-                Instance = this;
+                instance = this;
             }
             else
             {
-                Destroy(gameObject);
+                if (Application.isPlaying) Destroy(gameObject);
+                else DestroyImmediate(gameObject);
                 return;
             }
 
@@ -123,6 +133,11 @@ namespace DopamineCleaner.Core
             {
                 CreateNewInstance();
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this) instance = null;
         }
 
         private DamageText CreateNewInstance()

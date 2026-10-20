@@ -118,6 +118,21 @@ namespace DopamineCleaner.Editor
             // 29. 🎰 도파민 돌연변이 룰렛 & 👑 명예의 전당 TOP 10 랭킹 검증
             TestMutationRouletteAndHallOfFame();
 
+            // 30. ⚙️ 환경설정 모달 & 해상도 & 사운드 테스트
+            TestSettingsModalAndResolution();
+
+            // 31. 🚗 맵별 다이내믹 환경 재해 & 필드 기믹 (트럭/커피/세단기)
+            TestStageHazards();
+
+            // 32. 🎙️ 신규 요원 2종 (스트리머, 의사) & 나노 쉴드 검증
+            TestNewCharactersAndNanoShield();
+
+            // 33. 📸 디톡스 검진표 SNS 카드 렌더링 & PNG 캡처 검증
+            TestDetoxCardExporter();
+
+            // 34. 🏙️ 본부(TownScene) 사이버펑크 도트 그래픽 배경 & 파티클 검증
+            TestTownPixelAtmosphere();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -867,6 +882,9 @@ namespace DopamineCleaner.Editor
                 UnityEngine.Object.DestroyImmediate(hsObj);
                 UnityEngine.Object.DestroyImmediate(dtmObj);
                 UnityEngine.Object.DestroyImmediate(enemyObj);
+
+                SetField(typeof(DamageTextManager), "instance", null);
+                SetField(typeof(HitStopManager), "instance", null);
             }
             catch (Exception ex)
             {
@@ -1213,6 +1231,138 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "돌연변이 룰렛 및 명예의 전당 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestSettingsModalAndResolution()
+        {
+            Debug.Log("--- 30. ⚙️ 환경설정 모달 & 해상도 & 사운드 테스트 ---");
+            try
+            {
+                GameObject canvasObj = new GameObject("[TestCanvas_Settings]");
+                canvasObj.AddComponent<Canvas>();
+                SettingsModalUI modal = canvasObj.AddComponent<SettingsModalUI>();
+
+                modal.Open();
+                Assert(modal != null, "SettingsModalUI 동적 빌드 및 Open() 호출 성공");
+
+                DisplayModeManager.Instance?.SetWindowResolution(1600, 900);
+                Assert(DisplayModeManager.Instance.WindowWidth == 1600 && DisplayModeManager.Instance.WindowHeight == 900, "1600x900 창모드 해상도 즉시 적용 확인");
+
+                DisplayModeManager.Instance?.SetWindowResolution(1280, 720);
+                Assert(DisplayModeManager.Instance.WindowWidth == 1280, "1280x720 창모드 해상도 전환 확인");
+
+                modal.Close();
+                Assert(true, "SettingsModalUI 닫기 성공");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "환경설정 모달 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestStageHazards()
+        {
+            Debug.Log("--- 31. 🚗 맵별 다이내믹 환경 재해 & 필드 기믹 검증 ---");
+            try
+            {
+                GameObject hazObj = new GameObject("[TestHazardMgr]");
+                StageHazardManager shm = hazObj.AddComponent<StageHazardManager>();
+
+                Assert(shm != null && StageHazardManager.Instance != null, "StageHazardManager 인스턴스 초기화 확인");
+
+                // 고속도로 맵 트럭 스프라이트 생성 검증
+                var method = typeof(StageHazardManager).GetMethod("CreatePixelTruckSprite", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Sprite truckSprite = (Sprite)method?.Invoke(shm, null);
+                Assert(truckSprite != null && truckSprite.texture != null, "광속 사이버 트럭 픽셀 스프라이트 절차적 생성 확인");
+
+                UnityEngine.Object.DestroyImmediate(hazObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "스테이지 기믹 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestNewCharactersAndNanoShield()
+        {
+            Debug.Log("--- 32. 🎙️ 신규 요원 2종 (스트리머, 의사) & 나노 쉴드 검증 ---");
+            try
+            {
+                var streamer = CharacterDatabase.Get("char_streamer");
+                Assert(streamer != null && streamer.id == "char_streamer" && streamer.name == "유나", "인기 라이브 스트리머(유나) DB 등록 확인");
+                Assert(streamer.baseMagnetRadius >= 5.0f, "스트리머 자석 흡수 범위 5.0m 확인");
+
+                var doctor = CharacterDatabase.Get("char_doctor");
+                Assert(doctor != null && doctor.id == "char_doctor" && doctor.name == "오원장", "정신건강의학과 전문의(오원장) DB 등록 확인");
+
+                // 플레이어 컨트롤러 나노 쉴드 테스트
+                GameObject pcObj = new GameObject("[TestPlayer_Doctor]");
+                pcObj.AddComponent<Rigidbody2D>();
+                pcObj.AddComponent<CircleCollider2D>();
+                PlayerController pc = pcObj.AddComponent<PlayerController>();
+
+                // char_doctor로 초기화
+                SetField(pc, "characterId", "char_doctor");
+                SetField(pc, "hasNanoShield", true);
+                float curHp = pc.CurrentHP;
+
+                // 피격 시 나노 쉴드가 흡수하여 체력 감소 0 확인
+                pc.TakeDamage(30f);
+                Assert(Mathf.Approximately(pc.CurrentHP, curHp), "정신과 전문의 나노 쉴드: 30 피해 100% 무효화 흡수 확인");
+                bool shieldRemaining = (bool)typeof(PlayerController).GetField("hasNanoShield", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(pc);
+                Assert(!shieldRemaining, "나노 쉴드 피격 후 정상 소모 확인");
+
+                UnityEngine.Object.DestroyImmediate(pcObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "신규 캐릭터 및 나노 쉴드 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestDetoxCardExporter()
+        {
+            Debug.Log("--- 33. 📸 디톡스 검진표 SNS 카드 렌더링 & PNG 캡처 검증 ---");
+            try
+            {
+                string savedPath = DetoxCardExporter.ExportDetoxReportCard();
+                Assert(!string.IsNullOrEmpty(savedPath), $"디톡스 검진표 카드 PNG 렌더링 및 저장 성공 (경로: {savedPath})");
+                Assert(System.IO.File.Exists(savedPath), "생성된 PNG 파일의 디스크 실존 확인");
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "디톡스 검진표 익스포터 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestTownPixelAtmosphere()
+        {
+            Debug.Log("--- 34. 🏙️ 본부(TownScene) 사이버펑크 도트 그래픽 배경 & 파티클 검증 ---");
+            try
+            {
+                GameObject canvasObj = new GameObject("[TestCanvas_Atmo]");
+                canvasObj.AddComponent<Canvas>();
+                TownPixelAtmosphere atmo = canvasObj.AddComponent<TownPixelAtmosphere>();
+
+                Assert(atmo != null, "TownPixelAtmosphere 컴포넌트 생성 및 실행 성공");
+
+                // 텍스처 생성 메서드 검증
+                var methodSky = typeof(TownPixelAtmosphere).GetMethod("GenerateCitySkylineTexture", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Texture2D skyTex = (Texture2D)methodSky?.Invoke(atmo, new object[] { 128, 64 });
+                Assert(skyTex != null && skyTex.filterMode == FilterMode.Point, "사이버펑크 네온 빌딩 스카이라인 픽셀 텍스처 생성 확인");
+
+                var methodGrid = typeof(TownPixelAtmosphere).GetMethod("GenerateCyberGridTexture", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                Texture2D gridTex = (Texture2D)methodGrid?.Invoke(atmo, new object[] { 64, 32 });
+                Assert(gridTex != null && gridTex.filterMode == FilterMode.Point, "신스웨이브 원근 네온 그리드 텍스처 생성 확인");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "사이버펑크 도트 배경 연출 테스트 예외", ex.ToString());
             }
         }
 

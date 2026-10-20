@@ -19,6 +19,10 @@ namespace DopamineCleaner.Meta
         // 사물함 창고 (영구 보관 슬롯, 최대 24칸)
         public List<string> stashStorage = new() { "artifact_golden_calc", "item_speed_booster" };
 
+        // 동반자 펫 / 전술 보조 드론
+        public string equippedCompanionId = "pet_drone";
+        public List<string> unlockedCompanionIds = new() { "pet_dog", "pet_drone" };
+
         // 영구 계약 특약 레벨
         public int contractHPLevel = 0;
         public int contractSpeedLevel = 0;
@@ -197,6 +201,32 @@ namespace DopamineCleaner.Meta
                 Profile.unlockedCharacterIds.Add(charId);
                 Profile.selectedCharacterId = charId;
                 SaveProfile();
+                return true;
+            }
+            return false;
+        }
+
+        public void SelectCompanion(string companionId)
+        {
+            if (Profile.unlockedCompanionIds == null) Profile.unlockedCompanionIds = new() { "pet_dog", "pet_drone" };
+            if (Profile.unlockedCompanionIds.Contains(companionId))
+            {
+                Profile.equippedCompanionId = companionId;
+                SaveProfile();
+                OnProfileUpdated?.Invoke();
+            }
+        }
+
+        public bool UnlockCompanion(string companionId, int goldCost)
+        {
+            if (Profile.unlockedCompanionIds == null) Profile.unlockedCompanionIds = new() { "pet_dog", "pet_drone" };
+            if (Profile.gold >= goldCost && !Profile.unlockedCompanionIds.Contains(companionId))
+            {
+                Profile.gold -= goldCost;
+                Profile.unlockedCompanionIds.Add(companionId);
+                Profile.equippedCompanionId = companionId;
+                SaveProfile();
+                OnProfileUpdated?.Invoke();
                 return true;
             }
             return false;

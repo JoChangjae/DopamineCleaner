@@ -68,6 +68,18 @@ namespace DopamineCleaner.Meta
                 120f, 5.5f, 1.4f, 4.0f,
                 "도파민 제어: 시작부터 위성 궤도 1개를 기본 장착하고 출동합니다.",
                 3000, 5, false));
+
+            Register(new CharacterDefinition(
+                "char_streamer", "유나", "인기 라이브 스트리머", "🎙️",
+                85f, 6.2f, 1.1f, 5.0f,
+                "인기 폭발: 자석 흡수 범위가 2배이며, 피버 게이지 획득량이 +50% 증가합니다.",
+                1200, 1, false));
+
+            Register(new CharacterDefinition(
+                "char_doctor", "오원장", "정신건강의학과 전문의", "🩺",
+                135f, 4.8f, 1.05f, 3.0f,
+                "멘탈 주치의: 15초마다 나노 쉴드(피격 1회 무효화)를 자동 충전하며, 지속 치유를 받습니다.",
+                2200, 3, false));
         }
 
         private static void Register(CharacterDefinition c)

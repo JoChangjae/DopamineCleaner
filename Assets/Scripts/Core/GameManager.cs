@@ -125,10 +125,42 @@ namespace DopamineCleaner.Core
             isEndlessMode = false;
             endlessPromptShown = false;
 
+            EnsureCompanionPet();
+            EnsureStageHazards();
+
             Time.timeScale = 1f;
             SetState(GameState.Playing);
             OnKillsUpdated?.Invoke(stageKills, totalKills);
             OnStageChanged?.Invoke(currentStage);
+        }
+
+        private void EnsureCompanionPet()
+        {
+            if (Characters.CompanionPet.Instance == null && Characters.PlayerController.Instance != null)
+            {
+                GameObject petObj = new GameObject("TacticalCompanionPet");
+                petObj.transform.position = Characters.PlayerController.Instance.transform.position + new Vector3(-1f, 1f, 0f);
+                var pet = petObj.AddComponent<Characters.CompanionPet>();
+
+                Characters.CompanionType cType = Characters.CompanionType.PomodoroDrone;
+                if (Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.Profile != null)
+                {
+                    string compId = Meta.GameDataManager.Instance.Profile.equippedCompanionId;
+                    if (compId == "pet_dog") cType = Characters.CompanionType.HappyDog;
+                    else if (compId == "pet_cat") cType = Characters.CompanionType.NapCat;
+                    else if (compId == "pet_drone") cType = Characters.CompanionType.PomodoroDrone;
+                }
+                pet.Initialize(cType);
+            }
+        }
+
+        private void EnsureStageHazards()
+        {
+            if (StageHazardManager.Instance == null)
+            {
+                GameObject hazObj = new GameObject("[StageHazardManager]");
+                hazObj.AddComponent<StageHazardManager>();
+            }
         }
 
         public void SetState(GameState newState)

@@ -106,6 +106,17 @@ namespace DopamineCleaner.Core
             }
         }
 
+        public void AddFever(float amount)
+        {
+            if (isFever) return;
+            currentFever = Mathf.Min(maxFever, currentFever + amount);
+            OnFeverGaugeChanged?.Invoke(currentFever, maxFever);
+            if (currentFever >= maxFever)
+            {
+                ActivateFever();
+            }
+        }
+
         public void ActivateFever()
         {
             if (isFever) return;

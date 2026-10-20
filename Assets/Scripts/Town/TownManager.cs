@@ -35,6 +35,9 @@ namespace DopamineCleaner.Town
         [SerializeField] private Button windowModeBtn;
         [SerializeField] private Text windowModeBtnText;
 
+        [Header("환경설정 버튼")]
+        [SerializeField] private Button settingsBtn;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -64,11 +67,28 @@ namespace DopamineCleaner.Town
             {
                 windowModeBtn.onClick.AddListener(OnWindowModeToggleClicked);
             }
+            if (settingsBtn != null)
+            {
+                settingsBtn.onClick.AddListener(OnSettingsClicked);
+            }
             Core.DisplayModeManager.OnDisplayModeChanged += HandleDisplayModeChanged;
             UpdateWindowModeText();
 
             RefreshHeader();
             SwitchTab(0); // 기본 탭: 캐릭터 선택소
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                OnSettingsClicked();
+            }
+        }
+
+        public void OnSettingsClicked()
+        {
+            UI.SettingsModalUI.OpenSettings();
         }
 
         private void OnDestroy()

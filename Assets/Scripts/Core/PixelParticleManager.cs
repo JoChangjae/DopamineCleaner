@@ -166,6 +166,11 @@ namespace DopamineCleaner.Core
             }
         }
 
+        public void SpawnNeonPop(Vector3 position, Color themeColor, int count = 12)
+        {
+            SpawnDeathPop(position, themeColor, count);
+        }
+
         /// <summary>
         /// 탄환 피격 시 미세 네온 스파크 분사
         /// </summary>

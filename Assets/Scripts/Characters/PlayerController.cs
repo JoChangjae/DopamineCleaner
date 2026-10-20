@@ -57,6 +57,10 @@ namespace DopamineCleaner.Characters
         [SerializeField] private bool hasRevive = true;
         [SerializeField] private bool reviveUsed = false;
 
+        [Header("정신과 전문의 나노 쉴드")]
+        private bool hasNanoShield = false;
+        private float nanoShieldTimer = 15f;
+
         [Header("컴포넌트 캐싱")]
         private Rigidbody2D rb;
         private SpriteRenderer spriteRenderer;
@@ -186,6 +190,19 @@ namespace DopamineCleaner.Characters
             {
                 TryUseFirstAid();
             }
+
+            // 5. 정신과 전문의(char_doctor) 나노 쉴드 자동 재충전
+            if (characterId == "char_doctor" && !hasNanoShield)
+            {
+                nanoShieldTimer -= Time.deltaTime;
+                if (nanoShieldTimer <= 0f)
+                {
+                    hasNanoShield = true;
+                    nanoShieldTimer = 15f;
+                    DamageTextManager.Instance?.SpawnCustomText("🛡️ 나노 쉴드 충전 완료!", transform.position + Vector3.up * 0.8f, new Color(0.3f, 0.95f, 1f));
+                    SoundManager.Instance?.Play(SoundEffect.GemCollect, 0.6f);
+                }
+            }
         }
 
         private void FixedUpdate()
@@ -238,6 +255,17 @@ namespace DopamineCleaner.Characters
         public void TakeDamage(float amount)
         {
             if (IsInvincible || currentHP <= 0f) return;
+
+            // 정신과 전문의 나노 쉴드 1회 흡수
+            if (hasNanoShield)
+            {
+                hasNanoShield = false;
+                nanoShieldTimer = 15f;
+                invincibleTimer = 0.5f;
+                DamageTextManager.Instance?.SpawnCustomText("🛡️ 나노 쉴드 방어! (피해 무효)", transform.position + Vector3.up * 0.8f, new Color(0.3f, 0.95f, 1f));
+                SoundManager.Instance?.Play(SoundEffect.Whirlwind, 0.5f);
+                return;
+            }
 
             // 피버 모드 시 피격 피해 60% 경감
             if (FeverManager.Instance != null && FeverManager.Instance.IsFever)
@@ -354,14 +382,22 @@ namespace DopamineCleaner.Characters
                 case "char_intern":
                     ExecuteInternBroomSweep();
                     break;
+                case "char_adjuster":
                 case "char_auditor":
                     ExecuteAuditorImmunity();
                     break;
+                case "char_cleaner":
                 case "char_manager":
                     ExecuteManagerLockdown();
                     break;
                 case "char_director":
                     ExecuteDirectorGoldenRain();
+                    break;
+                case "char_streamer":
+                    ExecuteStreamerSuperChat();
+                    break;
+                case "char_doctor":
+                    ExecuteDoctorMentalCare();
                     break;
                 default:
                     ExecuteInternBroomSweep();
@@ -443,6 +479,38 @@ namespace DopamineCleaner.Characters
             DamageTextManager.Instance?.SpawnDamageText(150f, transform.position + Vector3.up * 0.8f, true);
         }
 
+        private void ExecuteStreamerSuperChat()
+        {
+            // 유나 (인기 스트리머): 구독과 슈퍼챗 폭죽! 피버 강제 발동 + 110 대미지 + 45 골드 수금 + 전방위 픽셀 팝
+            FeverManager.Instance?.AddFever(100f);
+            GameManager.Instance?.AddBonusGold(45);
+            SoundManager.Instance?.Play(SoundEffect.Fever, 1.0f);
+
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 6.0f);
+            foreach (var hit in hits)
+            {
+                if (hit != null && hit.CompareTag("Enemy") && hit.TryGetComponent<Enemies.Enemy>(out var enemy))
+                {
+                    enemy.TakeDamage(110f);
+                }
+            }
+
+            DamageTextManager.Instance?.SpawnCustomText("🎙️ [슈퍼챗 100만 도파민 후원 폭발!]", transform.position + Vector3.up * 1.1f, new Color(1f, 0.4f, 0.85f));
+            Core.PixelParticleManager.Instance?.SpawnNeonPop(transform.position, new Color(1f, 0.3f, 0.8f), 24);
+        }
+
+        private void ExecuteDoctorMentalCare()
+        {
+            // 오원장 (정신과 전문의): 즉각 체력 50% 회복 + 5초 완전 무적 및 나노 쉴드 재충전
+            Heal(maxHP * 0.5f);
+            invincibleTimer = 5.0f;
+            hasNanoShield = true;
+            SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.9f);
+
+            DamageTextManager.Instance?.SpawnCustomText("🩺 [특급 집중 멘탈 케어: HP 50% 회복 & 무적!]", transform.position + Vector3.up * 1.1f, new Color(0.2f, 0.95f, 0.65f));
+            Core.PixelParticleManager.Instance?.SpawnNeonPop(transform.position, new Color(0.3f, 1f, 0.6f), 20);
+        }
+
         private void InitCharacterStats()
         {
             if (Meta.GameDataManager.Instance != null)
@@ -456,7 +524,7 @@ namespace DopamineCleaner.Characters
                 magnetRadius = def.baseMagnetRadius * (1f + profile.researchMagLevel * 0.18f);
                 if (profile.researchRevLevel > 0) hasRevive = true;
 
-                // 궁극기 세팅
+                // 궁극기 및 고유 패시브 세팅
                 switch (characterId)
                 {
                     case "char_intern":
@@ -464,11 +532,13 @@ namespace DopamineCleaner.Characters
                         UltimateSkillIcon = "🧹";
                         ultimateCooldown = 16f;
                         break;
+                    case "char_adjuster":
                     case "char_auditor":
                         UltimateSkillName = "법적 면책 특권";
                         UltimateSkillIcon = "🛡️";
                         ultimateCooldown = 20f;
                         break;
+                    case "char_cleaner":
                     case "char_manager":
                         UltimateSkillName = "긴급 현장 통제";
                         UltimateSkillIcon = "🚨";
@@ -478,6 +548,18 @@ namespace DopamineCleaner.Characters
                         UltimateSkillName = "자본의 힘";
                         UltimateSkillIcon = "💼";
                         ultimateCooldown = 22f;
+                        break;
+                    case "char_streamer":
+                        UltimateSkillName = "슈퍼챗 도파민 축제";
+                        UltimateSkillIcon = "🎙️";
+                        ultimateCooldown = 15f;
+                        magnetRadius *= 2.0f; // 인기 폭발: 2배 자석 반경
+                        break;
+                    case "char_doctor":
+                        UltimateSkillName = "집중 멘탈 케어";
+                        UltimateSkillIcon = "🩺";
+                        ultimateCooldown = 20f;
+                        hasNanoShield = true; // 시작 시 나노 쉴드 보유
                         break;
                     default:
                         UltimateSkillName = "전면 대청소";

@@ -151,6 +151,11 @@ namespace DopamineCleaner.Core
             SoundManager.Instance?.Play(SoundEffect.Dash, 0.35f);
         }
 
+        public void SetWindowResolution(int width, int height)
+        {
+            SetDisplayMode(true, width, height);
+        }
+
         public string GetDisplayModeLabel()
         {
             if (!IsWindowed)

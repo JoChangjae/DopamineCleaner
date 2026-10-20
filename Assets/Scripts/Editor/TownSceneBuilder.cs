@@ -57,8 +57,10 @@ namespace DopamineCleaner.Editor
             esObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
             esObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
 
-            // TownManager
+            // TownManager & Pixel Atmosphere
             TownManager townMgr = canvasObj.AddComponent<TownManager>();
+            canvasObj.AddComponent<TownPixelAtmosphere>();
+            canvasObj.AddComponent<UI.SettingsModalUI>();
 
             // 배경 패널
             GameObject bgObj = CreateUIObject("TownBackground", canvasObj.transform);
@@ -91,6 +93,12 @@ namespace DopamineCleaner.Editor
             Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 22, TextAnchor.MiddleRight, new Vector2(25, -18), new Vector2(400, 35));
             karmaTxt.color = new Color(0.6f, 0.85f, 1f);
 
+            // 상단 환경설정 버튼 (헤더 중앙)
+            Button settingsBtn = CreateButton("SettingsButton", headerObj.transform, "⚙️ 환경설정", 16, new Color(0.20f, 0.35f, 0.45f));
+            RectTransform sRt = settingsBtn.GetComponent<RectTransform>();
+            sRt.sizeDelta = new Vector2(160, 48);
+            sRt.anchoredPosition = new Vector2(90, 0);
+
             // 상단 창모드 / 전체화면 토글 버튼 (헤더 중앙 우측)
             Button winModeBtn = CreateButton("WindowModeButton", headerObj.transform, "🖥️ 화면 모드 (F11)", 16, new Color(0.24f, 0.28f, 0.38f));
             RectTransform wRt = winModeBtn.GetComponent<RectTransform>();
@@ -103,6 +111,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(townMgr, "activeCharacterText", activeCharTxt);
             SetPrivateField(townMgr, "windowModeBtn", winModeBtn);
             SetPrivateField(townMgr, "windowModeBtnText", winModeTxt);
+            SetPrivateField(townMgr, "settingsBtn", settingsBtn);
 
             // 상단 탭 네비게이션 버튼 (5개)
             GameObject tabNavObj = CreateUIObject("TabNavBar", canvasObj.transform);
@@ -210,15 +219,15 @@ namespace DopamineCleaner.Editor
             RectTransform cRt = container.GetComponent<RectTransform>();
             cRt.anchorMin = new Vector2(0.5f, 0.5f);
             cRt.anchorMax = new Vector2(0.5f, 0.5f);
-            cRt.sizeDelta = new Vector2(1740, 720);
-            cRt.anchoredPosition = Vector2.zero;
+            cRt.sizeDelta = new Vector2(1650, 640);
+            cRt.anchoredPosition = new Vector2(0, 35);
 
             GridLayoutGroup glg = container.AddComponent<GridLayoutGroup>();
-            glg.cellSize = new Vector2(400, 680);
-            glg.spacing = new Vector2(30, 0);
+            glg.cellSize = new Vector2(520, 310);
+            glg.spacing = new Vector2(25, 15);
             glg.childAlignment = TextAnchor.MiddleCenter;
-            glg.constraint = GridLayoutGroup.Constraint.FixedRowCount;
-            glg.constraintCount = 1;
+            glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = 3;
 
             SetPrivateField(ui, "cardContainer", container.transform);
             SetPrivateField(ui, "characterCardPrefab", cardPrefab);
@@ -543,28 +552,28 @@ namespace DopamineCleaner.Editor
         {
             GameObject card = CreateUIObject("CharacterCard", null);
             RectTransform rt = card.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(400, 680);
+            rt.sizeDelta = new Vector2(520, 310);
 
             Image bg = card.AddComponent<Image>();
             bg.color = new Color(0.20f, 0.17f, 0.28f);
 
-            Text icon = CreateText("Icon", card.transform, "🧑‍💼", 68, TextAnchor.MiddleCenter, new Vector2(0, 230), new Vector2(120, 90));
-            Text name = CreateText("Name", card.transform, "김인턴", 28, TextAnchor.MiddleCenter, new Vector2(0, 160), new Vector2(360, 42));
+            Text icon = CreateText("Icon", card.transform, "🧑‍💼", 54, TextAnchor.MiddleCenter, new Vector2(-190, 45), new Vector2(100, 100));
+            Text name = CreateText("Name", card.transform, "김인턴", 23, TextAnchor.MiddleLeft, new Vector2(40, 75), new Vector2(340, 35));
             name.fontStyle = FontStyle.Bold;
 
-            Text title = CreateText("Title", card.transform, "수습 클리너", 20, TextAnchor.MiddleCenter, new Vector2(0, 120), new Vector2(360, 32));
+            Text title = CreateText("Title", card.transform, "수습 클리너", 17, TextAnchor.MiddleLeft, new Vector2(40, 45), new Vector2(340, 28));
             title.color = new Color(0.75f, 0.70f, 0.90f);
 
-            Text stats = CreateText("Stats", card.transform, "체력: 100 | 이속: 5.0 | 공격력: x1.0", 17, TextAnchor.MiddleCenter, new Vector2(0, 55), new Vector2(380, 50));
+            Text stats = CreateText("Stats", card.transform, "체력: 100 | 이속: 5.0 | 공격력: x1.0", 14, TextAnchor.MiddleLeft, new Vector2(40, 15), new Vector2(340, 30));
             stats.color = new Color(0.6f, 0.9f, 1f);
 
-            Text passive = CreateText("Passive", card.transform, "[고유 특성]\n열정 넘치는 신입: 밸런스 균형", 17, TextAnchor.UpperCenter, new Vector2(0, -60), new Vector2(360, 130));
+            Text passive = CreateText("Passive", card.transform, "[고유 특성]\n열정 넘치는 신입: 밸런스 균형", 14, TextAnchor.UpperLeft, new Vector2(0, -35), new Vector2(480, 50));
             passive.color = new Color(0.95f, 0.88f, 0.72f);
 
-            Button btn = CreateButton("ActionButton", card.transform, "요원 선택", 22, new Color(0.85f, 0.4f, 0.5f));
+            Button btn = CreateButton("ActionButton", card.transform, "요원 선택", 18, new Color(0.85f, 0.4f, 0.5f));
             RectTransform btnRt = btn.GetComponent<RectTransform>();
-            btnRt.sizeDelta = new Vector2(330, 65);
-            btnRt.anchoredPosition = new Vector2(0, -255);
+            btnRt.sizeDelta = new Vector2(380, 45);
+            btnRt.anchoredPosition = new Vector2(0, -95);
 
             string path = "Assets/Prefabs/CharacterCardPrefab.prefab";
             Directory.CreateDirectory("Assets/Prefabs");

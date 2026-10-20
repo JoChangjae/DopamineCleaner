@@ -140,8 +140,9 @@ namespace DopamineCleaner.Editor
             scaler.matchWidthOrHeight = 0.5f;
             canvasObj.AddComponent<GraphicRaycaster>();
 
-            // 실시간 무기 진화 계통도 모달 (Tab 키)
+            // 실시간 무기 진화 계통도 모달 (Tab 키) 및 통합 환경설정 모달 (ESC)
             canvasObj.AddComponent<UI.EvolutionTreeModalUI>();
+            canvasObj.AddComponent<UI.SettingsModalUI>();
 
             // EventSystem
             GameObject esObj = new GameObject("EventSystem");

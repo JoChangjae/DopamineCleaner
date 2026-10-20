@@ -828,6 +828,8 @@ namespace DopamineCleaner.UI
                     muteBtn.onClick.RemoveAllListeners();
                     muteBtn.onClick.AddListener(OnToggleMuteClicked);
                 }
+
+                EnsurePauseSettingsButton();
             }
 
             // 2. 게임오버 패널 버튼들
@@ -839,6 +841,8 @@ namespace DopamineCleaner.UI
                     restartBtn.onClick.RemoveAllListeners();
                     restartBtn.onClick.AddListener(OnRestartButtonClicked);
                 }
+
+                EnsureSaveReportCardButton();
             }
 
             // 3. 레벨업 패널 비상 건너뛰기 버튼
@@ -850,6 +854,106 @@ namespace DopamineCleaner.UI
                     skipBtn.onClick.RemoveAllListeners();
                     skipBtn.onClick.AddListener(OnSkipLevelUpClicked);
                 }
+            }
+        }
+
+        private void EnsurePauseSettingsButton()
+        {
+            if (pausePanel == null) return;
+            var settingsBtn = pausePanel.transform.Find("SettingsButton")?.GetComponent<Button>();
+            if (settingsBtn == null)
+            {
+                GameObject sBtnObj = new GameObject("SettingsButton");
+                sBtnObj.transform.SetParent(pausePanel.transform, false);
+                RectTransform sRt = sBtnObj.AddComponent<RectTransform>();
+                sRt.anchoredPosition = new Vector2(0, -90);
+                sRt.sizeDelta = new Vector2(280, 42);
+
+                Image sImg = sBtnObj.AddComponent<Image>();
+                sImg.color = new Color(0.24f, 0.28f, 0.45f, 0.95f);
+
+                settingsBtn = sBtnObj.AddComponent<Button>();
+                var outl = sBtnObj.AddComponent<Outline>();
+                outl.effectColor = new Color(0f, 0f, 0f, 0.8f);
+                outl.effectDistance = new Vector2(1.5f, -1.5f);
+
+                GameObject txtObj = new GameObject("Text");
+                txtObj.transform.SetParent(sBtnObj.transform, false);
+                RectTransform txtRt = txtObj.AddComponent<RectTransform>();
+                txtRt.anchorMin = Vector2.zero;
+                txtRt.anchorMax = Vector2.one;
+                txtRt.sizeDelta = Vector2.zero;
+
+                Text t = txtObj.AddComponent<Text>();
+                t.text = "⚙️ 환경설정 (오디오/화면)";
+                t.fontSize = 16;
+                t.alignment = TextAnchor.MiddleCenter;
+                t.color = Color.white;
+                t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            }
+
+            if (settingsBtn != null)
+            {
+                settingsBtn.onClick.RemoveAllListeners();
+                settingsBtn.onClick.AddListener(() => SettingsModalUI.OpenSettings());
+            }
+        }
+
+        private void EnsureSaveReportCardButton()
+        {
+            if (gameOverPanel == null) return;
+            Transform existing = gameOverPanel.transform.Find("SaveCardButton");
+            Button saveBtn;
+            Text btnText;
+            if (existing == null)
+            {
+                GameObject btnObj = new GameObject("SaveCardButton");
+                btnObj.transform.SetParent(gameOverPanel.transform, false);
+                RectTransform rt = btnObj.AddComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0, -220);
+                rt.sizeDelta = new Vector2(340, 48);
+
+                Image img = btnObj.AddComponent<Image>();
+                img.color = new Color(0.18f, 0.45f, 0.35f, 0.95f);
+
+                saveBtn = btnObj.AddComponent<Button>();
+                var outl = btnObj.AddComponent<Outline>();
+                outl.effectColor = new Color(0f, 0f, 0f, 0.85f);
+                outl.effectDistance = new Vector2(1.5f, -1.5f);
+
+                GameObject txtObj = new GameObject("Text");
+                txtObj.transform.SetParent(btnObj.transform, false);
+                RectTransform txtRt = txtObj.AddComponent<RectTransform>();
+                txtRt.anchorMin = Vector2.zero;
+                txtRt.anchorMax = Vector2.one;
+                txtRt.sizeDelta = Vector2.zero;
+
+                btnText = txtObj.AddComponent<Text>();
+                btnText.text = "📸 [검진표 카드 바탕화면 저장]";
+                btnText.fontSize = 16;
+                btnText.alignment = TextAnchor.MiddleCenter;
+                btnText.color = Color.white;
+                btnText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            }
+            else
+            {
+                saveBtn = existing.GetComponent<Button>();
+                btnText = existing.GetComponentInChildren<Text>();
+            }
+
+            if (saveBtn != null)
+            {
+                saveBtn.onClick.RemoveAllListeners();
+                saveBtn.onClick.AddListener(() =>
+                {
+                    SoundManager.Instance?.Play(SoundEffect.ButtonClick, 1.0f);
+                    string savedPath = DetoxCardExporter.ExportDetoxReportCard();
+                    if (btnText != null)
+                    {
+                        btnText.text = "✅ [바탕화면에 저장 완료!]";
+                        btnText.color = new Color(0.4f, 1f, 0.6f);
+                    }
+                });
             }
         }
 
