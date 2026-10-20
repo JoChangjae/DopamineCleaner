@@ -244,7 +244,10 @@ namespace DopamineCleaner.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            EditorUtility.DisplayDialog("도파민 클리너 (Dopamine Cleaner)", "🧠 'TownScene.unity'(도파민 본부 씬) 구축이 성공적으로 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 요원 선택/보급소/창고/출동 시스템을 이용할 수 있습니다.", "확인");
+            if (!Application.isBatchMode)
+            {
+                EditorUtility.DisplayDialog("도파민 클리너 (Dopamine Cleaner)", "🧠 'TownScene.unity'(도파민 본부 씬) 구축이 성공적으로 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 요원 선택/보급소/창고/출동 시스템을 이용할 수 있습니다.", "확인");
+            }
         }
 
                 private static void CreatePetManagementModal(Transform canvasTransform)
