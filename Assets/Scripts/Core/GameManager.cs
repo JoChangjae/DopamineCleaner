@@ -186,8 +186,10 @@ namespace DopamineCleaner.Core
                     if (compId == "pet_dog") cType = Characters.CompanionType.HappyDog;
                     else if (compId == "pet_cat") cType = Characters.CompanionType.NapCat;
                     else if (compId == "pet_drone") cType = Characters.CompanionType.PomodoroDrone;
+                    else if (compId == "pet_hamster") cType = Characters.CompanionType.BombHamster;
                 }
-                pet.Initialize(cType);
+                int petTier = Meta.GameDataManager.Instance != null ? Meta.GameDataManager.Instance.GetCompanionTier(Meta.GameDataManager.Instance.Profile?.equippedCompanionId ?? "pet_drone") : 1;
+                pet.Initialize(cType, petTier);
             }
         }
 

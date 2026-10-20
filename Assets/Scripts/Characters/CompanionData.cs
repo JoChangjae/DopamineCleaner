@@ -8,7 +8,8 @@ namespace DopamineCleaner.Characters
         None,
         HappyDog,       // 🐕 [산책견 댕댕이]: 보석 자동 수거 전문
         NapCat,         // 🐱 [단잠 냥이]: 15초마다 힐링 쉼터 장판 생성
-        PomodoroDrone   // 🤖 [뽀모도로 드론]: 25초 집중 사격 + 5초 2배 경험치
+        PomodoroDrone,  // 🤖 [뽀모도로 드론]: 25초 집중 사격 + 5초 2배 경험치
+        BombHamster     // 🐹 [폭격 햄스터]: 해바라기씨 폭탄 투하 광역 폭격
     }
 
     [Serializable]
@@ -48,6 +49,14 @@ namespace DopamineCleaner.Characters
                 name = "뽀모도로 드론",
                 description = "25초간 주기적 레이저 사격을 가하고, 5초간 경험치 획득량을 2배로 증폭시킵니다.",
                 icon = "🤖"
+            },
+            new CompanionInfo
+            {
+                type = CompanionType.BombHamster,
+                id = "pet_hamster",
+                name = "폭격 햄스터",
+                description = "주기적으로 해바라기씨 도파민 폭탄을 투하하여 적들을 한 방에 일망타진합니다.",
+                icon = "🐹"
             }
         };
 

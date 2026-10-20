@@ -113,6 +113,13 @@ namespace DopamineCleaner.Editor
             cdRt.anchoredPosition = new Vector2(265, 0);
             codexBtn.onClick.AddListener(() => UI.EvolutionTreeModalUI.Instance?.OpenCodex(0));
 
+            // 상단 펫 훈련소 버튼
+            Button petBtn = CreateButton("PetButton", headerObj.transform, "🐾 동행 펫", 16, new Color(0.25f, 0.55f, 0.42f));
+            RectTransform petRt = petBtn.GetComponent<RectTransform>();
+            petRt.sizeDelta = new Vector2(140, 48);
+            petRt.anchoredPosition = new Vector2(420, 0);
+            petBtn.onClick.AddListener(() => Town.PetManagementModalUI.Instance?.ToggleModal());
+
             // 상단 창모드 / 전체화면 토글 버튼 (헤더 중앙 우측)
             Button winModeBtn = CreateButton("WindowModeButton", headerObj.transform, "🖥️ 화면 모드 (F11)", 16, new Color(0.24f, 0.28f, 0.38f));
             RectTransform wRt = winModeBtn.GetComponent<RectTransform>();
@@ -236,6 +243,56 @@ namespace DopamineCleaner.Editor
             AssetDatabase.Refresh();
 
             EditorUtility.DisplayDialog("도파민 클리너 (Dopamine Cleaner)", "🧠 'TownScene.unity'(도파민 본부 씬) 구축이 성공적으로 완료되었습니다!\n상단 [▶ 플레이] 버튼을 누르면 요원 선택/보급소/창고/출동 시스템을 이용할 수 있습니다.", "확인");
+        }
+
+                private static void CreatePetManagementModal(Transform canvasTransform)
+        {
+            GameObject modalObj = CreateUIObject("PetManagementModal", canvasTransform);
+            RectTransform mRt = modalObj.GetComponent<RectTransform>();
+            mRt.anchorMin = Vector2.zero;
+            mRt.anchorMax = Vector2.one;
+            mRt.sizeDelta = Vector2.zero;
+
+            Image mBg = modalObj.AddComponent<Image>();
+            mBg.color = new Color(0.06f, 0.08f, 0.12f, 0.94f);
+
+            var petUI = modalObj.AddComponent<Town.PetManagementModalUI>();
+
+            // 헤더
+            CreateText("Header", modalObj.transform, "🐾 동행 펫 육성 & 출격 관리소", 32, TextAnchor.MiddleCenter, new Vector2(0, 360), new Vector2(800, 45));
+
+            Text goldTxt = CreateText("GoldStatus", modalObj.transform, "💰 보유 골드: 0 G", 20, TextAnchor.MiddleCenter, new Vector2(0, 315), new Vector2(600, 35));
+            goldTxt.color = new Color(1f, 0.85f, 0.3f);
+
+            // 닫기 버튼
+            Button closeBtn = CreateButton("CloseBtn", modalObj.transform, "✖ 닫기 (ESC)", 18, new Color(0.7f, 0.2f, 0.2f));
+            RectTransform cRt = closeBtn.GetComponent<RectTransform>();
+            cRt.anchorMin = new Vector2(1f, 1f);
+            cRt.anchorMax = new Vector2(1f, 1f);
+            cRt.pivot = new Vector2(1f, 1f);
+            cRt.sizeDelta = new Vector2(140, 46);
+            cRt.anchoredPosition = new Vector2(-40, -40);
+
+            // 카드 컨테이너
+            GameObject container = CreateUIObject("PetCardContainer", modalObj.transform);
+            RectTransform cntRt = container.GetComponent<RectTransform>();
+            cntRt.anchorMin = new Vector2(0.5f, 0.5f);
+            cntRt.anchorMax = new Vector2(0.5f, 0.5f);
+            cntRt.sizeDelta = new Vector2(1250, 460);
+            cntRt.anchoredPosition = new Vector2(0, -30);
+
+            HorizontalLayoutGroup hlg = container.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 25;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+
+            SetPrivateField(petUI, "modalPanel", modalObj);
+            SetPrivateField(petUI, "cardContainer", container.transform);
+            SetPrivateField(petUI, "closeButton", closeBtn);
+            SetPrivateField(petUI, "goldStatusText", goldTxt);
+
+            modalObj.SetActive(false);
         }
 
         private static GameObject CreateCharacterSelectPanel(Transform parent, GameObject cardPrefab)
@@ -434,6 +491,7 @@ namespace DopamineCleaner.Editor
             Button mapOff = CreateButton("BtnOff", mapBtnGroup.transform, "🏢 번아웃 오피스\n(7분 생존)", 20, new Color(0.32f, 0.25f, 0.4f));
             Button mapHigh = CreateButton("BtnHigh", mapBtnGroup.transform, "🛣️ 숏폼 고속도로\n(10분 생존)", 20, new Color(0.42f, 0.22f, 0.25f));
             Button mapAbyss = CreateButton("BtnAbyss", mapBtnGroup.transform, "📱 알고리즘 심연\n(12분 생존)", 20, new Color(0.36f, 0.18f, 0.48f));
+            Button mapBossRush = CreateButton("BtnBossRush", mapBtnGroup.transform, "👑 보스 러시\n(15분 무한)", 20, new Color(0.55f, 0.15f, 0.2f));
 
             // 2. 난이도 선택 헤더 & 버튼들
             CreateText("DiffHeader", panel.transform, "⚡ 도파민 오염 등급 (난이도 설정)", 25, TextAnchor.MiddleCenter, new Vector2(0, 215), new Vector2(900, 30));
@@ -539,6 +597,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(ui, "mapOfficeBtn", mapOff);
             SetPrivateField(ui, "mapHighwayBtn", mapHigh);
             SetPrivateField(ui, "mapAbyssBtn", mapAbyss);
+            SetPrivateField(ui, "mapBossRushBtn", mapBossRush);
 
             SetPrivateField(ui, "diffEasyBtn", btnEasy);
             SetPrivateField(ui, "diffNormalBtn", btnNorm);

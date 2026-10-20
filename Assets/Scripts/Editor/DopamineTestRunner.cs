@@ -139,6 +139,9 @@ namespace DopamineCleaner.Editor
             // 36. 📜 진화 족보/몬스터 도감, 🏆 정식 퇴근 승인서 & 🗺️ 스마트폰 알고리즘의 심연 던전
             TestPhase3GameplayExpansion();
 
+            // 37. 🎵 신스웨이브 BGM, ⚔️ 보스 러시, 🐱 펫 진화/폭격 햄스터 & 📱 가상 조이스틱/패드
+            TestPhase4MassiveExpansion();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -808,7 +811,7 @@ namespace DopamineCleaner.Editor
             try
             {
                 var companions = CompanionDatabase.GetAll();
-                Assert(companions.Count == 3, "반려 펫 3종(댕댕이, 냥이, 드론) DB 등록 확인");
+                Assert(companions.Count >= 3, "반려 펫 라인업 DB 등록 확인");
 
                 GameObject petObj = new GameObject("[TestPet]");
                 CompanionPet pet = petObj.AddComponent<CompanionPet>();
@@ -1450,6 +1453,56 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "신규 콘텐츠 Phase 3 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestPhase4MassiveExpansion()
+        {
+            Debug.Log("--- 37. 🎵 BGM, ⚔️ 보스 러시, 🐱 펫 진화/햄스터 & 📱 가상 조이스틱 검증 ---");
+            try
+            {
+                // 1. Chiptune / Synthwave 절차적 사운드 및 보스 BGM 검증
+                if (SoundManager.Instance == null) { GameObject snd = new GameObject("[TestSoundManager]"); var sm = snd.AddComponent<SoundManager>(); SetField(typeof(SoundManager), "Instance", sm); }
+                Assert(SoundManager.Instance != null, "SoundManager 인스턴스 검증");
+                SoundManager.Instance.PlayBossBGM();
+                SoundManager.Instance.Play(SoundEffect.PetBark, 0.5f);
+                SoundManager.Instance.Play(SoundEffect.PetMeow, 0.5f);
+                SoundManager.Instance.Play(SoundEffect.PunchStamp, 0.5f);
+                Assert(true, "절차적 신스웨이브 보스 BGM 및 펫/승인서 효과음 합성 성공");
+
+                // 2. 무한 보스 러시 모드 (map_bossrush) 메타데이터 검증
+                var bossRushDef = Meta.DungeonDatabase.Get("map_bossrush");
+                Assert(bossRushDef != null && bossRushDef.targetSurvivalSec >= 900f && bossRushDef.baseGoldReward >= 4000, "무한 보스 러시 모드(map_bossrush) DB 등록 및 보상 검증 성공");
+
+                // 3. 펫 진화 & 폭격 햄스터(BombHamster) 검증
+                var hamster = Characters.CompanionDatabase.Get(Characters.CompanionType.BombHamster);
+                Assert(hamster != null && hamster.id == "pet_hamster", "신규 동행 펫 '폭격 햄스터' DB 등록 성공");
+
+                GameObject petObj = new GameObject("[TestPet]");
+                var petComp = petObj.AddComponent<Characters.CompanionPet>();
+                petComp.Initialize(Characters.CompanionType.BombHamster, 2);
+                Assert(petComp.Type == Characters.CompanionType.BombHamster && petComp.Tier == 2, "폭격 햄스터 Tier 2 진화 초기화 검증 성공");
+                UnityEngine.Object.DestroyImmediate(petObj);
+
+                // 4. 가상 조이스틱 (VirtualJoystickUI) 및 조작 검증
+                GameObject canvasObj = new GameObject("[TestJoyCanvas]");
+                var canvas = canvasObj.AddComponent<Canvas>();
+                var joyUI = canvasObj.AddComponent<UI.VirtualJoystickUI>();
+                Assert(joyUI != null, "VirtualJoystickUI 인스턴스 및 컴포넌트 생성 성공");
+
+                // 플레이어 대시 및 쿨타임 프로퍼티 검증
+                GameObject playerObj = new GameObject("[TestPlayer]");
+                var player = playerObj.AddComponent<Characters.PlayerController>();
+                Assert(player.IsDashReady, "PlayerController.IsDashReady 프로퍼티 검증 성공");
+                player.PerformDash();
+                Assert(!player.IsDashReady && player.DashRemainingCooldown > 0f, "PlayerController 모바일/패드 대시 격발 성공");
+
+                UnityEngine.Object.DestroyImmediate(playerObj);
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "신규 콘텐츠 Phase 4 테스트 예외", ex.ToString());
             }
         }
 

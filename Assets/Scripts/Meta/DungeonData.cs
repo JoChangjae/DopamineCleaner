@@ -67,6 +67,11 @@ namespace DopamineCleaner.Meta
                 "map_abyss", "스마트폰 알고리즘의 심연", "무한 둠스크롤링과 블랙홀의 나락", "📱",
                 new Color(0.75f, 0.65f, 0.95f), 720f, 2500, 6,
                 "끝없는 추천 피드와 악성 알고리즘이 플레이어를 빨아들이는 심연. (목표: 12분 생존)"));
+
+            Register(new DungeonMapDefinition(
+                "map_bossrush", "무한 보스 러시", "도파민 보스 연속 난입 극한 모드", "👑",
+                new Color(0.95f, 0.35f, 0.25f), 900f, 4000, 10,
+                "45초마다 도파민 마왕과 특별 감사관이 교대로 난입하는 극한 모드. (목표: 15분 무한 생존)"));
         }
 
         private static void Register(DungeonMapDefinition m)

@@ -18,6 +18,8 @@ namespace DopamineCleaner.Characters
         private float pomodoroCycleTimer = 0f;
         private bool isPomodoroFocus = true;
         private SpriteRenderer spriteRenderer;
+        private int companionTier = 1;
+        public int Tier => companionTier;
 
         public CompanionType Type => companionType;
 
@@ -34,9 +36,10 @@ namespace DopamineCleaner.Characters
             if (Instance == this) Instance = null;
         }
 
-        public void Initialize(CompanionType type)
+        public void Initialize(CompanionType type, int tier = 1)
         {
             companionType = type;
+            companionTier = Mathf.Clamp(tier, 1, 3);
             skillTimer = 2.0f;
             pomodoroCycleTimer = 25.0f;
             isPomodoroFocus = true;
@@ -55,7 +58,8 @@ namespace DopamineCleaner.Characters
             {
                 CompanionType.HappyDog => new Color(0.95f, 0.7f, 0.3f), // 황금빛 댕댕이
                 CompanionType.NapCat => new Color(0.9f, 0.5f, 0.8f),   // 핑크 냥이
-                CompanionType.PomodoroDrone => new Color(0.2f, 0.9f, 1f), // 네온 사이언 드론
+                CompanionType.PomodoroDrone => new Color(0.2f, 0.9f, 1f),
+                CompanionType.BombHamster => new Color(1.0f, 0.5f, 0.2f), // 오렌지 햄스터
                 _ => Color.white
             };
 
@@ -141,6 +145,48 @@ namespace DopamineCleaner.Characters
                         }
                     }
                     break;
+            }
+        }
+
+                private void DropHamsterBomb()
+        {
+            var enemies = FindObjectsByType<Enemy>();
+            if (enemies == null || enemies.Length == 0) return;
+
+            Enemy target = null;
+            float minDist = 10f;
+            foreach (var e in enemies)
+            {
+                if (e != null && e.IsAlive)
+                {
+                    float d = Vector2.Distance(transform.position, e.transform.position);
+                    if (d < minDist)
+                    {
+                        minDist = d;
+                        target = e;
+                    }
+                }
+            }
+
+            if (target != null)
+            {
+                Vector3 blastPos = target.transform.position;
+                float blastRadius = 3.2f + (companionTier - 1) * 1.0f;
+                float blastDmg = 55f + (companionTier - 1) * 45f;
+
+                SoundManager.Instance?.Play(SoundEffect.Explosion, 0.7f);
+                PixelParticleManager.Instance?.SpawnNeonPop(blastPos, new Color(1f, 0.6f, 0.1f), 16);
+                DamageTextManager.Instance?.SpawnCustomText($"🐹 폭격! (-{blastDmg:F0})", blastPos + Vector3.up * 0.7f, new Color(1f, 0.5f, 0.2f));
+
+                Collider2D[] hits = Physics2D.OverlapCircleAll(blastPos, blastRadius);
+                foreach (var h in hits)
+                {
+                    if (h != null && h.CompareTag("Enemy") && h.TryGetComponent<Enemy>(out var enemy))
+                    {
+                        Vector2 knock = ((Vector2)enemy.transform.position - (Vector2)blastPos).normalized;
+                        enemy.TakeDamage(blastDmg, knock, 5.0f);
+                    }
+                }
             }
         }
 

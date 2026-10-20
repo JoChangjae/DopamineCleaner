@@ -30,6 +30,8 @@ namespace DopamineCleaner.Characters
         [SerializeField] private float dashCooldown = 3.0f;
         private float dashTimer = 0f;
         private float dashCooldownTimer = 0f;
+        public bool IsDashReady => dashCooldownTimer <= 0f;
+        public float DashRemainingCooldown => Mathf.Max(0f, dashCooldownTimer);
 
         [Header("궁극기(Ultimate Q) 시스템")]
         [SerializeField] private float ultimateCooldown = 18f;
@@ -257,7 +259,7 @@ namespace DopamineCleaner.Characters
             rb.linearVelocity = movementInput * speed;
         }
 
-        private void PerformDash()
+        public void PerformDash()
         {
             if (dashCooldownTimer <= 0f)
             {

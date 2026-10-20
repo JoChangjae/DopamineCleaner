@@ -18,7 +18,10 @@ namespace DopamineCleaner.Core
         Slash,
         ButtonClick,
         Warning,
-        Laser
+        Laser,
+        PetBark,
+        PetMeow,
+        PunchStamp
     }
 
     public class SoundManager : MonoBehaviour
@@ -31,6 +34,7 @@ namespace DopamineCleaner.Core
 
         private AudioClip townBgmClip;
         private AudioClip battleBgmClip;
+        private AudioClip bossBgmClip;
 
         private void Awake()
         {
@@ -80,12 +84,25 @@ namespace DopamineCleaner.Core
             clipCache[SoundEffect.ButtonClick] = GenerateTone(0.04f, 900f, 1300f, WaveType.Sine);
             clipCache[SoundEffect.Warning] = GenerateTone(0.35f, 440f, 880f, WaveType.Square);
             clipCache[SoundEffect.Laser] = GenerateTone(0.25f, 1200f, 300f, WaveType.Sine);
+            clipCache[SoundEffect.PetBark] = GenerateTone(0.12f, 320f, 640f, WaveType.Square);
+            clipCache[SoundEffect.PetMeow] = GenerateTone(0.22f, 850f, 620f, WaveType.Sine);
+            clipCache[SoundEffect.PunchStamp] = GenerateTone(0.28f, 180f, 40f, WaveType.Noise);
         }
 
         private void GenerateProceduralBGM()
         {
             townBgmClip = GenerateBGMTrack(8.0f, 105f, false);
             battleBgmClip = GenerateBGMTrack(6.0f, 138f, true);
+            bossBgmClip = GenerateBGMTrack(5.0f, 155f, true);
+        }
+
+                public void PlayBossBGM()
+        {
+            if (bgmSource == null || bossBgmClip == null) return;
+            if (bgmSource.clip == bossBgmClip && bgmSource.isPlaying) return;
+            bgmSource.clip = bossBgmClip;
+            bgmSource.pitch = 1.0f;
+            if (!isMuted) bgmSource.Play();
         }
 
         public void PlayBGM(bool isBattle)

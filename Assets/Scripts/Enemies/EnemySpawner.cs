@@ -18,6 +18,8 @@ namespace DopamineCleaner.Enemies
         [SerializeField] private float baseSpawnInterval = 0.5f;
         private float spawnTimer = 0f;
         private int lastWaveTriggerSec = 0;
+        private float bossRushTimer = 0f;
+        private int bossRushCount = 0;
 
         private readonly List<Enemy> enemyPool = new();
 
@@ -163,6 +165,19 @@ namespace DopamineCleaner.Enemies
             for (int i = 0; i < count; i++)
             {
                 SpawnSingleEnemy(EnemyType.SpamShooter, stage, time);
+            }
+        }
+
+                public void SpawnBossOfType(EnemyType bType, int stage)
+        {
+            Enemy boss = GetAvailableEnemy();
+            if (boss != null && PlayerController.Instance != null)
+            {
+                Vector3 spawnPos = GetPerimeterSpawnPosition();
+                boss.transform.position = spawnPos;
+                boss.Initialize(bType, stage, GameManager.Instance != null ? GameManager.Instance.SurvivalTime : 60f);
+                Core.SoundManager.Instance?.PlayBossBGM();
+                Core.DamageTextManager.Instance?.SpawnCustomText($"⚠️ [보스 난입] {bType} 등장!", spawnPos + Vector3.up * 1.5f, new Color(1f, 0.2f, 0.2f));
             }
         }
 

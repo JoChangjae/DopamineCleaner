@@ -52,6 +52,7 @@ namespace DopamineCleaner.Meta
         // 전술 동반자 드론 & 펫
         public string equippedCompanionId = "pet_drone";
         public List<string> unlockedCompanionIds = new() { "pet_dog", "pet_drone" };
+        public List<string> companionTiers = new(); // e.g. "pet_dog:1"
     }
 
     [Serializable]
@@ -256,6 +257,33 @@ namespace DopamineCleaner.Meta
 
             var career = GetCareerData(charId);
             career.rankLevel++;
+            SaveProfile();
+            OnProfileUpdated?.Invoke();
+            return true;
+        }
+
+                public int GetCompanionTier(string companionId)
+        {
+            if (Profile?.companionTiers == null) return 1;
+            foreach (var item in Profile.companionTiers)
+            {
+                var parts = item.Split(':');
+                if (parts.Length == 2 && parts[0] == companionId && int.TryParse(parts[1], out int tier))
+                    return tier;
+            }
+            return 1;
+        }
+
+        public bool UpgradeCompanionTier(string companionId, int cost)
+        {
+            if (Profile == null || Profile.gold < cost) return false;
+            int currentTier = GetCompanionTier(companionId);
+            if (currentTier >= 3) return false;
+
+            Profile.gold -= cost;
+            if (Profile.companionTiers == null) Profile.companionTiers = new List<string>();
+            Profile.companionTiers.RemoveAll(item => item.StartsWith(companionId + ":"));
+            Profile.companionTiers.Add(companionId + ":" + (currentTier + 1));
             SaveProfile();
             OnProfileUpdated?.Invoke();
             return true;
