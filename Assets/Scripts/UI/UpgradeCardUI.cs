@@ -188,7 +188,7 @@ namespace DopamineCleaner.UI
                 evoBadge.SetActive(info.isEvolution);
             }
 
-            // 4. 선택 버튼 리스너 바인딩
+            // 4. 카드 전체 클릭 리스너 바인딩 (스킬 칸 어디를 눌러도 100% 즉시 선택)
             if (selectButton == null)
             {
                 selectButton = GetComponent<Button>() ?? GetComponentInChildren<Button>();
@@ -202,6 +202,15 @@ namespace DopamineCleaner.UI
                     Core.SoundManager.Instance?.Play(Core.SoundEffect.LevelUp, 0.65f);
                     onSelect?.Invoke();
                 });
+            }
+
+            // 모든 자식 그래픽 요소의 raycastTarget을 해제하여 카드 클릭이 차단되지 않도록 보장
+            foreach (var g in GetComponentsInChildren<Graphic>(true))
+            {
+                if (g.gameObject != gameObject && (selectButton == null || g.gameObject != selectButton.gameObject))
+                {
+                    g.raycastTarget = false;
+                }
             }
         }
 

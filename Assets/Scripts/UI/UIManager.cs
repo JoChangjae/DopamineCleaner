@@ -662,21 +662,9 @@ namespace DopamineCleaner.UI
             recipeText.verticalOverflow = VerticalWrapMode.Truncate;
             recipeText.lineSpacing = 1.2f;
 
-            // 7. 하단 선택 버튼
-            GameObject selBtnObj = new GameObject("SelectBtn");
-            selBtnObj.transform.SetParent(cardObj.transform, false);
-            RectTransform sbRt = selBtnObj.AddComponent<RectTransform>();
-            sbRt.sizeDelta = new Vector2(240, 46);
-            sbRt.anchoredPosition = new Vector2(0, -168);
-            Image sbImg = selBtnObj.AddComponent<Image>();
-            sbImg.color = new Color(0.55f, 0.35f, 0.88f, 1f);
-            Button selBtn = selBtnObj.AddComponent<Button>();
-
-            Text sbText = CreateFallbackText("SelectBtnText", selBtnObj.transform, "선택", 16, Vector2.zero, new Vector2(230, 42));
-            sbText.color = Color.white;
-            sbText.fontStyle = FontStyle.Bold;
-
-            selBtn.onClick.AddListener(() => btn.onClick.Invoke());
+            // 7. 하단 탭 가이드 안내 텍스트
+            Text clickGuide = CreateFallbackText("ClickGuideText", cardObj.transform, "클릭하여 습득", 13, new Vector2(0, -182), new Vector2(240, 24));
+            clickGuide.color = new Color(0.55f, 0.58f, 0.70f);
 
             // 필드 바인딩
             var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
@@ -692,8 +680,6 @@ namespace DopamineCleaner.UI
             typeof(UpgradeCardUI).GetField("recipeBox", flags)?.SetValue(cardUI, recipeBoxObj);
             typeof(UpgradeCardUI).GetField("recipeGuideText", flags)?.SetValue(cardUI, recipeText);
             typeof(UpgradeCardUI).GetField("selectButton", flags)?.SetValue(cardUI, btn);
-            typeof(UpgradeCardUI).GetField("selectButtonBg", flags)?.SetValue(cardUI, sbImg);
-            typeof(UpgradeCardUI).GetField("selectButtonText", flags)?.SetValue(cardUI, sbText);
 
             return cardObj;
         }

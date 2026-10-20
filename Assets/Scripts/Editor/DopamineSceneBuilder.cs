@@ -841,8 +841,8 @@ namespace DopamineCleaner.Editor
             title.fontStyle = FontStyle.Bold;
 
             // 5. 스킬 설명 (가독성 높은 실버/화이트)
-            Text desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 14, TextAnchor.UpperCenter, new Vector2(0, -5), new Vector2(256, 74));
-            desc.color = new Color(0.86f, 0.86f, 0.92f);
+            Text desc = CreateText("CardDesc", cardObj.transform, "스킬 설명이 여기에 표시됩니다.", 15, TextAnchor.UpperCenter, new Vector2(0, -20), new Vector2(264, 90));
+            desc.color = new Color(0.88f, 0.88f, 0.94f);
             desc.horizontalOverflow = HorizontalWrapMode.Wrap;
             desc.verticalOverflow = VerticalWrapMode.Truncate;
             desc.lineSpacing = 1.25f;
@@ -850,32 +850,23 @@ namespace DopamineCleaner.Editor
             // 6. 진화 족보 가이드 전용 박스 (고대비 전용 공간)
             GameObject recipeBoxObj = CreateUIObject("RecipeBox", cardObj.transform);
             RectTransform rbRt = recipeBoxObj.GetComponent<RectTransform>();
-            rbRt.sizeDelta = new Vector2(264, 58);
-            rbRt.anchoredPosition = new Vector2(0, -92);
+            rbRt.sizeDelta = new Vector2(264, 68);
+            rbRt.anchoredPosition = new Vector2(0, -125);
             Image rbImg = recipeBoxObj.AddComponent<Image>();
             rbImg.color = new Color(0.08f, 0.07f, 0.13f, 0.95f);
             Outline rbOutline = recipeBoxObj.AddComponent<Outline>();
             rbOutline.effectColor = new Color(0.28f, 0.25f, 0.42f, 0.7f);
             rbOutline.effectDistance = new Vector2(1, -1);
 
-            Text recipeText = CreateText("RecipeText", recipeBoxObj.transform, "진화 가이드", 13, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(256, 52));
+            Text recipeText = CreateText("RecipeText", recipeBoxObj.transform, "진화 가이드", 13, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(256, 62));
             recipeText.color = new Color(0.9f, 0.9f, 0.95f);
             recipeText.horizontalOverflow = HorizontalWrapMode.Wrap;
             recipeText.verticalOverflow = VerticalWrapMode.Truncate;
             recipeText.lineSpacing = 1.2f;
 
-            // 7. 하단 선택 버튼
-            GameObject selBtnObj = CreateUIObject("SelectBtn", cardObj.transform);
-            RectTransform sbRt = selBtnObj.GetComponent<RectTransform>();
-            sbRt.sizeDelta = new Vector2(240, 46);
-            sbRt.anchoredPosition = new Vector2(0, -168);
-            Image sbImg = selBtnObj.AddComponent<Image>();
-            sbImg.color = new Color(0.55f, 0.35f, 0.88f, 1f);
-            Button selBtn = selBtnObj.AddComponent<Button>();
-
-            Text sbText = CreateText("SelectBtnText", selBtnObj.transform, "선택", 16, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(230, 42));
-            sbText.color = Color.white;
-            sbText.fontStyle = FontStyle.Bold;
+            // 7. 하단 탭 가이드 안내 텍스트 (불필요한 버튼 대신 깔끔한 가이드)
+            Text clickGuide = CreateText("ClickGuideText", cardObj.transform, "클릭하여 습득", 13, TextAnchor.MiddleCenter, new Vector2(0, -182), new Vector2(240, 24));
+            clickGuide.color = new Color(0.55f, 0.58f, 0.70f);
 
             // 필드 바인딩
             SetPrivateField(cardUI, "cardBackground", cardBg);
@@ -890,11 +881,6 @@ namespace DopamineCleaner.Editor
             SetPrivateField(cardUI, "recipeBox", recipeBoxObj);
             SetPrivateField(cardUI, "recipeGuideText", recipeText);
             SetPrivateField(cardUI, "selectButton", btn);
-            SetPrivateField(cardUI, "selectButtonBg", sbImg);
-            SetPrivateField(cardUI, "selectButtonText", sbText);
-
-            // 하단 버튼 클릭도 전체 카드 클릭과 동일하게 호출
-            selBtn.onClick.AddListener(() => btn.onClick.Invoke());
 
             string path = "Assets/Prefabs/UpgradeCardPrefab.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(cardObj, path);
