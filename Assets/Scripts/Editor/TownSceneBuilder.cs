@@ -60,6 +60,7 @@ namespace DopamineCleaner.Editor
             // TownManager & Pixel Atmosphere
             TownManager townMgr = canvasObj.AddComponent<TownManager>();
             canvasObj.AddComponent<TownPixelAtmosphere>();
+            canvasObj.AddComponent<CyberTerminalBootUI>();
             canvasObj.AddComponent<UI.SettingsModalUI>();
 
             // 배경 패널

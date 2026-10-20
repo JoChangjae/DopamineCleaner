@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
@@ -156,6 +156,8 @@ namespace DopamineCleaner.Editor
 
             // UI Manager
             UIManager uiMgr = canvasObj.AddComponent<UIManager>();
+            canvasObj.AddComponent<UI.BossWarningUI>();
+            canvasObj.AddComponent<UI.BossHealthBarUI>();
             BuildCanvasUI(canvasObj, uiMgr, cardPrefab, questMgr, sanctuaryMgr, slotMachine);
 
             // 8. 씬 저장

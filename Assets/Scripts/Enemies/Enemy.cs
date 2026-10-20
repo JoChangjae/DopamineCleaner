@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using DopamineCleaner.Core;
 using DopamineCleaner.Characters;
@@ -41,6 +41,7 @@ namespace DopamineCleaner.Enemies
         private float specialActionTimer = 0f;
         private float bossPatternTimer = 4.0f;
         private bool isBossSpecialActing = false;
+        private bool isBossBerserk = false;
         private int bossPatternIndex = 0;
         private TextMesh nameplateText;
 
@@ -119,6 +120,7 @@ namespace DopamineCleaner.Enemies
             stolenGemsCount = 0;
             affixActionTimer = 0.5f;
             specialActionTimer = Random.Range(1.0f, 2.5f);
+            isBossBerserk = false;
             float stageMult = 1.0f + (stage - 1) * 0.32f;
 
             switch (type)
@@ -281,8 +283,11 @@ namespace DopamineCleaner.Enemies
                     specialActionTimer -= Time.deltaTime;
                     if (specialActionTimer <= 0f)
                     {
-                        specialActionTimer = 3.6f;
-                        FireBossRadialBurst(8);
+                        specialActionTimer = isBossBerserk ? 1.8f : 3.6f;
+                        if (isBossBerserk)
+                            FireBossSpiralBurst(16);
+                        else
+                            FireBossRadialBurst(8);
                     }
 
                     // 2. 6초 주기 특수 텔레그래프 필살기 패턴 (돌진 vs 원형 충격파 교대)
@@ -312,8 +317,11 @@ namespace DopamineCleaner.Enemies
                     specialActionTimer -= Time.deltaTime;
                     if (specialActionTimer <= 0f)
                     {
-                        specialActionTimer = 3.2f;
-                        FireBossRadialBurst(10);
+                        specialActionTimer = isBossBerserk ? 1.6f : 3.2f;
+                        if (isBossBerserk)
+                            FireBossSpiralBurst(16);
+                        else
+                            FireBossRadialBurst(10);
                     }
 
                     // 2. 5초 주기 돌진 및 충격파 필살기
@@ -393,6 +401,40 @@ namespace DopamineCleaner.Enemies
                 projObj.transform.position = transform.position;
                 EnemyProjectile ep = projObj.AddComponent<EnemyProjectile>();
                 ep.Initialize(dir, 5.0f, damage * 0.8f);
+            }
+        }
+
+        private void FireBossSpiralBurst(int bulletCount = 16)
+        {
+            float baseAngleOffset = Time.time * 65f;
+            for (int i = 0; i < bulletCount; i++)
+            {
+                float angle = (i * (360f / bulletCount) + baseAngleOffset) * Mathf.Deg2Rad;
+                Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+
+                GameObject projObj = new GameObject("BossSpiralBullet");
+                projObj.transform.position = transform.position;
+                EnemyProjectile ep = projObj.AddComponent<EnemyProjectile>();
+                ep.Initialize(dir, 5.5f, damage * 0.85f);
+            }
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Laser, 0.5f);
+        }
+
+        private void TriggerBossBerserk()
+        {
+            isBossBerserk = true;
+            moveSpeed *= 1.35f;
+            damage *= 1.25f;
+
+            Core.SoundManager.Instance?.Play(Core.SoundEffect.Warning, 1.0f);
+            Core.HitStopManager.Instance?.TriggerHitStop(0.35f);
+            Core.PixelParticleManager.Instance?.SpawnDeathPop(transform.position, new Color(1f, 0.2f, 0.1f), 35);
+            Core.DamageTextManager.Instance?.SpawnDamageText(0f, transform.position + Vector3.up * 1.5f, true);
+
+            if (nameplateText != null)
+            {
+                nameplateText.text = "🔥 [광폭화 각성] " + nameplateText.text;
+                nameplateText.color = new Color(1f, 0.2f, 0.1f);
             }
         }
 
@@ -506,6 +548,11 @@ namespace DopamineCleaner.Enemies
 
             currentHP -= amount;
 
+            if ((enemyType == EnemyType.DopamineBoss || enemyType == EnemyType.AuditorKim) && !isBossBerserk && currentHP > 0f && currentHP <= maxHP * 0.5f)
+            {
+                TriggerBossBerserk();
+            }
+
             // 중타격/엘리트 피격 시 0.04초 역경직(Hit-Stop) 발동
             if (amount >= 35f || IsElite || enemyType == EnemyType.DopamineBoss)
             {
@@ -576,6 +623,10 @@ namespace DopamineCleaner.Enemies
             if (isBoss)
             {
                 // 보스 격파 시 확정 황금상자 & 대량 EXP 드랍
+                Core.HitStopManager.Instance?.TriggerHitStop(0.5f);
+                GameObject gChest = new GameObject("GoldenChest");
+                gChest.transform.position = transform.position;
+                gChest.AddComponent<Items.GoldenChest>();
                 ItemManager.Instance?.SpawnGem(transform.position, GemType.Chest, 0);
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.left * 1.2f, GemType.Cake, 0);
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.right * 1.2f, GemType.Magnet, 0);
@@ -584,6 +635,10 @@ namespace DopamineCleaner.Enemies
             else if (IsElite)
             {
                 // 엘리트 몬스터 격파 시 확정 황금상자 + 보너스 골드 드랍!
+                Core.HitStopManager.Instance?.TriggerHitStop(0.5f);
+                GameObject gChest = new GameObject("GoldenChest");
+                gChest.transform.position = transform.position;
+                gChest.AddComponent<Items.GoldenChest>();
                 ItemManager.Instance?.SpawnGem(transform.position, GemType.Chest, 0);
                 GameManager.Instance?.AddBonusGold(Random.Range(30, 55));
                 Core.SoundManager.Instance?.Play(Core.SoundEffect.LevelUp, 0.6f);

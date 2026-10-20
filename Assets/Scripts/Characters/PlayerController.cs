@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using DopamineCleaner.Core;
 using DopamineCleaner.Meta;
@@ -80,6 +80,7 @@ namespace DopamineCleaner.Characters
         public float MagnetRadius => magnetRadius;
         public bool IsDashing => dashTimer > 0f;
         public bool IsInvincible => invincibleTimer > 0f || IsDashing;
+        public float NextLevelExp => nextLevelExp;
 
         // 사원 승진 직급 및 런타임 버프 배율
         public CareerRank CurrentCareerRank { get; private set; } = CareerRank.Intern;

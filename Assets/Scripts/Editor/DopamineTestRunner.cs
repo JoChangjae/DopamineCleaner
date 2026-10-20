@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -132,6 +132,9 @@ namespace DopamineCleaner.Editor
 
             // 34. 🏙️ 본부(TownScene) 사이버펑크 도트 그래픽 배경 & 파티클 검증
             TestTownPixelAtmosphere();
+
+            // 35. 보스전 2.0 (경고 배너, 체력바, 황금 상자) 및 사이버 단말기 부팅 시퀀스
+            TestBossBattle2AndCyberBoot();
 
             // 최종 리포트
             Debug.Log("==================================================================");
@@ -1363,6 +1366,41 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "사이버펑크 도트 배경 연출 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestBossBattle2AndCyberBoot()
+        {
+            Debug.Log("--- 35. 👑 보스전 2.0 (경고 배너, 체력바, 황금 상자) 및 사이버 부팅 단말기 테스트 ---");
+            try
+            {
+                // 1. CyberTerminalBootUI 검증
+                GameObject canvasObj = new GameObject("[TestCanvas_Boot]");
+                canvasObj.AddComponent<Canvas>();
+                var bootUI = canvasObj.AddComponent<CyberTerminalBootUI>();
+                Assert(bootUI != null, "CyberTerminalBootUI 컴포넌트 부착 성공");
+
+                // 2. BossWarningUI 검증
+                var warnUI = canvasObj.AddComponent<BossWarningUI>();
+                Assert(warnUI != null, "BossWarningUI 컴포넌트 부착 성공");
+
+                // 3. BossHealthBarUI 검증
+                var hpBarUI = canvasObj.AddComponent<BossHealthBarUI>();
+                Assert(hpBarUI != null, "BossHealthBarUI 컴포넌트 부착 성공");
+
+                // 4. GoldenChest 검증
+                GameObject chestObj = new GameObject("[TestGoldenChest]");
+                var chest = chestObj.AddComponent<GoldenChest>();
+                var col = chestObj.GetComponent<CircleCollider2D>();
+                if (col != null) col.isTrigger = true;
+                Assert(chest != null && col != null && col.isTrigger, "전설 도파민 황금 상자(GoldenChest) 콜라이더 및 컴포넌트 정상 초기화");
+
+                UnityEngine.Object.DestroyImmediate(chestObj);
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "보스전 2.0 및 사이버 단말기 테스트 예외", ex.ToString());
             }
         }
 
