@@ -98,12 +98,6 @@ namespace DopamineCleaner.Editor
             acRt.pivot = new Vector2(0f, 0.5f);
             acRt.anchoredPosition = new Vector2(30, -18);
 
-            Text goldTxt = CreateText("GoldText", headerObj.transform, "💰 보유 골드: 600 G", 22, TextAnchor.MiddleRight, new Vector2(25, 18), new Vector2(400, 40));
-            goldTxt.color = new Color(1f, 0.85f, 0.3f);
-
-            Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 22, TextAnchor.MiddleRight, new Vector2(25, -18), new Vector2(400, 35));
-            karmaTxt.color = new Color(0.6f, 0.85f, 1f);
-
             // 상단 환경설정 버튼 (헤더 중앙)
             Button settingsBtn = CreateButton("SettingsButton", headerObj.transform, "⚙️ 환경설정", 16, new Color(0.20f, 0.35f, 0.45f));
             RectTransform sRt = settingsBtn.GetComponent<RectTransform>();

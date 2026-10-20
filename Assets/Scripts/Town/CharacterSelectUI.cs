@@ -16,15 +16,7 @@ namespace DopamineCleaner.Town
 
         public void RefreshUI()
         {
-            if (GameDataManager.Instance == null) return;
-
-            RefreshCharacterCards();
-            RefreshCompanionBar();
-        }
-
-        private void RefreshCharacterCards()
-        {
-            if (cardContainer == null || characterCardPrefab == null) return;
+            if (cardContainer == null || characterCardPrefab == null || GameDataManager.Instance == null) return;
 
             foreach (Transform child in cardContainer)
             {
@@ -38,6 +30,8 @@ namespace DopamineCleaner.Town
             {
                 CreateCard(charDef, profile);
             }
+
+            RefreshCompanionBar();
         }
 
         private void CreateCard(CharacterDefinition def, PlayerProfileData profile)
@@ -193,6 +187,35 @@ namespace DopamineCleaner.Town
             }
         }
 
+        private Button CreateDynamicPromoteButton(Transform parent)
+        {
+            GameObject pObj = new GameObject("PromoteButton");
+            pObj.transform.SetParent(parent, false);
+            RectTransform pRt = pObj.AddComponent<RectTransform>();
+            pRt.sizeDelta = new Vector2(330, 48);
+            pRt.anchoredPosition = new Vector2(0, -188);
+
+            Image img = pObj.AddComponent<Image>();
+            img.color = new Color(0.35f, 0.32f, 0.45f);
+            Button btn = pObj.AddComponent<Button>();
+
+            GameObject tObj = new GameObject("Text");
+            tObj.transform.SetParent(pObj.transform, false);
+            RectTransform tRt = tObj.AddComponent<RectTransform>();
+            tRt.anchorMin = Vector2.zero;
+            tRt.anchorMax = Vector2.one;
+            tRt.sizeDelta = Vector2.zero;
+
+            Text txt = tObj.AddComponent<Text>();
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.fontSize = 17;
+            txt.fontStyle = FontStyle.Bold;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.color = Color.white;
+
+            return btn;
+        }
+
         private void RefreshCompanionBar()
         {
             if (companionBar == null)
@@ -292,6 +315,15 @@ namespace DopamineCleaner.Town
                     }
                 });
             }
+        }
+
+        private Sprite AssetDatabaseLoadSprite(string path)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+#else
+            return null;
+#endif
         }
     }
 }
