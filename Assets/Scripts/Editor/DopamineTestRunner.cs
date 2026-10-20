@@ -1346,6 +1346,11 @@ namespace DopamineCleaner.Editor
                 string savedPath = DetoxCardExporter.ExportDetoxReportCard();
                 Assert(!string.IsNullOrEmpty(savedPath), $"디톡스 검진표 카드 PNG 렌더링 및 저장 성공 (경로: {savedPath})");
                 Assert(System.IO.File.Exists(savedPath), "생성된 PNG 파일의 디스크 실존 확인");
+                // 테스트 완료 후 바탕화면에 생성된 임시 테스트 이미지 자동 정리
+                if (System.IO.File.Exists(savedPath))
+                {
+                    System.IO.File.Delete(savedPath);
+                }
             }
             catch (Exception ex)
             {
