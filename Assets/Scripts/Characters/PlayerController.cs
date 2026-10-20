@@ -353,21 +353,27 @@ namespace DopamineCleaner.Characters
 
         public static float CalculateRequiredExp(int level)
         {
-            if (level <= 1) return 25f;
-            if (level <= 20)
+            if (level <= 1) return 45f;
+            if (level <= 10)
             {
-                // 1~20 레벨: 25 -> 42 -> 59 -> 76 ... (레벨당 +17, 안정적인 초반 성장 템포)
-                return 25f + (level - 1) * 17f;
+                // 1~10 레벨: 45, 80, 125, 180, 250, 335, 435, 550, 680, 830 (초반 신중한 스킬 빌드업)
+                return 45f + (level - 1) * 30f + (level - 1) * (level - 1) * 6f;
+            }
+            else if (level <= 25)
+            {
+                // 11~25 레벨: 830 ~ 3800 (중반 빌드 심화 단계)
+                float offset = level - 10;
+                return 830f + offset * 130f + offset * offset * 5f;
             }
             else if (level <= 40)
             {
-                // 21~40 레벨: 365 -> 405 -> 445 ... (레벨당 +40, 빌드 완성기)
-                return 365f + (level - 20) * 40f;
+                // 26~40 레벨: 3800 ~ 7500 (후반 무기 진화 및 마스터리)
+                return 3800f + (level - 25) * 250f;
             }
             else
             {
-                // 41 레벨 이후: 1165 -> 1235 ... (레벨당 +70, 후반 극한 도전)
-                return 1165f + (level - 40) * 70f;
+                // 41 레벨 이후: 7500+ (극한 엔드게임 생존 도전)
+                return 7500f + (level - 40) * 400f;
             }
         }
 

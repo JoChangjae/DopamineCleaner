@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -1066,7 +1066,7 @@ namespace DopamineCleaner.Editor
                 GameObject townCanvas = GameObject.Find("TownCanvas");
                 if (townCanvas != null)
                 {
-                    var winBtn = townCanvas.transform.Find("HeaderBar/WindowModeButton");
+                    var winBtn = townCanvas.transform.Find("HeaderBar/HeaderNavGroup/WindowModeButton") ?? townCanvas.transform.Find("HeaderBar/WindowModeButton");
                     Assert(winBtn != null, "본부 상단 HeaderBar [🖥️ 화면 모드 (F11)] 버튼 배치 확인");
                 }
 
@@ -1510,6 +1510,11 @@ namespace DopamineCleaner.Editor
 
                 UnityEngine.Object.DestroyImmediate(playerObj);
                 UnityEngine.Object.DestroyImmediate(canvasObj);
+
+                // 5. 난이도 및 밸런스 검증 (레벨업 경험치 곡선 및 상자 드랍 조절)
+                Assert(Characters.PlayerController.CalculateRequiredExp(1) == 45f, "1레벨 필요 경험치 45 검증");
+                Assert(Characters.PlayerController.CalculateRequiredExp(2) == 81f, "2레벨 필요 경험치 81 검증");
+                Assert(Characters.PlayerController.CalculateRequiredExp(5) == 261f, "5레벨 필요 경험치 261 검증");
             }
             catch (Exception ex)
             {

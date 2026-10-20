@@ -128,63 +128,63 @@ namespace DopamineCleaner.Enemies
             switch (type)
             {
                 case EnemyType.MindDust:
-                    maxHP = (12f + survivalSec * 0.15f) * stageMult;
+                    maxHP = (15f + survivalSec * 0.22f) * stageMult;
                     moveSpeed = Random.Range(2.4f, 3.0f);
-                    damage = 5f + (stage - 1) * 2f;
+                    damage = 7f + (stage - 1) * 2.5f;
                     baseExp = 1;
                     SetVisualColor(new Color(0.85f, 0.78f, 0.92f)); // 연보라
                     transform.localScale = Vector3.one * 0.9f;
                     break;
 
                 case EnemyType.HeavySloth:
-                    maxHP = (28f + survivalSec * 0.28f) * stageMult;
+                    maxHP = (36f + survivalSec * 0.38f) * stageMult;
                     moveSpeed = Random.Range(1.6f, 2.0f);
-                    damage = 10f + (stage - 1) * 3f;
+                    damage = 13f + (stage - 1) * 3.5f;
                     baseExp = 2;
                     SetVisualColor(new Color(0.75f, 0.88f, 0.92f)); // 포근한 하늘빛
                     transform.localScale = Vector3.one * 1.3f;
                     break;
 
                 case EnemyType.NotificationGhost:
-                    maxHP = (45f + survivalSec * 0.40f) * stageMult;
+                    maxHP = (52f + survivalSec * 0.50f) * stageMult;
                     moveSpeed = Random.Range(3.4f, 4.2f);
-                    damage = 14f + (stage - 1) * 4f;
+                    damage = 16f + (stage - 1) * 4.5f;
                     baseExp = 3;
                     SetVisualColor(new Color(1.0f, 0.76f, 0.82f)); // 핑크
                     transform.localScale = Vector3.one * 1.1f;
                     break;
 
                 case EnemyType.ShortsRunner:
-                    maxHP = (35f + survivalSec * 0.30f) * stageMult;
+                    maxHP = (42f + survivalSec * 0.40f) * stageMult;
                     moveSpeed = Random.Range(4.5f, 5.5f);
-                    damage = 12f + (stage - 1) * 3f;
-                    baseExp = 3;
+                    damage = 14f + (stage - 1) * 3.5f;
+                    baseExp = 2;
                     SetVisualColor(new Color(1.0f, 0.45f, 0.2f)); // 번갯빛 주황
                     transform.localScale = Vector3.one * 0.85f;
                     break;
 
                 case EnemyType.SpamShooter:
-                    maxHP = (30f + survivalSec * 0.25f) * stageMult;
+                    maxHP = (38f + survivalSec * 0.35f) * stageMult;
                     moveSpeed = 2.0f;
-                    damage = 10f + (stage - 1) * 3f;
-                    baseExp = 4;
+                    damage = 13f + (stage - 1) * 3.5f;
+                    baseExp = 3;
                     SetVisualColor(new Color(0.95f, 0.25f, 0.35f)); // 핏빛 빨강
                     transform.localScale = Vector3.one * 1.0f;
                     break;
 
                 case EnemyType.DoomScroller:
-                    maxHP = (85f + survivalSec * 0.65f) * stageMult;
+                    maxHP = (110f + survivalSec * 0.85f) * stageMult;
                     moveSpeed = 1.35f;
-                    damage = 18f + (stage - 1) * 4f;
-                    baseExp = 8;
+                    damage = 22f + (stage - 1) * 5f;
+                    baseExp = 6;
                     SetVisualColor(new Color(0.7f, 0.45f, 0.95f)); // 심연의 암자색
                     transform.localScale = Vector3.one * 1.55f;
                     break;
 
                 case EnemyType.DopamineBoss:
-                    maxHP = (380f + (stage - 1) * 260f) * stageMult;
+                    maxHP = (480f + (stage - 1) * 320f) * stageMult;
                     moveSpeed = 1.8f + Mathf.Min(0.6f, (stage - 1) * 0.12f);
-                    damage = 22f + (stage - 1) * 6f;
+                    damage = 26f + (stage - 1) * 7f;
                     baseExp = 35;
                     SetVisualColor(GetBossStageColor(stage));
                     transform.localScale = Vector3.one * 2.8f;
@@ -657,24 +657,22 @@ namespace DopamineCleaner.Enemies
         {
             if (isBoss)
             {
-                // 보스 격파 시 확정 황금상자 & 대량 EXP 드랍
+                // 보스 격파 시 확정 황금상자 & 대량 EXP 드랍 (단일 황금상자로 밸런스 조정)
                 Core.HitStopManager.Instance?.TriggerHitStop(0.5f);
                 GameObject gChest = new GameObject("GoldenChest");
                 gChest.transform.position = transform.position;
                 gChest.AddComponent<Items.GoldenChest>();
-                ItemManager.Instance?.SpawnGem(transform.position, GemType.Chest, 0);
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.left * 1.2f, GemType.Cake, 0);
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.right * 1.2f, GemType.Magnet, 0);
                 ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 1.0f, GemType.Pink, 35);
             }
             else if (IsElite)
             {
-                // 엘리트 몬스터 격파 시 확정 황금상자 + 보너스 골드 드랍!
+                // 엘리트 몬스터 격파 시 확정 황금상자 + 보너스 골드 드랍! (단일 황금상자 유지)
                 Core.HitStopManager.Instance?.TriggerHitStop(0.5f);
                 GameObject gChest = new GameObject("GoldenChest");
                 gChest.transform.position = transform.position;
                 gChest.AddComponent<Items.GoldenChest>();
-                ItemManager.Instance?.SpawnGem(transform.position, GemType.Chest, 0);
                 GameManager.Instance?.AddBonusGold(Random.Range(30, 55));
                 Core.SoundManager.Instance?.Play(Core.SoundEffect.LevelUp, 0.6f);
 
@@ -698,14 +696,12 @@ namespace DopamineCleaner.Enemies
 
                 ItemManager.Instance?.SpawnGem(transform.position, gType, baseExp);
 
-                // 무작위 특수 아이템 드랍 (3% 케이크, 2.5% 폭탄, 0.5% 보물상자)
+                // 무작위 특수 아이템 드랍 (2% 케이크, 2% 폭탄 - 일반 몹 상자 남발 방지)
                 int roll = Random.Range(0, 1000);
-                if (roll < 30)
+                if (roll < 20)
                     ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 0.4f, GemType.Cake, 0);
-                else if (roll < 55)
+                else if (roll < 40)
                     ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 0.4f, GemType.Bomb, 0);
-                else if (roll < 60)
-                    ItemManager.Instance?.SpawnGem(transform.position + Vector3.up * 0.4f, GemType.Chest, 0);
             }
 
             if (enemyType == EnemyType.AuditorKim)

@@ -21,6 +21,8 @@ namespace DopamineCleaner.UI
             private set => instance = value;
         }
 
+        public bool IsOpen => isOpen;
+
         private struct EvolutionRecipe
         {
             public string weaponName;
@@ -109,6 +111,12 @@ namespace DopamineCleaner.UI
 
         private void Update()
         {
+            if (isOpen && Input.GetKeyDown(KeyCode.Escape))
+            {
+                CloseModal();
+                return;
+            }
+
             // Tab 키로 인게임에서 진화 족보 모달 열기/닫기
             if (Input.GetKeyDown(KeyCode.Tab))
             {

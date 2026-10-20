@@ -122,11 +122,11 @@ namespace DopamineCleaner.Editor
 
             Button codexBtn = CreateButton("CodexButton", headerNavObj.transform, "📜 정화 도감", 15, new Color(0.38f, 0.28f, 0.65f));
             codexBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 46);
-            codexBtn.onClick.AddListener(() => UI.EvolutionTreeModalUI.Instance?.OpenCodex(0));
+            SetPrivateField(townMgr, "codexBtn", codexBtn);
 
             Button petBtn = CreateButton("PetButton", headerNavObj.transform, "🐾 동행 펫", 15, new Color(0.25f, 0.55f, 0.42f));
             petBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(135, 46);
-            petBtn.onClick.AddListener(() => Town.PetManagementModalUI.Instance?.ToggleModal());
+            SetPrivateField(townMgr, "petBtn", petBtn);
 
             Button winModeBtn = CreateButton("WindowModeButton", headerNavObj.transform, "🖥️ 화면 모드 (F11)", 15, new Color(0.24f, 0.28f, 0.38f));
             winModeBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(195, 46);
@@ -234,6 +234,9 @@ namespace DopamineCleaner.Editor
             GameObject dungeonPanel = CreateDungeonSelectPanel(contentArea.transform);
             SetPrivateField(townMgr, "dungeonPanel", dungeonPanel);
             dungeonPanel.SetActive(false);
+
+            // 동행 펫 육성/출격 관리 모달 생성
+            CreatePetManagementModal(canvasObj.transform);
 
             // 씬 저장
             Directory.CreateDirectory("Assets/Scenes");

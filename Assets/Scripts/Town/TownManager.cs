@@ -33,6 +33,10 @@ namespace DopamineCleaner.Town
         [SerializeField] private Button tabHallOfFameBtn;
         [SerializeField] private Button tabRemodelBtn;
 
+        [Header("상단 유틸 버튼")]
+        [SerializeField] private Button codexBtn;
+        [SerializeField] private Button petBtn;
+
         [Header("화면 모드 버튼")]
         [SerializeField] private Button windowModeBtn;
         [SerializeField] private Text windowModeBtnText;
@@ -75,6 +79,22 @@ namespace DopamineCleaner.Town
             {
                 settingsBtn.onClick.AddListener(OnSettingsClicked);
             }
+            if (codexBtn != null)
+            {
+                codexBtn.onClick.AddListener(() =>
+                {
+                    Core.SoundManager.Instance?.Play(Core.SoundEffect.ButtonClick, 0.7f);
+                    UI.EvolutionTreeModalUI.Instance?.OpenCodex(0);
+                });
+            }
+            if (petBtn != null)
+            {
+                petBtn.onClick.AddListener(() =>
+                {
+                    Core.SoundManager.Instance?.Play(Core.SoundEffect.ButtonClick, 0.7f);
+                    PetManagementModalUI.Instance?.ToggleModal();
+                });
+            }
             Core.DisplayModeManager.OnDisplayModeChanged += HandleDisplayModeChanged;
             UpdateWindowModeText();
 
@@ -86,6 +106,16 @@ namespace DopamineCleaner.Town
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                if (PetManagementModalUI.Instance != null && PetManagementModalUI.Instance.IsOpen)
+                {
+                    PetManagementModalUI.Instance.CloseModal();
+                    return;
+                }
+                if (UI.EvolutionTreeModalUI.Instance != null && UI.EvolutionTreeModalUI.Instance.IsOpen)
+                {
+                    UI.EvolutionTreeModalUI.Instance.CloseModal();
+                    return;
+                }
                 OnSettingsClicked();
             }
         }

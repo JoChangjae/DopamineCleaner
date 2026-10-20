@@ -9,7 +9,18 @@ namespace DopamineCleaner.Town
 {
     public class PetManagementModalUI : MonoBehaviour
     {
-        public static PetManagementModalUI Instance { get; private set; }
+        private static PetManagementModalUI instance;
+        public static PetManagementModalUI Instance
+        {
+            get
+            {
+                if (instance == null) instance = FindAnyObjectByType<PetManagementModalUI>(FindObjectsInactive.Include);
+                return instance;
+            }
+            private set => instance = value;
+        }
+
+        public bool IsOpen => modalPanel != null && modalPanel.activeSelf;
 
         [SerializeField] private GameObject modalPanel;
         [SerializeField] private Transform cardContainer;
@@ -20,11 +31,19 @@ namespace DopamineCleaner.Town
 
         private void Awake()
         {
-            if (Instance == null) Instance = this;
+            if (instance == null || instance == this) instance = this;
             else { Destroy(gameObject); return; }
 
             EnsureFont();
             if (closeButton != null) closeButton.onClick.AddListener(CloseModal);
+        }
+
+        private void Update()
+        {
+            if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            {
+                CloseModal();
+            }
         }
 
         private static void EnsureFont()
@@ -49,6 +68,7 @@ namespace DopamineCleaner.Town
 
         public void OpenModal()
         {
+            EnsureFont();
             if (modalPanel != null)
             {
                 modalPanel.SetActive(true);

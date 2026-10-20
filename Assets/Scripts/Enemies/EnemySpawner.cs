@@ -148,7 +148,7 @@ namespace DopamineCleaner.Enemies
                 enemy.transform.position = spawnPos;
 
                 EliteAffix affix = forcedAffix;
-                if (affix == EliteAffix.None && type != EnemyType.DopamineBoss && survivalSec >= 25f && Random.value < 0.16f)
+                if (affix == EliteAffix.None && type != EnemyType.DopamineBoss && survivalSec >= 45f && Random.value < 0.04f)
                 {
                     affix = (EliteAffix)Random.Range(1, 5); // 1~4
                 }
