@@ -60,6 +60,9 @@ namespace DopamineCleaner.Editor
             // TownManager & Pixel Atmosphere
             TownManager townMgr = canvasObj.AddComponent<TownManager>();
             canvasObj.AddComponent<TownPixelAtmosphere>();
+            // Cyber Terminal Boot Sequence (접속 시 레트로 CLI 부팅 연출)
+            GameObject bootObj = CreateUIObject("CyberTerminalBoot", canvasObj.transform);
+            bootObj.AddComponent<CyberTerminalBootUI>();
                         canvasObj.AddComponent<UI.SettingsModalUI>();
             canvasObj.AddComponent<UI.EvolutionTreeModalUI>();
 
@@ -91,7 +94,7 @@ namespace DopamineCleaner.Editor
             ctRt.pivot = new Vector2(0f, 0.5f);
             ctRt.anchoredPosition = new Vector2(30, 18);
 
-            Text activeCharTxt = CreateText("ActiveCharText", headerObj.transform, "요원증: 🧑‍💼 김인턴 (수습 클리너)", 19, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(550, 35));
+            Text activeCharTxt = CreateText("ActiveCharText", headerObj.transform, "요원증: 🧑‍💼 김인턴 (수습 클리너)", 18, TextAnchor.MiddleLeft, Vector2.zero, new Vector2(450, 32));
             activeCharTxt.color = new Color(0.85f, 0.8f, 0.95f);
             RectTransform acRt = activeCharTxt.GetComponent<RectTransform>();
             acRt.anchorMin = new Vector2(0f, 0.5f);
@@ -99,51 +102,51 @@ namespace DopamineCleaner.Editor
             acRt.pivot = new Vector2(0f, 0.5f);
             acRt.anchoredPosition = new Vector2(30, -18);
 
-            // 상단 환경설정 버튼 (헤더 중앙)
-            Button settingsBtn = CreateButton("SettingsButton", headerObj.transform, "⚙️ 환경설정", 16, new Color(0.20f, 0.35f, 0.45f));
-            RectTransform sRt = settingsBtn.GetComponent<RectTransform>();
-            sRt.sizeDelta = new Vector2(160, 48);
-            sRt.anchoredPosition = new Vector2(90, 0);
+            // 상단 유틸리티 버튼 그룹 (환경설정 / 정화 도감 / 동행 펫 / 화면 모드)
+            GameObject headerNavObj = CreateUIObject("HeaderNavGroup", headerObj.transform);
+            RectTransform navRt = headerNavObj.GetComponent<RectTransform>();
+            navRt.anchorMin = new Vector2(0.5f, 0.5f);
+            navRt.anchorMax = new Vector2(0.5f, 0.5f);
+            navRt.pivot = new Vector2(0.5f, 0.5f);
+            navRt.sizeDelta = new Vector2(780, 50);
+            navRt.anchoredPosition = new Vector2(30, 0);
 
-            // 상단 정화 도감 버튼
-            Button codexBtn = CreateButton("CodexButton", headerObj.transform, "📜 정화 도감", 16, new Color(0.38f, 0.28f, 0.65f));
-            RectTransform cdRt = codexBtn.GetComponent<RectTransform>();
-            cdRt.sizeDelta = new Vector2(160, 48);
-            cdRt.anchoredPosition = new Vector2(265, 0);
+            HorizontalLayoutGroup navHlg = headerNavObj.AddComponent<HorizontalLayoutGroup>();
+            navHlg.spacing = 14;
+            navHlg.childAlignment = TextAnchor.MiddleCenter;
+            navHlg.childControlWidth = false;
+            navHlg.childControlHeight = false;
+
+            Button settingsBtn = CreateButton("SettingsButton", headerNavObj.transform, "⚙️ 환경설정", 15, new Color(0.20f, 0.35f, 0.45f));
+            settingsBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 46);
+
+            Button codexBtn = CreateButton("CodexButton", headerNavObj.transform, "📜 정화 도감", 15, new Color(0.38f, 0.28f, 0.65f));
+            codexBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 46);
             codexBtn.onClick.AddListener(() => UI.EvolutionTreeModalUI.Instance?.OpenCodex(0));
 
-            // 상단 펫 훈련소 버튼
-            Button petBtn = CreateButton("PetButton", headerObj.transform, "🐾 동행 펫", 16, new Color(0.25f, 0.55f, 0.42f));
-            RectTransform petRt = petBtn.GetComponent<RectTransform>();
-            petRt.sizeDelta = new Vector2(140, 48);
-            petRt.anchoredPosition = new Vector2(420, 0);
+            Button petBtn = CreateButton("PetButton", headerNavObj.transform, "🐾 동행 펫", 15, new Color(0.25f, 0.55f, 0.42f));
+            petBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(135, 46);
             petBtn.onClick.AddListener(() => Town.PetManagementModalUI.Instance?.ToggleModal());
 
-            // 상단 창모드 / 전체화면 토글 버튼 (헤더 중앙 우측)
-            Button winModeBtn = CreateButton("WindowModeButton", headerObj.transform, "🖥️ 화면 모드 (F11)", 16, new Color(0.24f, 0.28f, 0.38f));
-            RectTransform wRt = winModeBtn.GetComponent<RectTransform>();
-            wRt.anchorMin = new Vector2(1f, 0.5f);
-            wRt.anchorMax = new Vector2(1f, 0.5f);
-            wRt.pivot = new Vector2(1f, 0.5f);
-            wRt.sizeDelta = new Vector2(210, 46);
-            wRt.anchoredPosition = new Vector2(-460, 0);
+            Button winModeBtn = CreateButton("WindowModeButton", headerNavObj.transform, "🖥️ 화면 모드 (F11)", 15, new Color(0.24f, 0.28f, 0.38f));
+            winModeBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(195, 46);
             Text winModeTxt = winModeBtn.GetComponentInChildren<Text>();
 
-            Text goldTxt = CreateText("GoldText", headerObj.transform, "💰 보유 골드: 600 G", 21, TextAnchor.MiddleRight, Vector2.zero, new Vector2(400, 38));
+            Text goldTxt = CreateText("GoldText", headerObj.transform, "💰 보유 골드: 600 G", 20, TextAnchor.MiddleRight, Vector2.zero, new Vector2(360, 36));
             goldTxt.color = new Color(1f, 0.85f, 0.3f);
             RectTransform gRt = goldTxt.GetComponent<RectTransform>();
             gRt.anchorMin = new Vector2(1f, 0.5f);
             gRt.anchorMax = new Vector2(1f, 0.5f);
             gRt.pivot = new Vector2(1f, 0.5f);
-            gRt.anchoredPosition = new Vector2(-30, 18);
+            gRt.anchoredPosition = new Vector2(-25, 18);
 
-            Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 21, TextAnchor.MiddleRight, Vector2.zero, new Vector2(400, 34));
+            Text karmaTxt = CreateText("KarmaText", headerObj.transform, "✨ 디톡스 포인트: 1 P", 20, TextAnchor.MiddleRight, Vector2.zero, new Vector2(360, 32));
             karmaTxt.color = new Color(0.6f, 0.85f, 1f);
             RectTransform kRt = karmaTxt.GetComponent<RectTransform>();
             kRt.anchorMin = new Vector2(1f, 0.5f);
             kRt.anchorMax = new Vector2(1f, 0.5f);
             kRt.pivot = new Vector2(1f, 0.5f);
-            kRt.anchoredPosition = new Vector2(-30, -18);
+            kRt.anchoredPosition = new Vector2(-25, -18);
 
             SetPrivateField(townMgr, "goldText", goldTxt);
             SetPrivateField(townMgr, "karmaText", karmaTxt);

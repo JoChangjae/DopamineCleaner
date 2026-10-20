@@ -227,8 +227,8 @@ namespace DopamineCleaner.Town
                 rt.anchorMin = new Vector2(0.5f, 0f);
                 rt.anchorMax = new Vector2(0.5f, 0f);
                 rt.pivot = new Vector2(0.5f, 0f);
-                rt.sizeDelta = new Vector2(1650, 65);
-                rt.anchoredPosition = new Vector2(0, 5);
+                rt.sizeDelta = new Vector2(1520, 56);
+                rt.anchoredPosition = new Vector2(0, 10);
 
                 Image bg = companionBar.AddComponent<Image>();
                 bg.color = new Color(0.14f, 0.11f, 0.22f, 0.95f);
@@ -237,7 +237,7 @@ namespace DopamineCleaner.Town
                 outl.effectDistance = new Vector2(1f, -1f);
 
                 HorizontalLayoutGroup hlg = companionBar.AddComponent<HorizontalLayoutGroup>();
-                hlg.spacing = 20;
+                hlg.spacing = 14;
                 hlg.childAlignment = TextAnchor.MiddleCenter;
                 hlg.childControlWidth = false;
                 hlg.childControlHeight = false;
@@ -255,10 +255,10 @@ namespace DopamineCleaner.Town
             GameObject lblObj = new GameObject("CompLabel");
             lblObj.transform.SetParent(companionBar.transform, false);
             RectTransform lRt = lblObj.AddComponent<RectTransform>();
-            lRt.sizeDelta = new Vector2(280, 50);
+            lRt.sizeDelta = new Vector2(230, 46);
             Text lTxt = lblObj.AddComponent<Text>();
             lTxt.text = "🐾 [전술 동반자 드론/펫]:";
-            lTxt.fontSize = 18;
+            lTxt.fontSize = 16;
             lTxt.alignment = TextAnchor.MiddleCenter;
             lTxt.color = new Color(1f, 0.85f, 0.3f);
             lTxt.font = font;
@@ -269,7 +269,7 @@ namespace DopamineCleaner.Town
                 GameObject btnObj = new GameObject($"Comp_{comp.id}");
                 btnObj.transform.SetParent(companionBar.transform, false);
                 RectTransform bRt = btnObj.AddComponent<RectTransform>();
-                bRt.sizeDelta = new Vector2(380, 50);
+                bRt.sizeDelta = new Vector2(285, 46);
 
                 Image img = btnObj.AddComponent<Image>();
                 bool isEquipped = profile.equippedCompanionId == comp.id;
@@ -292,7 +292,7 @@ namespace DopamineCleaner.Town
                 Text t = txtObj.AddComponent<Text>();
                 string status = isEquipped ? "✅ [동행 중]" : (isUnlocked ? "동행 선택" : "500G 영입");
                 t.text = $"{comp.icon} {comp.name} {status}";
-                t.fontSize = 15;
+                t.fontSize = 14;
                 t.alignment = TextAnchor.MiddleCenter;
                 t.color = Color.white;
                 t.font = font;

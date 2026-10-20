@@ -5,6 +5,11 @@ using DopamineCleaner.Core;
 
 namespace DopamineCleaner.Town
 {
+    /// <summary>
+    /// 게임 접속 시 멋진 레트로 사이버펑크 CLI 터미널 부팅 시퀀스를 연출하는 UI.
+    /// 실시간 타이머(WaitForSecondsRealtime)를 사용하여 어떤 환경에서도 멈춤 없이 안정적으로 실행되며,
+    /// 아무 키나 클릭 시 즉시 스킵되어 본부로 진입합니다.
+    /// </summary>
     public class CyberTerminalBootUI : MonoBehaviour
     {
         public static bool HasBootedThisSession = false;
@@ -15,21 +20,41 @@ namespace DopamineCleaner.Town
         private bool isFinished = false;
         private bool isSkipped = false;
 
+        private static Font koreanFont;
+
         private readonly string[] bootLogs = new string[]
         {
-            "💻 [SYSTEM] INITIALIZING DOPAMINE CLEANER OS v1.3.0...",
-            "⚡ [HARDWARE] SYNCHRONIZING NEURAL RECEPTORS ... [100% OK]",
-            "🛡️ [SECURITY] ACTIVATING SHORT-FORM VIRUS FIREWALL ... [ONLINE]",
-            "🚨 [SURVEILLANCE] 3 CONTAMINATED ZONES DETECTED: [HIGHWAY] [OFFICE] [WARD]",
-            "👥 [PERSONNEL] 6 ELITE CLEANERS STANDING BY. TACTICAL PET/DRONE ARMED.",
-            "📡 [UPLINK] HEADQUARTERS QUANTUM COMM LINK ESTABLISHED.",
+            "> [SYS_INIT] DOPAMINE CLEANER OS v1.4.0 INITIALIZING ... [OK]",
+            "> [KERNEL] QUANTUM NEURAL INTERFACE LINKED ... [100% OK]",
+            "> [SECURITY] SCANNING SHORT-FORM VIRUS CONTAMINATION ... [ALERT]",
+            "> [SURVEILLANCE] 3 CRITICAL ZONES IDENTIFIED: [HIGHWAY] [OFFICE] [WARD]",
+            "> [AGENTS] 6 ELITE DETOX AGENTS STANDING BY ... [ARMED]",
+            "> [COMPANIONS] TACTICAL DRONES & PET BIO-MODULES SYNCHRONIZED",
+            "> [FACILITIES] HQ SILICON-VALLEY REMODELING MATRIX ONLINE",
             "==================================================================",
-            "✨ >> ACCESS GRANTED. WELCOME TO DETOX HEADQUARTERS, AGENT."
+            ">> ACCESS GRANTED. WELCOME TO DETOX HEADQUARTERS, AGENT."
         };
+
+        private void Awake()
+        {
+            EnsureFont();
+        }
+
+        private static void EnsureFont()
+        {
+            if (koreanFont == null)
+            {
+#if UNITY_EDITOR
+                koreanFont = UnityEditor.AssetDatabase.LoadAssetAtPath<Font>("Assets/Fonts/MalgunGothic.ttf");
+#endif
+                if (koreanFont == null)
+                    koreanFont = Font.CreateDynamicFontFromOSFont(new string[] { "Malgun Gothic", "맑은 고딕", "Arial" }, 18);
+            }
+        }
 
         private void Start()
         {
-            // 한 세션에 한 번만 실행 (원할 경우 강제 재생 가능)
+            // 한 게임 세션 동안 첫 진입 시에만 1회 출력 (원할 경우 재실행 가능)
             if (HasBootedThisSession)
             {
                 Destroy(gameObject);
@@ -54,12 +79,13 @@ namespace DopamineCleaner.Town
 
         private void CreateTerminalUI()
         {
+            EnsureFont();
             Canvas canvas = GetComponentInParent<Canvas>() ?? FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
             bootPanel = new GameObject("CyberTerminalBootOverlay");
             bootPanel.transform.SetParent(canvas.transform, false);
-            bootPanel.transform.SetAsLastSibling(); // 최상단에 렌더링
+            bootPanel.transform.SetAsLastSibling(); // UI 최상단에 렌더링
 
             RectTransform pRt = bootPanel.AddComponent<RectTransform>();
             pRt.anchorMin = Vector2.zero;
@@ -68,28 +94,26 @@ namespace DopamineCleaner.Town
 
             canvasGroup = bootPanel.AddComponent<CanvasGroup>();
 
-            // 검은 CRT 배경
+            // 1. CRT 모니터 어두운 배경
             Image bg = bootPanel.AddComponent<Image>();
             bg.color = new Color(0.04f, 0.04f, 0.07f, 0.98f);
 
-            // CRT 모니터 테두리 박스
+            // 2. 터미널 윈도우 프레임 박스
             GameObject boxObj = new GameObject("TerminalBox");
             boxObj.transform.SetParent(bootPanel.transform, false);
             RectTransform bRt = boxObj.AddComponent<RectTransform>();
             bRt.anchorMin = new Vector2(0.5f, 0.5f);
             bRt.anchorMax = new Vector2(0.5f, 0.5f);
-            bRt.sizeDelta = new Vector2(1050, 580);
+            bRt.sizeDelta = new Vector2(1100, 600);
 
             Image boxBg = boxObj.AddComponent<Image>();
-            boxBg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+            boxBg.color = new Color(0.06f, 0.08f, 0.12f, 0.96f);
 
             var outl = boxObj.AddComponent<Outline>();
-            outl.effectColor = new Color(0.2f, 0.85f, 1f, 0.85f);
+            outl.effectColor = new Color(0.2f, 0.85f, 1f, 0.9f);
             outl.effectDistance = new Vector2(2f, -2f);
 
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-
-            // 상단 타이틀 바
+            // 3. 상단 헤더 바
             GameObject headerObj = new GameObject("Header");
             headerObj.transform.SetParent(boxObj.transform, false);
             RectTransform hRt = headerObj.AddComponent<RectTransform>();
@@ -102,51 +126,57 @@ namespace DopamineCleaner.Town
             Image hBg = headerObj.AddComponent<Image>();
             hBg.color = new Color(0.12f, 0.18f, 0.28f, 1f);
 
+            // 타이틀 텍스트
             GameObject hTxtObj = new GameObject("HeaderText");
             hTxtObj.transform.SetParent(headerObj.transform, false);
             RectTransform htRt = hTxtObj.AddComponent<RectTransform>();
             htRt.anchorMin = Vector2.zero;
             htRt.anchorMax = Vector2.one;
-            htRt.sizeDelta = new Vector2(-20, 0);
+            htRt.offsetMin = new Vector2(20, 0);
+            htRt.offsetMax = new Vector2(-220, 0);
 
             Text hTxt = hTxtObj.AddComponent<Text>();
-            hTxt.font = font;
-            hTxt.text = "⚡ [TERMINAL_BOOT_SYS] NEURAL COMMAND PROMPT v1.3.0";
+            hTxt.font = koreanFont;
+            hTxt.text = "⚡ [TERMINAL_BOOT_SYS] NEURAL COMMAND PROMPT v1.4.0";
             hTxt.fontSize = 17;
             hTxt.fontStyle = FontStyle.Bold;
             hTxt.color = new Color(0.35f, 0.95f, 1f);
             hTxt.alignment = TextAnchor.MiddleLeft;
 
-            // 스킵 안내 텍스트
+            // 스킵 안내 버튼 텍스트
             GameObject skipObj = new GameObject("SkipGuide");
             skipObj.transform.SetParent(headerObj.transform, false);
             RectTransform sRt = skipObj.AddComponent<RectTransform>();
-            sRt.anchorMin = Vector2.zero;
-            sRt.anchorMax = Vector2.one;
-            sRt.sizeDelta = new Vector2(-25, 0);
+            sRt.anchorMin = new Vector2(1f, 0f);
+            sRt.anchorMax = new Vector2(1f, 1f);
+            sRt.pivot = new Vector2(1f, 0.5f);
+            sRt.sizeDelta = new Vector2(240, 0);
+            sRt.anchoredPosition = new Vector2(-15, 0);
 
             Text sTxt = skipObj.AddComponent<Text>();
-            sTxt.font = font;
-            sTxt.text = "[Click or Any Key to Skip >>]";
+            sTxt.font = koreanFont;
+            sTxt.text = "[클릭 시 즉시 스킵 >>]";
             sTxt.fontSize = 14;
-            sTxt.color = new Color(0.7f, 0.7f, 0.8f, 0.8f);
+            sTxt.color = new Color(0.8f, 0.85f, 0.95f, 0.85f);
             sTxt.alignment = TextAnchor.MiddleRight;
 
-            // 콘솔 텍스트 출력 영역
+            // 4. 콘솔 텍스트 바디
             GameObject bodyObj = new GameObject("ConsoleBody");
             bodyObj.transform.SetParent(boxObj.transform, false);
             RectTransform bodyRt = bodyObj.AddComponent<RectTransform>();
             bodyRt.anchorMin = Vector2.zero;
             bodyRt.anchorMax = Vector2.one;
-            bodyRt.offsetMin = new Vector2(30, 25);
-            bodyRt.offsetMax = new Vector2(-30, -55);
+            bodyRt.offsetMin = new Vector2(35, 25);
+            bodyRt.offsetMax = new Vector2(-35, -60);
 
             consoleText = bodyObj.AddComponent<Text>();
-            consoleText.font = font;
+            consoleText.font = koreanFont;
             consoleText.fontSize = 18;
             consoleText.lineSpacing = 1.35f;
-            consoleText.color = new Color(0.3f, 1f, 0.65f); // 레트로 터미널 형광 그린/민트
+            consoleText.color = new Color(0.3f, 1f, 0.65f); // 네온 레트로 그린
             consoleText.alignment = TextAnchor.UpperLeft;
+            consoleText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            consoleText.verticalOverflow = VerticalWrapMode.Overflow;
             consoleText.text = "";
         }
 
@@ -159,7 +189,7 @@ namespace DopamineCleaner.Town
             {
                 if (isSkipped)
                 {
-                    // 스킵 시 전체 텍스트 즉각 완성
+                    // 스킵 시 전체 텍스트 즉각 표시
                     currentFullText = string.Join("\n", bootLogs);
                     if (consoleText != null) consoleText.text = currentFullText;
                     break;
@@ -171,25 +201,24 @@ namespace DopamineCleaner.Town
                     consoleText.text = currentFullText;
                 }
 
-                SoundManager.Instance?.Play(SoundEffect.Shoot, 0.25f);
-                yield return new WaitForSeconds(0.18f);
+                SoundManager.Instance?.Play(SoundEffect.Shoot, 0.2f);
+                // 실시간 초 기반 대기 (어떤 Time.timeScale 상황에서도 100% 정상 작동)
+                yield return new WaitForSecondsRealtime(0.12f);
             }
 
-            // 부팅 완료 대기 (0.35초)
-            SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.5f);
-            yield return new WaitForSeconds(0.35f);
+            // 부팅 완료 대기
+            SoundManager.Instance?.Play(SoundEffect.LevelUp, 0.45f);
+            yield return new WaitForSecondsRealtime(isSkipped ? 0.15f : 0.4f);
 
-            // 페이드아웃 및 셔터 오픈 효과
+            // 페이드아웃 및 CRT 셔터 오픈 효과
             isFinished = true;
             float elapsed = 0f;
-            float duration = 0.4f;
-
-            Vector3 origScale = bootPanel.transform.localScale;
+            float duration = 0.35f;
 
             while (elapsed < duration)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float t = elapsed / duration;
+                float t = Mathf.Clamp01(elapsed / duration);
 
                 if (canvasGroup != null)
                 {
@@ -198,7 +227,7 @@ namespace DopamineCleaner.Town
 
                 if (bootPanel != null)
                 {
-                    // 수직으로 샤라락 열리는 CRT 셔터 연출
+                    // 수직 셔터 오픈
                     bootPanel.transform.localScale = new Vector3(1f, Mathf.Lerp(1f, 0.02f, t), 1f);
                 }
 
