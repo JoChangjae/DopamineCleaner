@@ -62,6 +62,7 @@ namespace DopamineCleaner.Editor
             canvasObj.AddComponent<TownPixelAtmosphere>();
             canvasObj.AddComponent<CyberTerminalBootUI>();
             canvasObj.AddComponent<UI.SettingsModalUI>();
+            canvasObj.AddComponent<UI.EvolutionTreeModalUI>();
 
             // 배경 패널
             GameObject bgObj = CreateUIObject("TownBackground", canvasObj.transform);
@@ -104,6 +105,13 @@ namespace DopamineCleaner.Editor
             RectTransform sRt = settingsBtn.GetComponent<RectTransform>();
             sRt.sizeDelta = new Vector2(160, 48);
             sRt.anchoredPosition = new Vector2(90, 0);
+
+            // 상단 정화 도감 버튼
+            Button codexBtn = CreateButton("CodexButton", headerObj.transform, "📜 정화 도감", 16, new Color(0.38f, 0.28f, 0.65f));
+            RectTransform cdRt = codexBtn.GetComponent<RectTransform>();
+            cdRt.sizeDelta = new Vector2(160, 48);
+            cdRt.anchoredPosition = new Vector2(265, 0);
+            codexBtn.onClick.AddListener(() => UI.EvolutionTreeModalUI.Instance?.OpenCodex(0));
 
             // 상단 창모드 / 전체화면 토글 버튼 (헤더 중앙 우측)
             Button winModeBtn = CreateButton("WindowModeButton", headerObj.transform, "🖥️ 화면 모드 (F11)", 16, new Color(0.24f, 0.28f, 0.38f));
@@ -425,6 +433,7 @@ namespace DopamineCleaner.Editor
             Button mapHosp = CreateButton("BtnHosp", mapBtnGroup.transform, "🏥 격리 병동\n(5분 생존)", 20, new Color(0.24f, 0.32f, 0.38f));
             Button mapOff = CreateButton("BtnOff", mapBtnGroup.transform, "🏢 번아웃 오피스\n(7분 생존)", 20, new Color(0.32f, 0.25f, 0.4f));
             Button mapHigh = CreateButton("BtnHigh", mapBtnGroup.transform, "🛣️ 숏폼 고속도로\n(10분 생존)", 20, new Color(0.42f, 0.22f, 0.25f));
+            Button mapAbyss = CreateButton("BtnAbyss", mapBtnGroup.transform, "📱 알고리즘 심연\n(12분 생존)", 20, new Color(0.36f, 0.18f, 0.48f));
 
             // 2. 난이도 선택 헤더 & 버튼들
             CreateText("DiffHeader", panel.transform, "⚡ 도파민 오염 등급 (난이도 설정)", 25, TextAnchor.MiddleCenter, new Vector2(0, 215), new Vector2(900, 30));
@@ -529,6 +538,7 @@ namespace DopamineCleaner.Editor
             SetPrivateField(ui, "mapHospitalBtn", mapHosp);
             SetPrivateField(ui, "mapOfficeBtn", mapOff);
             SetPrivateField(ui, "mapHighwayBtn", mapHigh);
+            SetPrivateField(ui, "mapAbyssBtn", mapAbyss);
 
             SetPrivateField(ui, "diffEasyBtn", btnEasy);
             SetPrivateField(ui, "diffNormalBtn", btnNorm);

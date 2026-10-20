@@ -158,6 +158,7 @@ namespace DopamineCleaner.Editor
             UIManager uiMgr = canvasObj.AddComponent<UIManager>();
             canvasObj.AddComponent<UI.BossWarningUI>();
             canvasObj.AddComponent<UI.BossHealthBarUI>();
+            canvasObj.AddComponent<UI.VictoryCertificateUI>();
             BuildCanvasUI(canvasObj, uiMgr, cardPrefab, questMgr, sanctuaryMgr, slotMachine);
 
             // 8. 씬 저장
@@ -547,6 +548,17 @@ namespace DopamineCleaner.Editor
             Text pauseEquipTxt = CreateText("PauseEquipText", pausePanelObj.transform, "장비 정보를 불러오는 중...", 20, TextAnchor.MiddleCenter, new Vector2(0, 65), new Vector2(920, 440));
             pauseEquipTxt.lineSpacing = 1.3f;
             pauseEquipTxt.color = new Color(0.9f, 0.88f, 0.95f);
+
+            // 📜 진화 족보 & 정화 도감 열기 버튼
+            GameObject codexBtnObj = CreateUIObject("CodexButton", pausePanelObj.transform);
+            RectTransform codexRt = codexBtnObj.GetComponent<RectTransform>();
+            codexRt.sizeDelta = new Vector2(380, 50);
+            codexRt.anchoredPosition = new Vector2(0, -215);
+            Image codexImg = codexBtnObj.AddComponent<Image>();
+            codexImg.color = new Color(0.38f, 0.28f, 0.65f);
+            Button codexBtn = codexBtnObj.AddComponent<Button>();
+            codexBtn.onClick.AddListener(() => UI.EvolutionTreeModalUI.Instance?.ToggleModal());
+            CreateText("CodexText", codexBtnObj.transform, "📜 진화 족보 & 몬스터 도감 [Tab]", 18, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(360, 46));
 
             // 효과음 토글 버튼
             GameObject muteBtnObj = CreateUIObject("MuteButton", pausePanelObj.transform);

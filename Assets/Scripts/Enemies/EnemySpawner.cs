@@ -98,27 +98,30 @@ namespace DopamineCleaner.Enemies
 
         private EnemyType DetermineEnemyType(float survivalSec)
         {
-            if (survivalSec < 20f) return EnemyType.MindDust;
+            bool isAbyss = Meta.GameDataManager.Instance != null && Meta.GameDataManager.Instance.SelectedMapId == "map_abyss";
+
+            if (survivalSec < 20f && !isAbyss) return EnemyType.MindDust;
             if (survivalSec < 45f)
             {
                 float r = Random.value;
-                if (r < 0.6f) return EnemyType.MindDust;
-                if (r < 0.85f) return EnemyType.HeavySloth;
+                if (r < 0.45f) return EnemyType.MindDust;
+                if (r < 0.75f) return EnemyType.HeavySloth;
                 return EnemyType.ShortsRunner;
             }
 
             float roll = Random.value;
-            if (roll < 0.30f) return EnemyType.MindDust;
-            if (roll < 0.55f) return EnemyType.HeavySloth;
-            if (roll < 0.75f) return EnemyType.NotificationGhost;
-            if (roll < 0.90f) return EnemyType.ShortsRunner;
-            return EnemyType.SpamShooter;
+            if (roll < 0.20f) return EnemyType.MindDust;
+            if (roll < 0.40f) return EnemyType.HeavySloth;
+            if (roll < 0.60f) return EnemyType.NotificationGhost;
+            if (roll < 0.80f) return EnemyType.ShortsRunner;
+            if (roll < 0.92f) return EnemyType.SpamShooter;
+            return EnemyType.DoomScroller;
         }
 
         private void TriggerWaveRush(int sec, int stage, float survivalSec)
         {
             int waveCount = Mathf.Min(20, 10 + stage * 3);
-            EnemyType waveType = (sec % 30 == 0) ? EnemyType.HeavySloth : EnemyType.NotificationGhost;
+            EnemyType waveType = (sec % 60 == 0) ? EnemyType.DoomScroller : ((sec % 30 == 0) ? EnemyType.HeavySloth : EnemyType.NotificationGhost);
 
             for (int i = 0; i < waveCount; i++)
             {

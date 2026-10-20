@@ -76,6 +76,10 @@ namespace DopamineCleaner.Core
                     SpawnOfficeGimmicks();
                     break;
 
+                case "map_abyss":
+                    SpawnAbyssGimmicks();
+                    break;
+
                 case "map_hospital":
                 default:
                     SpawnHospitalGimmicks();
@@ -224,6 +228,19 @@ namespace DopamineCleaner.Core
         #endregion
 
         #region Office Gimmicks: 커피 머신 & 문서 세단기
+                private void SpawnAbyssGimmicks()
+        {
+            Vector3 center = PlayerController.Instance != null ? PlayerController.Instance.transform.position : Vector3.zero;
+
+            // 1. 무한 스크롤 싱크홀 (블랙홀 함정)
+            CreateGimmickObject("AbyssSinkhole_1", center + new Vector3(-8f, 5f, 0), "abyss_sinkhole", new Color(0.45f, 0.15f, 0.65f), "🌀 [무한 스크롤 싱크홀]");
+            CreateGimmickObject("AbyssSinkhole_2", center + new Vector3(8f, -6f, 0), "abyss_sinkhole", new Color(0.45f, 0.15f, 0.65f), "🌀 [무한 스크롤 싱크홀]");
+
+            // 2. 푸시 알림 펄스 탑
+            CreateGimmickObject("PushTower_1", center + new Vector3(7f, 6f, 0), "push_tower", new Color(1.0f, 0.25f, 0.45f), "🚨 [알고리즘 펄스 탑]");
+            CreateGimmickObject("PushTower_2", center + new Vector3(-7f, -5f, 0), "push_tower", new Color(1.0f, 0.25f, 0.45f), "🚨 [알고리즘 펄스 탑]");
+        }
+
         private void SpawnOfficeGimmicks()
         {
             Vector3 center = PlayerController.Instance != null ? PlayerController.Instance.transform.position : Vector3.zero;
@@ -307,6 +324,42 @@ namespace DopamineCleaner.Core
 
                 switch (g.type)
                 {
+                    case "abyss_sinkhole":
+                        if (distToPlayer < 4.0f)
+                        {
+                            Vector3 pull = ((Vector3)g.position - PlayerController.Instance.transform.position).normalized;
+                            PlayerController.Instance.transform.position += pull * (1.2f * Time.deltaTime);
+                        }
+                        Collider2D[] abHits = Physics2D.OverlapCircleAll(g.position, 3.5f);
+                        foreach (var hit in abHits)
+                        {
+                            if (hit != null && hit.CompareTag("Enemy") && hit.TryGetComponent<Enemy>(out var e))
+                            {
+                                e.transform.position = Vector3.MoveTowards(e.transform.position, (Vector3)g.position, 2.0f * Time.deltaTime);
+                                e.TakeDamage(35f * Time.deltaTime);
+                            }
+                        }
+                        break;
+
+                    case "push_tower":
+                        g.effectTimer += Time.deltaTime;
+                        if (g.effectTimer >= 7.0f)
+                        {
+                            g.effectTimer = 0f;
+                            SoundManager.Instance?.Play(SoundEffect.Whirlwind, 0.7f);
+                            PixelParticleManager.Instance?.SpawnNeonPop((Vector3)g.position, new Color(1.0f, 0.3f, 0.5f), 16);
+                            Collider2D[] pKits = Physics2D.OverlapCircleAll(g.position, 5.0f);
+                            foreach (var hit in pKits)
+                            {
+                                if (hit != null && hit.CompareTag("Enemy") && hit.TryGetComponent<Enemy>(out var e))
+                                {
+                                    Vector2 pushDir = ((Vector2)e.transform.position - g.position).normalized;
+                                    e.TakeDamage(45f, pushDir, 4.0f);
+                                }
+                            }
+                        }
+                        break;
+
                     case "coffee":
                         // 플레이어가 가까이 오면 상호작용 안내
                         if (distToPlayer < 2.0f && g.cooldownTimer <= 0f)

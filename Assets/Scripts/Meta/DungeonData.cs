@@ -62,6 +62,11 @@ namespace DopamineCleaner.Meta
                 "map_highway", "심야 숏폼 고속도로", "무한 스크롤 도파민 폭주 도로", "🛣️",
                 new Color(0.95f, 0.85f, 0.85f), 600f, 1800, 4,
                 "끝없이 맹렬히 돌진하는 최고 난이도의 고속도로. (목표: 10분 생존)"));
+
+            Register(new DungeonMapDefinition(
+                "map_abyss", "스마트폰 알고리즘의 심연", "무한 둠스크롤링과 블랙홀의 나락", "📱",
+                new Color(0.75f, 0.65f, 0.95f), 720f, 2500, 6,
+                "끝없는 추천 피드와 악성 알고리즘이 플레이어를 빨아들이는 심연. (목표: 12분 생존)"));
         }
 
         private static void Register(DungeonMapDefinition m)

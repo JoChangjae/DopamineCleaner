@@ -13,6 +13,7 @@ namespace DopamineCleaner.Enemies
         NotificationGhost, // 알림 유령 (스마트폰 알림, 고속 이동)
         ShortsRunner,      // 숏폼 알고리즘 (초고속 지그재그 돌진)
         SpamShooter,       // 스팸/악플러 (원거리 투사체 사격)
+        DoomScroller,      // 둠스크롤러 (심연 중력 골렘)
         DopamineBoss,      // 도파민 거대 보스
         AuditorKim         // 불시 특별 감사 김감사 부장
     }
@@ -121,6 +122,7 @@ namespace DopamineCleaner.Enemies
             affixActionTimer = 0.5f;
             specialActionTimer = Random.Range(1.0f, 2.5f);
             isBossBerserk = false;
+            if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             float stageMult = 1.0f + (stage - 1) * 0.32f;
 
             switch (type)
@@ -170,6 +172,15 @@ namespace DopamineCleaner.Enemies
                     transform.localScale = Vector3.one * 1.0f;
                     break;
 
+                case EnemyType.DoomScroller:
+                    maxHP = (85f + survivalSec * 0.65f) * stageMult;
+                    moveSpeed = 1.35f;
+                    damage = 18f + (stage - 1) * 4f;
+                    baseExp = 15;
+                    SetVisualColor(new Color(0.7f, 0.45f, 0.95f)); // 심연의 암자색
+                    transform.localScale = Vector3.one * 1.55f;
+                    break;
+
                 case EnemyType.DopamineBoss:
                     maxHP = (380f + (stage - 1) * 260f) * stageMult;
                     moveSpeed = 1.8f + Mathf.Min(0.6f, (stage - 1) * 0.12f);
@@ -191,6 +202,30 @@ namespace DopamineCleaner.Enemies
                     nameplateText.text = "💼 [본사 감사팀장] 김감사 부장";
                     nameplateText.color = new Color(1f, 0.3f, 0.3f);
                     break;
+            }
+
+            string spriteName = type switch
+            {
+                EnemyType.HeavySloth => "enemy_sloth",
+                EnemyType.NotificationGhost => "enemy_ghost",
+                EnemyType.ShortsRunner => "enemy_shorts",
+                EnemyType.SpamShooter => "enemy_spam",
+                EnemyType.DoomScroller => "enemy_doomscroller",
+                EnemyType.DopamineBoss => "enemy_boss",
+                EnemyType.AuditorKim => "enemy_boss",
+                _ => "enemy_dust"
+            };
+            if (spriteRenderer != null)
+            {
+                Sprite sp = Resources.Load<Sprite>($"Enemies/{spriteName}");
+#if UNITY_EDITOR
+                if (sp == null)
+                    sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Enemies/{spriteName}.png");
+#endif
+                if (sp != null)
+                {
+                    spriteRenderer.sprite = sp;
+                }
             }
 
             if (Meta.GameDataManager.Instance != null)

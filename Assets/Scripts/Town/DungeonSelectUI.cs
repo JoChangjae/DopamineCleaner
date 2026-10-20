@@ -12,6 +12,7 @@ namespace DopamineCleaner.Town
         [SerializeField] private Button mapHospitalBtn;
         [SerializeField] private Button mapOfficeBtn;
         [SerializeField] private Button mapHighwayBtn;
+        [SerializeField] private Button mapAbyssBtn;
 
         [Header("난이도 선택 버튼 목록")]
         [SerializeField] private Button diffEasyBtn;
@@ -50,6 +51,7 @@ namespace DopamineCleaner.Town
             if (mapHospitalBtn != null) mapHospitalBtn.onClick.AddListener(() => SelectMap("map_hospital"));
             if (mapOfficeBtn != null) mapOfficeBtn.onClick.AddListener(() => SelectMap("map_office"));
             if (mapHighwayBtn != null) mapHighwayBtn.onClick.AddListener(() => SelectMap("map_highway"));
+            if (mapAbyssBtn != null) mapAbyssBtn.onClick.AddListener(() => SelectMap("map_abyss"));
 
             if (diffEasyBtn != null) diffEasyBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Easy));
             if (diffNormalBtn != null) diffNormalBtn.onClick.AddListener(() => SelectDifficulty(DungeonDifficulty.Normal));
@@ -133,6 +135,7 @@ namespace DopamineCleaner.Town
                 {
                     "map_office" => "bg_office_carpet",
                     "map_highway" => "bg_highway_road",
+                    "map_abyss" => "bg_abyss_matrix",
                     _ => "bg_hospital_floor"
                 };
                 Sprite sp = Resources.Load<Sprite>($"Environment/{spriteName}") ??

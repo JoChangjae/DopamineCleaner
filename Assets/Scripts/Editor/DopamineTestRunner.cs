@@ -136,6 +136,9 @@ namespace DopamineCleaner.Editor
             // 35. 보스전 2.0 (경고 배너, 체력바, 황금 상자) 및 사이버 단말기 부팅 시퀀스
             TestBossBattle2AndCyberBoot();
 
+            // 36. 📜 진화 족보/몬스터 도감, 🏆 정식 퇴근 승인서 & 🗺️ 스마트폰 알고리즘의 심연 던전
+            TestPhase3GameplayExpansion();
+
             // 최종 리포트
             Debug.Log("==================================================================");
             if (failedCount == 0)
@@ -1401,6 +1404,52 @@ namespace DopamineCleaner.Editor
             catch (Exception ex)
             {
                 Assert(false, "보스전 2.0 및 사이버 단말기 테스트 예외", ex.ToString());
+            }
+        }
+
+        private static void TestPhase3GameplayExpansion()
+        {
+            Debug.Log("--- 36. 📜 진화 족보/몬스터 도감, 🏆 퇴근 승인서 & 🗺️ 알고리즘 심연 검증 ---");
+            try
+            {
+                // 1. 제3 테마 던전: 스마트폰 알고리즘의 심연 (map_abyss) 메타데이터 검증
+                var abyssDef = Meta.DungeonDatabase.Get("map_abyss");
+                Assert(abyssDef != null && abyssDef.targetSurvivalSec >= 720f && abyssDef.baseGoldReward >= 2500, "제3 테마 던전 '스마트폰 알고리즘의 심연' DB 등록 및 보상 검증 성공");
+
+                // 2. 둠스크롤러(DoomScroller) 몬스터 초기화 및 스프라이트 로드 검증
+                GameObject enemyObj = new GameObject("[TestDoomScroller]");
+                var sr = enemyObj.AddComponent<SpriteRenderer>();
+                var col = enemyObj.AddComponent<CircleCollider2D>();
+                var enemy = enemyObj.AddComponent<Enemies.Enemy>();
+                enemy.Initialize(Enemies.EnemyType.DoomScroller, 1, 60f);
+                Assert(enemy.IsAlive && enemy.MaxHP > 80f, "신규 엘리트 몬스터 '둠스크롤러(DoomScroller)' 스탯 초기화 성공");
+                Assert(sr.sprite != null && sr.sprite.name.Contains("doomscroller"), "둠스크롤러 전용 도트 스프라이트(enemy_doomscroller) 자동 바인딩 성공");
+                UnityEngine.Object.DestroyImmediate(enemyObj);
+
+                // 3. 공식 퇴근 승인서(VictoryCertificateUI) 인스턴스 및 바인딩 검증
+                GameObject canvasObj = new GameObject("[TestVictoryCanvas]");
+                var canvas = canvasObj.AddComponent<Canvas>();
+                var certUI = canvasObj.AddComponent<UI.VictoryCertificateUI>();
+                GameObject panel = new GameObject("CertificatePanel");
+                panel.transform.SetParent(canvasObj.transform);
+                var certTxt = new GameObject("CertContent").AddComponent<UnityEngine.UI.Text>();
+                certTxt.transform.SetParent(panel.transform);
+                var punchTxt = new GameObject("PunchStamp").AddComponent<UnityEngine.UI.Text>();
+                punchTxt.transform.SetParent(panel.transform);
+
+                SetField(certUI, "panelObj", panel);
+                SetField(certUI, "certContentText", certTxt);
+                SetField(certUI, "punchStampText", punchTxt);
+
+                certUI.ShowVictoryCertificate();
+                Assert(panel.activeSelf, "보스 처치 시 공식 퇴근 승인서 UI 팝업 활성화 성공");
+                Assert(certTxt.text.Contains("도파민 디톡스 임무 완수 확인서"), "퇴근 승인서 본문 텍스트 포맷 정상 검증 성공");
+
+                UnityEngine.Object.DestroyImmediate(canvasObj);
+            }
+            catch (Exception ex)
+            {
+                Assert(false, "신규 콘텐츠 Phase 3 테스트 예외", ex.ToString());
             }
         }
 

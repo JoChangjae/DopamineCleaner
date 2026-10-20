@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DopamineCleaner.Core;
@@ -719,6 +719,11 @@ namespace DopamineCleaner.UI
         {
             if (state == GameState.GameOver)
             {
+                if (GameManager.Instance != null && GameManager.Instance.IsVictory && VictoryCertificateUI.Instance != null)
+                {
+                    VictoryCertificateUI.Instance.ShowVictoryCertificate();
+                    return;
+                }
                 ShowGameOverUI();
             }
         }
